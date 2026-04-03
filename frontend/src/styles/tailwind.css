@@ -1,0 +1,29 @@
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@import 'tw-animate-css';
+@layer base {
+  :root {
+    --background: 241 245 249;      /* #F1F5F9 */
+    --foreground: 15 23 42;         /* #0F172A */
+
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+
+    --primary: 30 41 59;            /* #1E293B navy */
+    --primary-foreground: 248 250 252;
+
+    --secondary: 51 65 85;          /* #334155 */
+    --secondary-foreground: 241 245 249;
+
+    --muted: 226 232 240;
+    --muted-foreground: 100 116 139;
+
+    --accent: 71 85 105;            /* #475569 */
+    --accent-foreground: 248 250 252;
+
+    --border: 203 213 225;
+    --input: 226 232 240;
+    --ring: 30 41 59;
+  }
+}

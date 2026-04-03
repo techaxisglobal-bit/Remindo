@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+.env
+
+# MacOS
+.DS_Store
+
+# Electron
+release/
+dist-electron/
+
+# Capacitor - Android
+android/app/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/app/src/main/assets/public/

@@ -1,0 +1,15 @@
+node_modules/
+.env
+err.log
+out.log
+server.log
+server_log.txt
+log.txt
+vapid_keys.json
+node_test.txt
+test_persistence.js
+verify_pw.js
+check_db.js
+check_logs.js
+gen_vapid.js
+gen_vapid_file.js

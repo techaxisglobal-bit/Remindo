@@ -1,0 +1,143 @@
+@custom-variant dark (&:is(.dark *));
+
+/* ===== PROFESSIONAL NAVY / GREY THEME ===== */
+
+:root {
+  --font-size: 16px;
+
+  --background: #f1f5f9;
+  /* slate-100 */
+  --foreground: #0f172a;
+  /* slate-900 */
+
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  --primary: #1e293b;
+  /* navy */
+  --primary-foreground: #f8fafc;
+
+  --secondary: #334155;
+  /* dark grey */
+  --secondary-foreground: #f1f5f9;
+
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+
+  --accent: #475569;
+  --accent-foreground: #f8fafc;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #cbd5e1;
+  --input: #e2e8f0;
+  --ring: #1e293b;
+
+  --radius: 0.75rem;
+
+  /* Sidebar */
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #1e293b;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #e2e8f0;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #cbd5e1;
+  --sidebar-ring: #1e293b;
+}
+
+/* ===== DARK MODE ===== */
+[data-theme='dark'],
+.dark {
+  --background: #000000;
+  /* Pure Black */
+  --foreground: #e5e7eb;
+
+  /* Semi-transparent overlays as requested */
+  --card: #ffffff0d;
+  --card-foreground: #e5e7eb;
+
+  --popover: #ffffff0d;
+  --popover-foreground: #e5e7eb;
+
+  --primary: #f8fafc;
+  --primary-foreground: #000000;
+
+  --secondary: #ffffff0d;
+  --secondary-foreground: #e5e7eb;
+
+  --muted: #ffffff0d;
+  --muted-foreground: #94a3b8;
+
+  --accent: #ffffff1a;
+  --accent-foreground: #e5e7eb;
+
+  --destructive: #7f1d1d;
+  --destructive-foreground: #e5e7eb;
+
+  --border: #ffffff1a;
+  --input: #ffffff0d;
+  --ring: #94a3b8;
+
+  --sidebar: #000000;
+  /* Pure Black */
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #334155;
+  --sidebar-primary-foreground: #e5e7eb;
+  --sidebar-accent: #ffffff0d;
+  --sidebar-accent-foreground: #e5e7eb;
+  --sidebar-border: #ffffff1a;
+  --sidebar-ring: #94a3b8;
+
+  /* Specific variables requested */
+  --docusaurus-collapse-button-bg: #ffffff0d;
+  --docusaurus-collapse-button-bg-hover: #ffffff1a;
+}
+
+/* Enforce the glassmorphism theme on hardcoded Tailwind classes */
+[data-theme='dark'] .dark\:bg-gray-800,
+.dark .dark\:bg-gray-800 {
+  background-color: #000000 !important;
+  /* Pure Black for cards/sidebar components */
+  border-color: #ffffff1a !important;
+}
+
+[data-theme='dark'] .dark\:bg-gray-700,
+.dark .dark\:bg-gray-700 {
+  background-color: #1a1a1a !important;
+  /* Slightly lighter for hover/accents */
+}
+
+[data-theme='dark'] .dark\:hover\:bg-gray-700:hover,
+.dark .dark\:hover\:bg-gray-700:hover {
+  background-color: #262626 !important;
+}
+
+[data-theme='dark'] .dark\:border-gray-700,
+.dark .dark\:border-gray-700 {
+  border-color: #ffffff1a !important;
+}
+
+/* Fix secondary button hover state (prevent fading) */
+/* The class generated is potentially complex to guess perfectly, but focusing on standard usage */
+[data-theme='dark'] .hover\:bg-secondary\/80:hover,
+.dark .hover\:bg-secondary\/80:hover {
+  background-color: #ffffff1a !important;
+}
+
+/* Ensure global background matches the deep dark theme */
+[data-theme='dark'] .dark\:bg-slate-900,
+.dark .dark\:bg-slate-900 {
+  background-color: #000000 !important;
+  /* Pure Black */
+}
+
+/* ===== Date & Time input icon dark mode fix ===== */
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
