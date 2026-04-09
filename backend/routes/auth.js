@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { OAuth2Client } = require('google-auth-library');
+const emailService = require('../services/emailService');
 
 // @route   POST api/auth/signup
 // @desc    Register new user (sends OTP for email verification)
@@ -14,28 +15,45 @@ router.post('/signup', async (req, res) => {
     email = email.toLowerCase();
 
     try {
+        console.log(`Signup attempt for: ${email}`);
         let user = await User.findOne({ where: { email } });
 
         if (user) {
-            return res.status(400).json({ msg: 'User already exists' });
+            console.log(`User found in DB. Name: ${user.name}, isVerified: ${user.isVerified}`);
+            if (user.isVerified) {
+                console.log(`Blocking signup because user is already verified.`);
+                return res.status(400).json({ msg: 'User already exists' });
+            }
+            console.log(`User exists but is NOT verified. Proceeding to update.`);
+        } else {
+            console.log(`User not found in DB. Proceeding to create.`);
         }
 
         // Generate 6-digit OTP for email verification
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-        user = await User.create({
-            name,
-            email,
-            password,
-            otp,
-            otpExpires: new Date(Date.now() + 10 * 60 * 1000),
-            isVerified: false
-        });
+        if (user) {
+            // User exists but is not verified, update their info
+            user.name = name;
+            user.password = password;
+            user.otp = otp;
+            user.otpExpires = otpExpires;
+            await user.save();
+        } else {
+            // Create new record for new user
+            user = await User.create({
+                name,
+                email,
+                password,
+                otp,
+                otpExpires,
+                isVerified: false
+            });
+        }
 
-        console.log(`---------------------------------------------------`);
-        console.log(`EMAIL VERIFICATION FOR: ${email}`);
-        console.log(`YOUR OTP IS: ${otp}`);
-        console.log(`---------------------------------------------------`);
+        // Send real email OTP
+        await emailService.sendOTP(email, otp, 'signup');
 
         await ActivityLog.create({
             userId: user.id,
@@ -170,10 +188,8 @@ router.post('/forgot-password', async (req, res) => {
         user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
         await user.save();
 
-        console.log(`---------------------------------------------------`);
-        console.log(`PASSWORD RESET OTP FOR: ${email}`);
-        console.log(`YOUR OTP IS: ${otp}`);
-        console.log(`---------------------------------------------------`);
+        // Send real email OTP for password reset
+        await emailService.sendOTP(email, otp, 'reset');
 
         res.json({ msg: 'OTP sent to your email' });
 
