@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Smart App</string>
-    <string name="title_activity_main">Smart App</string>
-    <string name="package_name">com.smart.app</string>
-    <string name="custom_url_scheme">com.smart.app</string>
+    <string name="app_name">Remindo</string>
+    <string name="title_activity_main">Remindo</string>
+    <string name="package_name">com.remindo.app</string>
+    <string name="custom_url_scheme">com.remindo.app</string>
+    <string name="server_client_id">733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com</string>
 </resources>

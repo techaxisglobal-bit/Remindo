@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "733914668823",
+    "project_id": "ferrous-wonder-495407-b6",
+    "storage_bucket": "ferrous-wonder-495407-b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733914668823:android:aa6810c72cb8d5c735a152",
+        "android_client_info": {
+          "package_name": "com.remindo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFDb2RNionTFdodsiZbNI9EWufkskceCE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { API_BASE_URL } from '@/app/api';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
@@ -37,6 +39,17 @@ export function SignIn({ onSignIn }: SignInProps) {
     const saved = localStorage.getItem('theme') || 'light';
     setTheme(saved);
     document.documentElement.classList.toggle('dark', saved === 'dark');
+
+    // Initialize GoogleAuth
+    try {
+      GoogleAuth.initialize({
+        clientId: '733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+    } catch (err) {
+      console.error('Failed to initialize Google Auth', err);
+    }
   }, []);
 
   // Auto-clear error after 5 seconds
@@ -54,6 +67,25 @@ export function SignIn({ onSignIn }: SignInProps) {
 
   const isValidEmail = (em: string) => {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(em);
+  };
+
+  /**
+   * Helper to fetch with a simple retry mechanism
+   * Useful for Railway cold starts (server sleep)
+   */
+  const fetchWithRetry = async (url: string, options: RequestInit, retries = 2): Promise<Response> => {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (err) {
+      if (retries > 0 && err instanceof TypeError && err.message === 'Failed to fetch') {
+        console.warn(`Fetch failed, retrying... (${retries} attempts left)`);
+        // Wait 1.5 seconds before retrying
+        await new Promise(res => setTimeout(res, 1500));
+        return fetchWithRetry(url, options, retries - 1);
+      }
+      throw err;
+    }
   };
 
   // ── Normal Sign In / Sign Up ──
@@ -79,7 +111,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       const endpoint = isSignUp ? 'signup' : 'login';
       const body = isSignUp ? { name, email, password } : { email, password };
 
-      const res = await fetch(`http://localhost:5001/api/auth/${endpoint}`, {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -116,7 +148,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/verify', {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: signupOtp })
@@ -146,7 +178,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/forgot-password', {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -174,7 +206,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/reset-password', {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword })
@@ -323,7 +355,36 @@ export function SignIn({ onSignIn }: SignInProps) {
     }
   };
 
-  const handleGoogleClick = () => {
+  const handleGoogleClick = async () => {
+    const isWeb = Capacitor.getPlatform() === 'web';
+
+    if (!isWeb) {
+      // Native Google Sign In
+      setLoading(true);
+      try {
+        const googleUser = await GoogleAuth.signIn();
+        const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: googleUser.authentication.idToken })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.msg || 'Google authentication failed');
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        toast.success('Signed in with Google!');
+        onSignIn(data.user.email);
+      } catch (err: any) {
+        console.error('Google Native Error:', err);
+        toast.error(err.message || 'Google sign-in failed');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Web Google Sign In (Original flow)
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
       toast.error('Google Client ID not configured. Please add it to the .env file.');

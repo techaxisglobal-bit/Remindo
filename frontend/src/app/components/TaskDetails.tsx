@@ -303,7 +303,6 @@ export function TaskDetails({
   const [startTime, setStartTime] = useState(task.time || '12:00');
   const [endDate, setEndDate] = useState(parsedMetadata?.endDate || task.date);
   const [endTime, setEndTime] = useState(parsedMetadata?.endTime || '12:30');
-  const [location, setLocation] = useState(parsedMetadata?.location || task.location || '');
   const [description, setDescription] = useState(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
   const [notifyBefore, setNotifyBefore] = useState(task.notifyBefore || 5);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -335,7 +334,6 @@ export function TaskDetails({
       setStartTime(task.time || '12:00');
       setEndDate(parsedMetadata?.endDate || task.date);
       setEndTime(parsedMetadata?.endTime || '12:30');
-      setLocation(parsedMetadata?.location || task.location || '');
       setDescription(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
       setRepeat(parsedMetadata?.repeat || 'never');
       setIsSpecial(parsedMetadata?.isSpecial || false);
@@ -420,16 +418,7 @@ export function TaskDetails({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
-                <MapPin className="w-4 h-4 text-[#e0b596]" />
-                <input
-                  type="text"
-                  placeholder="Add location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="bg-transparent text-[13px] font-bold focus:outline-none w-full placeholder:text-gray-400 dark:placeholder:text-gray-500 border-none p-0"
-                />
-              </div>
+
 
               <button
                 type="button"
@@ -572,13 +561,7 @@ export function TaskDetails({
               <div className="flex flex-col gap-2">
                 <h1 className="text-3xl font-bold leading-tight">{task.title}</h1>
                 <div className="flex items-center gap-2">
-                  <Badge className={`
-                      ${task.category === 'Work' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      task.category === 'Personal' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                        'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'} border-none px-2 py-0.5
-                    `}>
-                    {task.category}
-                  </Badge>
+
                   {isSpecial && (
                     <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-none px-2 py-0.5 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" />
@@ -614,10 +597,7 @@ export function TaskDetails({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
-                <MapPin className="w-4 h-4 text-[#e0b596]" />
-                <span className="text-[13px] font-bold">{location || 'No location'}</span>
-              </div>
+
 
               <AnimatePresence>
                 {true && (
@@ -663,7 +643,7 @@ export function TaskDetails({
                       }
 
                       const finalDuration = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60));
-                      const metaData = JSON.stringify({ location, duration: finalDuration, repeat, endDate, endTime, isSpecial });
+                      const metaData = JSON.stringify({ duration: finalDuration, repeat, endDate, endTime, isSpecial });
                       const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
                       onUpdateTask({
                         ...task,
@@ -671,8 +651,9 @@ export function TaskDetails({
                         description: finalDescription,
                         date: startDate,
                         time: startTime,
-                        location,
                         duration: finalDuration,
+                        category: task.category || 'general',
+                        location: task.location || '',
                         isSpecial,
                         notifyBefore
                       });

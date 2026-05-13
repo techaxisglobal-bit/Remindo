@@ -1,5 +1,15 @@
 {
-  "appId": "com.smart.app",
-  "appName": "Smart App",
-  "webDir": "dist"
+  "appId": "com.remindo.app",
+  "appName": "Remindo",
+  "webDir": "dist",
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email"
+      ],
+      "serverClientId": "733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }

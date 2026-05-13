@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { API_BASE_URL } from "@/app/api";
 import { Toaster } from "@/app/components/ui/sonner";
 import { SignIn } from "@/app/components/SignIn";
 import { Dashboard } from "@/app/components/Dashboard";
@@ -8,6 +9,27 @@ import { toast } from "sonner";
 export default function App() {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  // Store tasks with pre-parsed metadata and dates for performance
+  const processedTasks = useMemo(() => {
+    return tasks.map(t => {
+      let isSpecial = (t as any).isSpecial;
+      let meta = (t as any).metadata || {};
+
+      if (!isSpecial && t.description?.includes('<!-- metadata:')) {
+        const match = t.description.match(/<!-- metadata: (.+) -->/);
+        if (match) {
+          try {
+            const parsedMeta = JSON.parse(match[1]);
+            if (parsedMeta.isSpecial) isSpecial = true;
+            meta = parsedMeta;
+          } catch (e) { }
+        }
+      }
+      return { ...t, isSpecial, metadata: meta };
+    });
+  }, [tasks]);
+
+  const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     return localStorage.getItem('notificationsEnabled') !== 'false';
   });
@@ -36,6 +58,25 @@ export default function App() {
       registerPush();
     }
   }, [notificationsEnabled, user]);
+
+  /**
+   * Helper to fetch with a simple retry mechanism
+   * Useful for Railway cold starts (server sleep)
+   */
+  const fetchWithRetry = async (url: string, options: RequestInit, retries = 2): Promise<Response> => {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (err) {
+      if (retries > 0 && err instanceof TypeError && (err.message === 'Failed to fetch' || err.message.includes('NetworkError'))) {
+        console.warn(`Fetch failed, retrying... (${retries} attempts left)`);
+        // Wait 1.5 seconds before retrying
+        await new Promise(res => setTimeout(res, 1500));
+        return fetchWithRetry(url, options, retries - 1);
+      }
+      throw err;
+    }
+  };
 
   const urlBase64ToUint8Array = (base64String: string) => {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -80,7 +121,7 @@ export default function App() {
       // Save to backend
       if (subscription) {
         const token = localStorage.getItem('token');
-        await fetch('http://localhost:5001/api/auth/save-subscription', {
+        await fetchWithRetry(`${API_BASE_URL}/api/auth/save-subscription`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -99,7 +140,7 @@ export default function App() {
     const newVal = !notificationsEnabled;
 
     try {
-      await fetch('http://localhost:5001/api/auth/update-notifications', {
+      await fetchWithRetry(`${API_BASE_URL}/api/auth/update-notifications`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +166,7 @@ export default function App() {
 
   const fetchTasks = async (token: string) => {
     try {
-      const res = await fetch('http://localhost:5001/api/tasks', {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks`, {
         headers: { 'x-auth-token': token }
       });
       if (res.ok) {
@@ -161,7 +202,7 @@ export default function App() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5001/api/tasks', {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,11 +221,15 @@ export default function App() {
   };
 
   const handleDeleteTask = async (id: string) => {
+    // Optimistic UI: Remove task from state immediately
+    const deletedTask = tasks.find(t => (t as any)._id === id || t.id === id);
+    setTasks(prev => prev.filter(task => (task as any)._id !== id && task.id !== id));
+
     const token = localStorage.getItem('token');
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
         method: 'DELETE',
         headers: { 'x-auth-token': token }
       });
@@ -204,7 +249,7 @@ export default function App() {
     if (!taskToToggle) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -227,8 +272,12 @@ export default function App() {
     const id = (updatedTask as any)._id || updatedTask.id;
     if (!token || !id) return;
 
+    // Optimistic UI: Update state immediately
+    const originalTask = tasks.find(t => ((t as any)._id === id || t.id === id));
+    setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? updatedTask : t));
+
     try {
-      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -242,14 +291,28 @@ export default function App() {
 
         if (savedId !== id) {
           // If the ID is different, it means a new task was created (e.g. date change duplication)
-          setTasks(prev => [...prev, savedTask]);
+          // We should remove the optimistic update of the original task and add the new one
+          setTasks(prev => {
+            const filtered = prev.filter(t => (t as any)._id !== id && t.id !== id);
+            return [...filtered, savedTask];
+          });
         } else {
-          // Standard update for the same task
+          // Sync with server version
           setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? savedTask : t));
         }
+      } else {
+        // Rollback on failure
+        if (originalTask) {
+          setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? originalTask : t));
+        }
+        toast.error('Failed to update task');
       }
     } catch (err) {
       console.error('Failed to update task:', err);
+      if (originalTask) {
+        setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? originalTask : t));
+      }
+      toast.error('Failed to update task');
     }
   };
 

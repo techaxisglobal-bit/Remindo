@@ -6,6 +6,8 @@ import { Switch } from '@/app/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
 import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/app/api';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 interface SettingsPanelProps {
   userEmail: string;
@@ -152,7 +154,12 @@ export function SettingsPanel({
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await GoogleAuth.signOut();
+    } catch (e) {
+      console.error('Google signOut error:', e);
+    }
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     toast.success('Logged out successfully');
@@ -312,10 +319,10 @@ export function SettingsPanel({
           <section className="space-y-4">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4 mb-2 px-1">Security</h3>
             <div className="space-y-3">
-              <div 
+              <div
                 className={`p-3 rounded-2xl transition-all duration-300 border ${showChangePassword ? 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10' : 'hover:bg-white/40 dark:hover:bg-white/10 border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group'}`}
               >
-                <button 
+                <button
                   onClick={() => setShowChangePassword(!showChangePassword)}
                   className="flex items-center justify-between w-full group"
                 >

@@ -1,13 +1,11 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
-    },
+    }
 });
 
 /**
@@ -18,7 +16,7 @@ const transporter = nodemailer.createTransport({
  */
 const sendOTP = async (email, otp, type = 'signup') => {
     const subject = type === 'signup' ? 'Email Verification - Remindo' : 'Password Reset - Remindo';
-    const message = type === 'signup' 
+    const message = type === 'signup'
         ? `Welcome to Remindo! Your verification code is: <b>${otp}</b>. It is valid for 10 minutes.`
         : `You requested a password reset. Your OTP is: <b>${otp}</b>. It is valid for 10 minutes.`;
 

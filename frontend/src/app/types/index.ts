@@ -3,7 +3,7 @@ export interface Task {
   sourceId?: string; // ✅ ADD THIS
   title: string;
   description: string;
-  category: string;
+  category?: string;
   date: string;
   time?: string;
   createdAt?: string;
@@ -24,16 +24,6 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-}
-
-export interface NearbyLocation {
-  id: string;
-  name: string;
-  category: string;
-  address: string;
-  distance: string;
-  rating: number;
-  isOpen: boolean;
 }
 
 export interface Festival {
