@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { API_URL } from '@/app/config';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, X, Send, User, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 
@@ -44,7 +45,7 @@ export function CustomerSupportChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/chat', {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

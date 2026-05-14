@@ -1,0 +1,56 @@
+mutation SeedData @transaction @auth(level: USER, insecureReason: "Seed data is for development purposes and can be created by any logged-in user.") {
+  user_insertMany(data: [
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      displayName: "Alice Smith",
+      email: "alice.smith@example.com",
+      createdAt: "2023-01-01T10:00:00Z"
+    },
+    {
+      id: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      displayName: "Bob Johnson",
+      email: "bob.johnson@example.com",
+      createdAt: "2023-01-02T11:00:00Z"
+    }
+  ])
+  category_insertMany(data: [
+    {
+      id: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33",
+      name: "Work",
+      createdAt: "2023-01-01T10:30:00Z",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      colorHex: "#FF5733"
+    },
+    {
+      id: "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+      name: "Personal",
+      createdAt: "2023-01-02T11:30:00Z",
+      userId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      colorHex: "#33FF57"
+    }
+  ])
+  reminder_insertMany(data: [
+    {
+      title: "Finish project report",
+      dueDate: "2023-01-10",
+      createdAt: "2023-01-03T09:00:00Z",
+      isCompleted: false,
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      categoryId: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33",
+      description: "Complete the Q1 financial report for the team.",
+      dueTime: "2023-01-10T17:00:00Z",
+      recurrenceType: "NONE"
+    },
+    {
+      title: "Buy groceries",
+      dueDate: "2023-01-05",
+      createdAt: "2023-01-03T10:00:00Z",
+      isCompleted: false,
+      userId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      categoryId: "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+      description: "Milk, eggs, bread, and vegetables.",
+      dueTime: "2023-01-05T18:00:00Z",
+      recurrenceType: "WEEKLY"
+    }
+  ])
+}

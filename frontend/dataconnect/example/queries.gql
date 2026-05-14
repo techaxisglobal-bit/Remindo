@@ -1,0 +1,55 @@
+query ListAllCategories @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only lists categories and does not expose sensitive user data.") {
+  categories {
+    id
+    name
+    colorHex
+    createdAt
+    user {
+      id
+      displayName
+    }
+  }
+}
+
+query MyReminders @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it only fetches reminders belonging to the current user.") {
+  reminders(where: {userId: {eq_expr: "auth.uid"}}, orderBy: [{dueDate: ASC}, {dueTime: ASC}]) {
+    id
+    title
+    description
+    dueDate
+    dueTime
+    isCompleted
+    recurrenceType
+    category {
+      id
+      name
+      colorHex
+    }
+    createdAt
+  }
+}
+
+mutation CreateNewReminder($title: String!, $dueDate: Date!, $isCompleted: Boolean!, $description: String, $dueTime: Timestamp, $recurrenceType: String, $categoryId: UUID) @auth(level: USER) {
+  reminder_insert(data: {
+    title: $title,
+    dueDate: $dueDate,
+    isCompleted: $isCompleted,
+    description: $description,
+    dueTime: $dueTime,
+    recurrenceType: $recurrenceType,
+    userId_expr: "auth.uid",
+    categoryId: $categoryId
+  }) {
+    id
+  }
+}
+
+mutation UpdateReminderStatus($id: UUID!, $isCompleted: Boolean!) @auth(level: USER) {
+  reminder_update(
+    key: {id: $id},
+    data: {isCompleted: $isCompleted},
+    where: {userId: {eq_expr: "auth.uid"}}
+  ) {
+    id
+  }
+}

@@ -236,7 +236,7 @@ export function SignIn({ onSignIn }: SignInProps) {
   const handleAppleResponse = async (response: any) => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/apple', {
+      const res = await fetch(`${API_URL}/api/auth/apple`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -289,7 +289,7 @@ export function SignIn({ onSignIn }: SignInProps) {
   const handleGoogleResponse = async (response: any) => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/google', {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: response.credential })

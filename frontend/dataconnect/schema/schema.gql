@@ -1,0 +1,25 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+}
+
+type Reminder @table {
+  title: String!
+  dueDate: Date!
+  createdAt: Timestamp!
+  isCompleted: Boolean!
+  user: User
+  description: String
+  dueTime: Timestamp
+  recurrenceType: String
+  category: Category
+}
+
+type Category @table {
+  name: String!
+  createdAt: Timestamp!
+  user: User
+  colorHex: String
+}

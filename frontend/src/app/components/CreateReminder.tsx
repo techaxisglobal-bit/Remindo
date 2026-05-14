@@ -565,7 +565,7 @@ export function CreateReminder({
     { id: 'preview-now', time: startTime, title: title, isPreview: true, completed: false, date: startDate }
   ].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) {
       toast.error('Please enter a title');
@@ -623,11 +623,9 @@ export function CreateReminder({
         if (onClose) onClose();
       }
     }
-    toast.success(`${count} events scheduled for the month`);
-  }
-
-  if (onClose) onClose();
-};
+    
+    if (onClose) onClose();
+  };
 
 return (
   <div className="flex flex-col md:flex-row bg-white dark:bg-[#1b1b1b] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-[#292929] max-w-2xl w-full mx-auto h-full relative">

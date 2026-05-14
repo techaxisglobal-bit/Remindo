@@ -22,7 +22,8 @@ import {
   startOfMonth,
   endOfMonth,
   endOfWeek,
-  eachDayOfInterval
+  eachDayOfInterval,
+  subDays
 } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -348,11 +349,21 @@ export function Dashboard({
 
   // --- Interaction Handlers ---
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const getCoordinates = (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e && e.touches.length > 0) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+    } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+    }
+    return { clientX: (e as MouseEvent | React.MouseEvent).clientX, clientY: (e as MouseEvent | React.MouseEvent).clientY };
+  };
+
+  const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     if ((activeView !== 'home' && activeView !== 'calendar') || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 60; // Offset for time column
-    const y = e.clientY - rect.top + containerRef.current.scrollTop; // Adjust for scroll
+    const { clientX, clientY } = getCoordinates(e);
+    const x = clientX - rect.left - 60; // Offset for time column
+    const y = clientY - rect.top + containerRef.current.scrollTop; // Adjust for scroll
 
     if (x < 0) return; // Clicked on time column
 
@@ -375,19 +386,19 @@ export function Dashboard({
     // On mobile, don't start the drag mode immediately to allow the browser to handle scrolls
     if (!isMobile) {
       setDragMode('create');
-    } else {
-      // On mobile, we'll set it in handlePointerMove if the movement is horizontal or after a threshold
-      // For now, let's just let handlePointerMove handle it
     }
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (dragMode === 'none' || !containerRef.current || !dragStart) return;
+  const handlePointerMove = useCallback((e: MouseEvent | TouchEvent) => {
+    if (dragMode === 'none' && !dragStart) return;
+    if (!containerRef.current || !dragStart) return;
+
+    const { clientX, clientY } = getCoordinates(e);
 
     // Auto scroll if near edges (simplified)
     const rect = containerRef.current.getBoundingClientRect();
-    const y = e.clientY - rect.top + containerRef.current.scrollTop;
-    const x = e.clientX - rect.left - 60;
+    const y = clientY - rect.top + containerRef.current.scrollTop;
+    const x = clientX - rect.left - 60;
 
     let time = getMinutesFromY(y);
     const dayIndex = getDayIndexFromX(x, rect.width - 60, weekDays.length);
@@ -401,27 +412,34 @@ export function Dashboard({
       time = Math.max(time, snapToGrid(currentMinutes));
     }
 
-    if (!wasDragging.current) wasDragging.current = true;
-    setDragCurrent({ x, y, time: snapToGrid(time), dayIndex });
-  }, [dragMode, dragStart, weekDays, startDate]);
-
-  if (!wasDragging.current && (dx > 5 || dy > 5)) {
-    wasDragging.current = true;
-    // On mobile, if we weren't in drag mode yet, check if this is a horizontal drag (creation)
-    if (isMobile && dragMode === 'none' && dx > dy && dx > 10) {
-      setDragMode('create');
+    let dx = 0;
+    let dy = 0;
+    if (touchStartPos.current) {
+        dx = Math.abs(clientX - touchStartPos.current.x);
+        dy = Math.abs(clientY - touchStartPos.current.y);
     }
-  }
-  const newTime = dragMode === 'create' ? snapToGridFloor(time) : snapToGrid(time);
-  const newDragCurrent = { x, y, time: newTime, dayIndex };
 
-  // Performance optimization: only update state if the grid position (time/day) actually changed
-  if (!dragCurrent ||
-    newDragCurrent.time !== dragCurrent.time ||
-    newDragCurrent.dayIndex !== dragCurrent.dayIndex) {
-    setDragCurrent(newDragCurrent);
-  }
-}, [dragMode, dragStart, weekDays, startDate, dragCurrent]);
+    if (!wasDragging.current && (dx > 5 || dy > 5)) {
+      wasDragging.current = true;
+      // On mobile, if we weren't in drag mode yet, check if this is a horizontal drag (creation)
+      if (isMobile && dragMode === 'none' && dx > dy && dx > 10) {
+        setDragMode('create');
+      }
+    }
+
+    // if still none, we might be just scrolling
+    if (dragMode === 'none') return;
+
+    const newTime = dragMode === 'create' ? snapToGridFloor(time) : snapToGrid(time);
+    const newDragCurrent = { x, y, time: newTime, dayIndex };
+
+    // Performance optimization: only update state if the grid position (time/day) actually changed
+    if (!dragCurrent ||
+      newDragCurrent.time !== dragCurrent.time ||
+      newDragCurrent.dayIndex !== dragCurrent.dayIndex) {
+      setDragCurrent(newDragCurrent);
+    }
+  }, [dragMode, dragStart, weekDays, startDate, dragCurrent, isMobile]);
 
 const handlePointerUp = useCallback((e?: MouseEvent | TouchEvent) => {
   if ((dragMode === 'create' || (isMobile && dragMode === 'none' && dragStart)) && dragStart) {
@@ -947,7 +965,6 @@ return (
                     </>
                   )}
                 </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1048,7 +1065,9 @@ return (
                 )}
               </AnimatePresence>
             </div>
+          </div>
 
+          <div className="flex items-center gap-3">
             <button
               className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-b from-[#e0b596]/90 to-[#c69472]/90 text-[#1f1f1f] shadow-[0_10px_20px_rgba(224,181,150,0.4),inset_0_1px_0_rgba(255,255,255,0.6)] border border-white/20 border-t-white/60 hover:brightness-110 hover:scale-[1.05] backdrop-blur-xl transition-all duration-300 rounded-xl text-sm font-semibold"
               onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
@@ -1091,60 +1110,55 @@ return (
       <div className="flex-1 relative flex overflow-hidden bg-gray-50 dark:bg-[#1f1f1f]">
         <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''}`}>
           {activeView === 'calendar' && (
-            !isMobile ? (
-              <div
-                className="flex flex-col h-full bg-white dark:bg-[#1f1f1f]"
-              >
-                {/* Calendar Grid Header */}
-                {calendarView !== 'month' ? (
-                  <div className="flex bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
-                    <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-[#252525]" />
-                    <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
-                      {weekDays.map((day, i) => (
-                          <div
-                            key={i}
-                            className={`py-3 text-center border-r border-gray-200 dark:border-[#333] last:border-r-0 ${isSameDay(day, new Date()) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                          >
-                            Schedule
-                          </button>
-    <button
-      onClick={() => setMobileViewMode('day')}
-      className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${mobileViewMode === 'day' ? 'bg-white dark:bg-[#3d3d45] text-[#e0b596] shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
-    >
-      Day
-    </button>
-                        </div >
-                  </div >
-    {/* Persistent Common Datestrip (Paginated or Grid) */}
-                < div className="flex flex-col bg-white dark:bg-[#1f1f1f] shrink-0 relative" >
+            <div className="flex flex-col h-full bg-white dark:bg-[#1f1f1f]">
+              {!isMobile ? (
+                // --- Desktop Calendar ---
+                <>
+                  {calendarView !== 'month' ? (
+                    <div className="flex bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
+                      <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-[#252525]" />
+                      <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
+                        {weekDays.map((day, i) => (
+                          <div key={i} className={`py-3 text-center border-r border-gray-200 dark:border-[#333] last:border-r-0 ${isSameDay(day, new Date()) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{format(day, 'EEE')}</div>
+                            <div className={`text-2xl mt-1 ${isSameDay(day, new Date()) ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-500 dark:text-gray-400 font-light'}`}>{format(day, 'd')}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-7 bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                        <div key={day} className="py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-[#333] last:border-r-0">{day}</div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                // --- Mobile Calendar Header ---
+                <div className="flex flex-col bg-white dark:bg-[#1f1f1f] shrink-0 relative">
+                  {/* Mobile View Mode Toggle */}
+                  <div className="px-4 py-2 flex items-center justify-center bg-gray-50/80 dark:bg-[#252525]/80 backdrop-blur-sm border-b border-gray-200 dark:border-[#333]">
+                    <div className="flex bg-gray-200 dark:bg-[#1b1b1b] p-1 rounded-full shadow-inner border border-gray-300 dark:border-[#2a2a2a]">
+                      <button onClick={() => setMobileViewMode('schedule')} className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${mobileViewMode === 'schedule' ? 'bg-white dark:bg-[#3d3d45] text-[#e0b596] shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Schedule</button>
+                      <button onClick={() => setMobileViewMode('day')} className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${mobileViewMode === 'day' ? 'bg-white dark:bg-[#3d3d45] text-[#e0b596] shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Day</button>
+                    </div>
+                  </div>
+                  
+                  {/* Persistent Common Datestrip... */}
                   {!isMobileCalendarExpanded ? (
-                    <div
-                      ref={dateStripRef}
-                      className="flex overflow-x-auto no-scrollbar py-3 px-0 snap-x snap-mandatory"
-                    >
+                    <div ref={dateStripRef} className="flex overflow-x-auto no-scrollbar py-3 px-0 snap-x snap-mandatory">
                       {horizontalScrollWeeks.map((week, weekIndex) => (
                         <div key={weekIndex} data-week={weekIndex} className="flex min-w-full justify-around px-2 snap-start">
                           {week.map((day, i) => {
                             const isSelected = isSameDay(day, currentDate);
                             return (
-                              <button
-                                key={i}
-                                data-date={format(day, 'yyyy-MM-dd')}
-                                onClick={() => handleDateSelect(day)}
-                                className={`flex flex-col items-center gap-1 transition-all ${isSelected ? 'scale-110 active' : 'opacity-60'}`}
-                              >
-                                <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-[#e0b596]' : 'text-gray-400'}`}>
-                                  {format(day, 'EEE')[0]}
-                                </span>
-                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold transition-all ${isSelected
-                                  ? 'bg-[#e0b596] text-white shadow-lg'
-                                  : isSameDay(day, new Date())
-                                    ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300'
-                                    : 'text-gray-700 dark:text-gray-300'
-                                  }`}>
+                              <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className={`flex flex-col items-center gap-1 transition-all ${isSelected ? 'scale-110 active' : 'opacity-60'}`}>
+                                <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-[#e0b596]' : 'text-gray-400'}`}>{format(day, 'EEE')[0]}</span>
+                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg' : isSameDay(day, new Date()) ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300'}`}>
                                   {format(day, 'd')}
                                 </span>
-                                {sanitizedTasks.some(t => isTaskOnDay(t.date, day)) && (
+                                {sanitizedTasks.some(t => isSameDay(parseTaskDate(t.date), day)) && (
                                   <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e0b596]' : 'bg-gray-400'}`} />
                                 )}
                               </button>
@@ -1154,12 +1168,7 @@ return (
                       ))}
                     </div>
                   ) : (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: '350px', opacity: 1 }}
-                      className="overflow-y-auto no-scrollbar"
-                      ref={expandedCalendarRef}
-                    >
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: '350px', opacity: 1 }} className="overflow-y-auto no-scrollbar" ref={expandedCalendarRef}>
                       <div className="px-4 py-2">
                         <div className="grid grid-cols-7 mb-4">
                           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
@@ -1170,193 +1179,149 @@ return (
                           {continuousCalendarDays.map((day, i) => {
                             const isSelected = isSameDay(day, currentDate);
                             const isFirstOfMonth = day.getDate() === 1;
-                            const hasTasks = sanitizedTasks.some(t => isTaskOnDay(t.date, day));
-
+                            const hasTasks = sanitizedTasks.some(t => isSameDay(parseTaskDate(t.date), day));
                             return (
-                              <button
-                                key={i}
-                                data-date={format(day, 'yyyy-MM-dd')}
-                                onClick={() => handleDateSelect(day)}
-                                className="relative flex flex-col items-center justify-center py-1 group"
-                              >
-                                {isFirstOfMonth && (
-                                  <span className="absolute -top-3 text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                                    {format(day, 'MMM')}
-                                  </span>
-                                )}
-                                <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected
-                                  ? 'bg-[#e0b596] text-white shadow-lg scale-110'
-                                  : isSameDay(day, new Date())
-                                    ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'
-                                  }`}>
+                              <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className="relative flex flex-col items-center justify-center py-1 group">
+                                {isFirstOfMonth && <span className="absolute -top-3 text-[9px] font-black text-gray-400 uppercase tracking-tighter">{format(day, 'MMM')}</span>}
+                                <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg scale-110' : isSameDay(day, new Date()) ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'}`}>
                                   {format(day, 'd')}
                                 </span>
-                                {hasTasks && !isSelected && (
-                                  <div className="absolute bottom-0 w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                                )}
+                                {hasTasks && !isSelected && <div className="absolute bottom-0 w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />}
                               </button>
                             );
                           })}
                         </div>
                       </div>
                     </motion.div>
-                  )
-                  }
-
+                  )}
                   {/* Drag Handle */}
-                  <motion.div
-                    onPanEnd={(_, info) => {
-                      if (info.offset.y > 20) setIsMobileCalendarExpanded(true);
-                      if (info.offset.y < -20) setIsMobileCalendarExpanded(false);
-                    }}
-                    className="flex justify-center pb-2 cursor-grab active:cursor-grabbing group select-none touch-none"
-                  >
+                  <motion.div onPanEnd={(_, info) => { if (info.offset.y > 20) setIsMobileCalendarExpanded(true); if (info.offset.y < -20) setIsMobileCalendarExpanded(false); }} className="flex justify-center pb-2 cursor-grab active:cursor-grabbing group select-none touch-none">
                     <div className="w-12 h-1.5 rounded-full bg-gray-200 dark:bg-[#333] group-hover:bg-gray-300 dark:group-hover:bg-[#444] transition-colors" />
                   </motion.div>
-                </div >
-              </div >
-            )}
+                </div>
+              )}
 
-          {/* Calendar Content Selection */}
-          {
-            isMobile && mobileViewMode === 'schedule' ? (
-              <div
-                ref={scheduleListRef}
-                className="flex-1 overflow-y-auto p-4 pb-32 space-y-8 bg-gray-50/30 dark:bg-transparent custom-scrollbar scroll-smooth"
-              >
-                {(() => {
-                  // ... (rest of logic remains same)
-                  let listDays = [];
-                  if (calendarView === 'day') {
-                    listDays = [currentDate];
-                  } else if (calendarView === 'week') {
-                    const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // Sunday
-                    listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
-                  } else if (calendarView === 'month') {
-                    const start = startOfMonth(currentDate);
-                    const end = endOfMonth(currentDate);
-                    listDays = eachDayOfInterval({ start, end });
-                  } else {
-                    // Fallback for workWeek or others (e.g. 7-day window)
-                    const start = subDays(currentDate, 3);
-                    listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
-                  }
+              {/* Calendar Content Selection */}
+              {isMobile && mobileViewMode === 'schedule' ? (
+                <div ref={scheduleListRef} className="flex-1 overflow-y-auto p-4 pb-32 space-y-8 bg-gray-50/30 dark:bg-transparent custom-scrollbar scroll-smooth">
+                  {(() => {
+                    let listDays = [];
+                    if (calendarView === 'day') {
+                      listDays = [currentDate];
+                    } else if (calendarView === 'week') {
+                      const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // Sunday
+                      listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+                    } else if (calendarView === 'month') {
+                      const start = startOfMonth(currentDate);
+                      const end = endOfMonth(currentDate);
+                      listDays = eachDayOfInterval({ start, end });
+                    } else {
+                      // Fallback for workWeek or others (e.g. 7-day window)
+                      const start = subDays(currentDate, 3);
+                      listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+                    }
 
-                  return listDays.map((day, i) => {
-                    const dayTasks = sanitizedTasks.filter(t => isTaskOnDay(t.date, day));
-                    return (
-                      <div key={i} data-schedule-date={format(day, 'yyyy-MM-dd')} className="space-y-4 pt-2">
-                        <h3 className="flex items-baseline gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                          {format(day, 'd MMM')}
-                          <span className="text-sm font-medium text-gray-400">
-                            {isToday(day) ? 'Today' : format(day, 'EEEE')}
-                          </span>
-                        </h3>
+                    return listDays.map((day, i) => {
+                      const dayTasks = sanitizedTasks.filter(t => isSameDay(parseTaskDate(t.date), day));
+                      return (
+                        <div key={i} data-schedule-date={format(day, 'yyyy-MM-dd')} className="space-y-4 pt-2">
+                          <h3 className="flex items-baseline gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                            {format(day, 'd MMM')}
+                            <span className="text-sm font-medium text-gray-400">
+                              {isToday(day) ? 'Today' : format(day, 'EEEE')}
+                            </span>
+                          </h3>
 
-                        <div className="space-y-3">
-                          {dayTasks.length > 0 ? (
-                            (() => {
-                              const dateKey = format(day, 'yyyy-MM-dd');
-                              const isExpanded = !!expandedScheduleDays[dateKey];
-                              return (
-                                <>
-                                  {dayTasks
-                                    .sort((a, b) => a.time!.localeCompare(b.time!))
-                                    .slice(0, isExpanded ? undefined : 2)
-                                    .map(task => {
-                                      const cleanDesc = task.description ? task.description.replace(/<!-- metadata: .*? -->/g, '').trim() : '';
-                                      const hasDesc = cleanDesc.length > 0;
-                                      return (
-                                        <div
-                                          key={task.id}
-                                          onMouseDown={(e) => e.stopPropagation()}
-                                          onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                          className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-[#252525]/50 border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-[#252525] border-gray-100 dark:border-[#333] shadow-sm'}`}
-                                        >
-                                          {/* Time & Duration (Left) */}
-                                          <div className="flex flex-col items-center min-w-[64px] text-center">
-                                            <span className={`text-[10px] md:text-xs font-bold leading-none ${task.completed ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                                              {task.time ? format(parse(task.time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 mt-1">
-                                              {(() => {
-                                                const match = task.description?.match(/<!-- metadata: (.+) -->/);
-                                                if (match) {
-                                                  try {
-                                                    const meta = JSON.parse(match[1]);
-                                                    if (meta.duration) return `${meta.duration} min`;
-                                                  } catch (e) { }
-                                                }
-                                                return '30 min';
-                                              })()}
-                                            </span>
+                          <div className="space-y-3">
+                            {dayTasks.length > 0 ? (
+                              (() => {
+                                const dateKey = format(day, 'yyyy-MM-dd');
+                                const isExpanded = !!expandedScheduleDays[dateKey];
+                                return (
+                                  <>
+                                    {dayTasks
+                                      .sort((a, b) => a.time!.localeCompare(b.time!))
+                                      .slice(0, isExpanded ? undefined : 2)
+                                      .map(task => {
+                                        const cleanDesc = task.description ? task.description.replace(/<!-- metadata: .*? -->/g, '').trim() : '';
+                                        const hasDesc = cleanDesc.length > 0;
+                                        return (
+                                          <div
+                                            key={task.id}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
+                                            className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-[#252525]/50 border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-[#252525] border-gray-100 dark:border-[#333] shadow-sm'}`}
+                                          >
+                                            {/* Time & Duration (Left) */}
+                                            <div className="flex flex-col items-center min-w-[64px] text-center">
+                                              <span className={`text-[10px] md:text-xs font-bold leading-none ${task.completed ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                                                {task.time ? format(parse(task.time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
+                                              </span>
+                                              <span className="text-[10px] text-gray-400 mt-1">
+                                                {(() => {
+                                                  const match = task.description?.match(/<!-- metadata: (.+) -->/);
+                                                  if (match) {
+                                                    try {
+                                                      const meta = JSON.parse(match[1]);
+                                                      if (meta.duration) return `${meta.duration} min`;
+                                                    } catch (e) { }
+                                                  }
+                                                  return '30 min';
+                                                })()}
+                                              </span>
+                                            </div>
+
+                                            {/* Colored Bar */}
+                                            <div className={`w-1 ${hasDesc ? 'h-10' : 'h-6'} rounded-full flex-shrink-0 ${task.completed ? 'bg-gray-300' :
+                                              isBefore(setMinutes(setHours(startOfDay(parseTaskDate(task.date)), parseInt(task.time?.split(':')[0] || '0')), parseInt(task.time?.split(':')[1] || '0')), subMinutes(new Date(), 1)) ?
+                                                'bg-amber-500' : 'bg-[#e0b596]'
+                                              }`} />
+
+                                            {/* Title (Right) */}
+                                            <div className="flex-1 min-w-0">
+                                              <h4 className={`font-bold text-sm md:text-base truncate ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
+                                                {task.title}
+                                              </h4>
+                                              {hasDesc && (
+                                                <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                                                  {cleanDesc}
+                                                </p>
+                                              )}
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
                                           </div>
-
-                                          {/* Colored Bar */}
-                                          <div className={`w-1 ${hasDesc ? 'h-10' : 'h-6'} rounded-full flex-shrink-0 ${task.completed ? 'bg-gray-300' :
-                                            isBefore(setMinutes(setHours(startOfDay(parseTaskDate(task.date)), parseInt(task.time?.split(':')[0] || '0')), parseInt(task.time?.split(':')[1] || '0')), subMinutes(new Date(), 1)) ?
-                                              'bg-amber-500' : 'bg-[#e0b596]'
-                                            }`} />
-
-                                          {/* Title (Right) */}
-                                          <div className="flex-1 min-w-0">
-                                            <h4 className={`font-bold text-sm md:text-base truncate ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
-                                              {task.title}
-                                            </h4>
-                                            {hasDesc && (
-                                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
-                                                {cleanDesc}
-                                              </p>
-                                            )}
-                                          </div>
-                                          <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                        </div>
-                                      )
-                                    })}
-                                  {dayTasks.length > 2 && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setExpandedScheduleDays(prev => ({ ...prev, [dateKey]: !isExpanded }));
-                                      }}
-                                      className="w-full flex items-center justify-center gap-1.5 py-3 mt-1 bg-gray-50 dark:bg-[#252525] border border-dashed border-gray-200 dark:border-[#333] rounded-xl text-xs font-bold text-[#e0b596] hover:bg-white dark:hover:bg-[#2a2a2a] transition-all"
-                                    >
-                                      {isExpanded ? 'Show less' : `+ ${dayTasks.length - 2} more tasks`}
-                                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                    </button>
-                                  )}
-                                </>
-                              );
-                            })()
-                          ) : (
-                            <p className="text-sm italic text-gray-400 pl-6">No events</p>
-                          )}
+                                        )
+                                      })}
+                                    {dayTasks.length > 2 && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedScheduleDays(prev => ({ ...prev, [dateKey]: !isExpanded }));
+                                        }}
+                                        className="w-full flex items-center justify-center gap-1.5 py-3 mt-1 bg-gray-50 dark:bg-[#252525] border border-dashed border-gray-200 dark:border-[#333] rounded-xl text-xs font-bold text-[#e0b596] hover:bg-white dark:hover:bg-[#2a2a2a] transition-all"
+                                      >
+                                        {isExpanded ? 'Show less' : `+ ${dayTasks.length - 2} more tasks`}
+                                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                      </button>
+                                    )}
+                                  </>
+                                );
+                              })()
+                            ) : (
+                              <p className="text-sm italic text-gray-400 pl-6">No events</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
-                }
-                      </div>
-                    </div >
-        ) : (
-        <div className="grid grid-cols-7 bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-            <div key={day} className="py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-[#333] last:border-r-0">
-              {day}
-            </div>
-          ))}
-        </div>
-        )
-}
-
-        {/* Calendar Grid Body */}
-        {
-          (calendarView !== 'month' || isMobile) ? (
-            <div
-              className="flex-1 overflow-y-auto relative custom-scrollbar touch-pan-y"
-              ref={containerRef}
-              onMouseDown={handleMouseDown}
-            >
+                      );
+                    });
+                  })()}
+                  </div>
+                ) : (calendarView !== 'month' || isMobile) ? (
+                  <div
+                    className="flex-1 overflow-y-auto relative custom-scrollbar touch-pan-y"
+                    ref={containerRef}
+                    onPointerDown={handlePointerDown}
+                  >
               <div className="flex min-h-[1440px] relative">
                 {/* Time Column */}
                 <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-white dark:bg-[#1f1f1f] select-none text-right pr-2 pt-2">
@@ -1618,103 +1583,9 @@ return (
                 );
               })}
             </div>
-          )
-        }
-      </div >
-      ) : (
-      <div className="flex flex-col h-full bg-white dark:bg-[#1f1f1f] overflow-hidden">
-        {/* Mobile Date Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-[#333]">
-          <div className="flex gap-4 overflow-x-auto no-scrollbar py-1">
-            {weekDays.map((day, i) => (
-              <button
-                key={i}
-                onClick={() => handleDateSelect(day)}
-                className={`flex flex-col items-center min-w-[40px] gap-1 transition-all ${isSameDay(day, currentDate) ? 'scale-110' : 'opacity-60'}`}
-              >
-                <span className={`text-[10px] font-bold uppercase ${isSameDay(day, currentDate) ? 'text-[#e0b596]' : 'text-gray-400'}`}>
-                  {format(day, 'EEE')[0]}
-                </span>
-                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${isSameDay(day, currentDate) ? 'bg-[#e0b596] text-white shadow-md' : 'text-gray-900 dark:text-white'}`}>
-                  {format(day, 'd')}
-                </span>
-              </button>
-            ))}
-          </div>
+          )}
         </div>
-
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-8">
-            {weekDays.map((day, i) => {
-              const dayTasks = tasks.filter(t => isSameDay(parseTaskDate(t.date), day));
-              return (
-                <div key={i} className="space-y-4">
-                  <h3 className="flex items-baseline gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                    {format(day, 'd MMM')}
-                    <span className="text-sm font-medium text-gray-400">
-                      {isToday(day) ? 'Today' : format(day, 'EEEE')}
-                    </span>
-                  </h3>
-
-                  <div className="space-y-3">
-                    {dayTasks.length > 0 ? (
-                      dayTasks
-                        .sort((a, b) => a.time!.localeCompare(b.time!))
-                        .map(task => (
-                          <div
-                            key={task.id}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                            className={`p-4 rounded-2xl border flex items-center justify-between group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-[#252525]/50 border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-[#252525] border-gray-100 dark:border-[#333] shadow-sm'}`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className={`w-1.5 h-10 rounded-full ${task.completed ? 'bg-gray-300' :
-                                isBefore(setMinutes(setHours(startOfDay(parseTaskDate(task.date)), parseInt(task.time?.split(':')[0] || '0')), parseInt(task.time?.split(':')[1] || '0')), subMinutes(new Date(), 1)) ?
-                                  'bg-amber-500' :
-                                  task.category === 'Work' ? 'bg-blue-500' : task.category === 'Personal' ? 'bg-green-500' : 'bg-purple-500'
-                                }`} />
-                              <div>
-                                <h4 className={`font-bold ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
-                                  {task.title}
-                                </h4>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                  {task.time ? format(parse(task.time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
-                                  {task.location && ` • ${task.location}`}
-                                </p>
-                              </div>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-gray-300" />
-                          </div>
-                        ))
-                    ) : (
-                      <p className="text-sm italic text-gray-400 pl-6">No events</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
-
-        {/* Mobile FAB and Navigation */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
-          <button
-            onClick={() => handleDateSelect(new Date())}
-            className="px-6 py-3 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-full shadow-lg text-[#e0b596] text-sm font-bold flex items-center gap-2 active:scale-95 transition-all"
-          >
-            <ChevronDown className="w-4 h-4 rotate-180" />
-            Today
-          </button>
-          <button
-            onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
-            className="w-14 h-14 bg-gradient-to-br from-[#e0b596] to-[#dcb49a] rounded-full shadow-xl shadow-[#e0b596]/30 flex items-center justify-center text-[#1f1f1f] active:scale-90 transition-all"
-          >
-            <Plus className="w-8 h-8" />
-          </button>
-        </div>
-      </div>
-      )
-            )}
+      )}
 
       {
         activeView === 'locations' && (

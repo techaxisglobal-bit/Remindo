@@ -308,6 +308,8 @@ export function TaskDetails({
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
+  const [repeat, setRepeat] = useState(parsedMetadata?.repeat || 'never');
+  const [isSpecial, setIsSpecial] = useState(parsedMetadata?.isSpecial || false);
 
   const REPEAT_OPTIONS = [
     { value: 'never', label: 'Does not repeat' },
