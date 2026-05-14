@@ -140,6 +140,7 @@ export function Dashboard({
   const [mobileViewMode, setMobileViewMode] = useState<'schedule' | 'day'>('schedule');
   const [expandedScheduleDays, setExpandedScheduleDays] = useState<Record<string, boolean>>({});
   const [isMobileCalendarExpanded, setIsMobileCalendarExpanded] = useState(false);
+  const [showMobileMiniCalendar, setShowMobileMiniCalendar] = useState(false);
   const [showSpecialCalendar, setShowSpecialCalendar] = useState(false);
   const [specialDateFilter, setSpecialDateFilter] = useState<Date | undefined>(undefined);
 
@@ -893,44 +894,59 @@ return (
 
                 <div className="relative">
                   <button
-                    onClick={() => setShowMiniCalendar(!showMiniCalendar)}
-                    className="text-sm font-semibold tracking-tight text-gray-500 dark:text-gray-300 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-[#292929] px-2 py-1 rounded transition-colors"
+                    onClick={() => {
+                      setShowMobileMiniCalendar(!showMobileMiniCalendar);
+                      if (!isMobile) setShowMiniCalendar(!showMiniCalendar);
+                    }}
+                    className="text-xs md:text-sm font-semibold tracking-tight text-gray-500 dark:text-gray-300 flex items-center gap-1.5 md:gap-2 hover:bg-gray-100 dark:hover:bg-[#292929] px-2 py-1 rounded transition-colors"
                   >
-                    {format(currentDate, 'MMMM yyyy')}
-                    <ChevronDown className={`w-3 h-3 transition-transform ${showMiniCalendar ? 'rotate-180' : ''}`} />
+                    {format(currentDate, 'MMM yyyy')}
+                    <ChevronDown className={`w-3 h-3 transition-transform ${(isMobile ? showMobileMiniCalendar : showMiniCalendar) ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {showMiniCalendar && (
-                    <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50">
-                      <DayPicker
-                        mode="single"
-                        month={currentMonth}
-                        onMonthChange={(month) => {
-                          setCurrentMonth(month);
-                        }}
-                        selected={currentDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            handleDateSelect(date);
-                            setShowMiniCalendar(false);
-                          }
-                        }}
-                        modifiers={{
-                          today: new Date()
-                        }}
-                        modifiersStyles={{
-                          today: { border: '2px solid #e0b596', fontWeight: 'bold', borderRadius: '50%' },
-                          selected: { backgroundColor: '#e0b596', color: 'white' }
-                        }}
-                        styles={{
-                          root: { color: theme === 'dark' ? '#f5f5f5' : '#1f2937', backgroundColor: theme === 'dark' ? '#292929' : '#ffffff' },
-                          day: { color: theme === 'dark' ? '#e0e0e0' : '#374151' },
-                          caption: { color: theme === 'dark' ? '#f5f5f5' : '#111827' }
-                        }}
-                        showOutsideDays
-                      />
-                    </div>
+                  {showMobileMiniCalendar && (
+                    <>
+                      {isMobile && <div className="fixed inset-0 z-40" onClick={() => setShowMobileMiniCalendar(false)} />}
+                      <div className={`${isMobile ? 'absolute top-full left-0 mt-2' : 'absolute top-full left-0 mt-2'} p-3 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[250px] aspect-square flex flex-col items-center justify-center`}>
+                        <DayPicker
+                          mode="single"
+                          month={currentMonth}
+                          onMonthChange={(month) => {
+                            setCurrentMonth(month);
+                          }}
+                          selected={currentDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              handleDateSelect(date);
+                              setShowMobileMiniCalendar(false);
+                              if (!isMobile) setShowMiniCalendar(false);
+                            }
+                          }}
+                          modifiers={{
+                            today: new Date()
+                          }}
+                          modifiersStyles={{
+                            today: { border: '2px solid #e0b596', fontWeight: 'bold', borderRadius: '50%' },
+                            selected: { backgroundColor: '#e0b596', color: 'white' }
+                          }}
+                          styles={{
+                            root: { 
+                              color: theme === 'dark' ? '#f5f5f5' : '#1f2937', 
+                              backgroundColor: 'transparent',
+                              margin: 0,
+                              width: '100%'
+                            },
+                            day: { color: theme === 'dark' ? '#e0e0e0' : '#374151', width: '28px', height: '28px', fontSize: '11px' },
+                            caption: { color: theme === 'dark' ? '#f5f5f5' : '#111827', fontSize: '12px', marginBottom: '4px' },
+                            nav_button: { color: theme === 'dark' ? '#e0b596' : '#c69472', width: '20px', height: '20px' },
+                            head_cell: { width: '28px', fontSize: '10px' }
+                          }}
+                          showOutsideDays
+                        />
+                      </div>
+                    </>
                   )}
+                </div>
                 </div>
               </div>
             </div>
