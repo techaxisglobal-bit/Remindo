@@ -12,6 +12,8 @@ const emailService = require('../services/emailService');
 // @access  Public
 router.post('/signup', async (req, res) => {
     let { name, email, password } = req.body;
+    if (email) email = email.trim().toLowerCase();
+    if (password) password = password.trim();
     if (!email || !email.includes('@') || !email.includes('.')) {
         return res.status(400).json({ msg: 'Please provide a valid email address' });
     }
@@ -78,7 +80,8 @@ router.post('/signup', async (req, res) => {
 // @access  Public
 router.post('/verify', async (req, res) => {
     let { email, otp } = req.body;
-    email = email.toLowerCase();
+    if (email) email = email.trim().toLowerCase();
+    if (otp) otp = otp.trim();
 
     try {
         let user = await User.findOne({ where: { email } });
@@ -125,7 +128,8 @@ router.post('/verify', async (req, res) => {
 // @access  Public
 router.post('/login', async (req, res) => {
     let { email, password } = req.body;
-    email = email.toLowerCase();
+    if (email) email = email.trim().toLowerCase();
+    if (password) password = password.trim();
 
     try {
         let user = await User.findOne({ where: { email } });
@@ -177,10 +181,10 @@ router.post('/login', async (req, res) => {
 // @access  Public
 router.post('/forgot-password', async (req, res) => {
     let { email } = req.body;
+    if (email) email = email.trim().toLowerCase();
     if (!email || !email.includes('@') || !email.includes('.')) {
         return res.status(400).json({ msg: 'Please provide a valid email address' });
     }
-    email = email.toLowerCase();
 
     try {
         let user = await User.findOne({ where: { email } });
@@ -210,7 +214,9 @@ router.post('/forgot-password', async (req, res) => {
 // @access  Public
 router.post('/reset-password', async (req, res) => {
     let { email, otp, newPassword } = req.body;
-    email = email.toLowerCase();
+    if (email) email = email.trim().toLowerCase();
+    if (otp) otp = otp.trim();
+    if (newPassword) newPassword = newPassword.trim();
 
     try {
         let user = await User.findOne({ where: { email } });

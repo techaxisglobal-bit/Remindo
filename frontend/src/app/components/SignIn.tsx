@@ -58,10 +58,16 @@ export function SignIn({ onSignIn }: SignInProps) {
   // Auto-clear error after 5 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(null), 2000);
+      const timer = setTimeout(() => setError(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Clear error when user starts typing
+  const handleInputChange = (setter: (val: string) => void, value: string) => {
+    setter(value);
+    if (error) setError(null);
+  };
 
   // Clear error when switching views
   useEffect(() => {
@@ -108,16 +114,19 @@ export function SignIn({ onSignIn }: SignInProps) {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error('Please fill in all fields');
+      setError('Please fill in all fields');
       return;
     }
     if (!isValidEmail(email)) {
-      toast.error('Please enter a valid email address');
+      setError('Please enter a valid email address');
       return;
     }
     if (isSignUp) {
-      if (!name) { toast.error('Please enter your name'); return; }
-      if (password !== confirmPassword) { toast.error('Passwords do not match'); return; }
+      if (!name) { setError('Please enter your name'); return; }
+      if (password.trim() !== confirmPassword.trim()) { 
+        setError('Passwords do not match'); 
+        return; 
+      }
     }
 
     setLoading(true);
@@ -214,9 +223,9 @@ export function SignIn({ onSignIn }: SignInProps) {
 
   // ── Forgot Password: Reset ──
   const handleVerifyOtpAndReset = async () => {
-    if (!otp || otp.length !== 6) { toast.error('Please enter the 6-digit OTP'); return; }
-    if (!newPassword) { toast.error('Please enter your new password'); return; }
-    if (newPassword !== confirmNewPassword) { toast.error('Passwords do not match'); return; }
+    if (!otp || otp.length !== 6) { setError('Please enter the 6-digit OTP'); return; }
+    if (!newPassword) { setError('Please enter your new password'); return; }
+    if (newPassword.trim() !== confirmNewPassword.trim()) { setError('Passwords do not match'); return; }
 
     setLoading(true);
     setError(null);
@@ -626,7 +635,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                       <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Full Name</Label>
                       <div className="relative mt-1">
                         <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input id="name" type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+                        <Input id="name" type="text" placeholder="John Doe" value={name} onChange={(e) => handleInputChange(setName, e.target.value)} className={inputClass} />
                       </div>
                     </motion.div>
                   )}
@@ -635,7 +644,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                     <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email Address</Label>
                     <div className="relative mt-1">
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+                      <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={(e) => handleInputChange(setEmail, e.target.value)} className={inputClass} />
                     </div>
                   </div>
 
@@ -648,7 +657,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                         type={showPassword ? 'text' : 'password'}
                         placeholder="••••••••"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => handleInputChange(setPassword, e.target.value)}
                         className={inputClassWithEye}
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
@@ -667,7 +676,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="••••••••"
                           value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onChange={(e) => handleInputChange(setConfirmPassword, e.target.value)}
                           className={inputClassWithEye}
                         />
                         <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
@@ -699,11 +708,14 @@ export function SignIn({ onSignIn }: SignInProps) {
                 <div className="text-center pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsSignUp(!isSignUp)}
-                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setError(null);
+                    }}
+                    className="group text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
                   >
                     {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                    <span className="text-[#e0b596] font-semibold hover:text-[#c69472]">
+                    <span className="text-[#e0b596] font-bold group-hover:text-[#c69472] underline decoration-2 underline-offset-4 decoration-[#e0b596]/30 group-hover:decoration-[#c69472]">
                       {isSignUp ? 'Sign In' : 'Sign Up'}
                     </span>
                   </button>
