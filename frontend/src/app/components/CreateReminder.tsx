@@ -602,8 +602,8 @@ export function CreateReminder({
 
     if (selectedDays.length === 0) {
       // Does not repeat - Create for startDate only
-      await createSingleTask(startDate);
       toast.success('Event scheduled');
+      createSingleTask(startDate);
     } else {
       // Create for all matching days from startDate to end of month
       const allDays = eachDayOfInterval({ start: startRange, end: endRange });
@@ -617,8 +617,8 @@ export function CreateReminder({
       }
 
       if (creationPromises.length > 0) {
-        await Promise.all(creationPromises);
         toast.success(`${creationPromises.length} events scheduled for the month`);
+        Promise.all(creationPromises);
       }
     }
     

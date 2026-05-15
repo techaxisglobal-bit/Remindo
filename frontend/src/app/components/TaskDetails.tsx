@@ -298,11 +298,21 @@ export function TaskDetails({
     return null;
   }, [task.description]);
 
+  const initialEndTime = useMemo(() => {
+    if (parsedMetadata?.endTime) return parsedMetadata.endTime;
+    try {
+      const start = parse(task.time || '12:00', 'HH:mm', new Date());
+      return format(addMinutes(start, task.duration || 30), 'HH:mm');
+    } catch (e) {
+      return '12:30';
+    }
+  }, [task.time, task.duration, parsedMetadata]);
+
   const [title, setTitle] = useState(task.title);
   const [startDate, setStartDate] = useState(task.date);
   const [startTime, setStartTime] = useState(task.time || '12:00');
   const [endDate, setEndDate] = useState(parsedMetadata?.endDate || task.date);
-  const [endTime, setEndTime] = useState(parsedMetadata?.endTime || '12:30');
+  const [endTime, setEndTime] = useState(initialEndTime);
   const [description, setDescription] = useState(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
   const [notifyBefore, setNotifyBefore] = useState(task.notifyBefore || 5);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -335,7 +345,15 @@ export function TaskDetails({
       setStartDate(task.date);
       setStartTime(task.time || '12:00');
       setEndDate(parsedMetadata?.endDate || task.date);
-      setEndTime(parsedMetadata?.endTime || '12:30');
+      
+      const calculatedEnd = parsedMetadata?.endTime || (() => {
+        try {
+          const start = parse(task.time || '12:00', 'HH:mm', new Date());
+          return format(addMinutes(start, task.duration || 30), 'HH:mm');
+        } catch (e) { return '12:30'; }
+      })();
+      setEndTime(calculatedEnd);
+
       setDescription(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
       setRepeat(parsedMetadata?.repeat || 'never');
       setIsSpecial(parsedMetadata?.isSpecial || false);

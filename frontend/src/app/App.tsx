@@ -207,6 +207,11 @@ export default function App() {
     const token = localStorage.getItem('token');
     if (!token) return;
 
+    // Optimistic UI: Add task to state immediately with temporary ID
+    const tempId = task.id || `temp-${Date.now()}`;
+    const taskWithId = { ...task, id: tempId };
+    setTasks(prev => [...prev, taskWithId]);
+
     try {
       const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks`, {
         method: 'POST',
@@ -218,10 +223,17 @@ export default function App() {
       });
       if (res.ok) {
         const newTask = await res.json();
-        setTasks(prev => [...prev, newTask]);
+        // Replace the temporary task with the real one from the server
+        setTasks(prev => prev.map(t => (t.id === tempId || (t as any)._id === tempId) ? newTask : t));
+      } else {
+        // Rollback on failure
+        setTasks(prev => prev.filter(t => t.id !== tempId && (t as any)._id !== tempId));
+        toast.error('Failed to save task');
       }
     } catch (err) {
       console.error('Failed to add task:', err);
+      // Rollback on error
+      setTasks(prev => prev.filter(t => t.id !== tempId && (t as any)._id !== tempId));
       toast.error('Failed to save task');
     }
   };
