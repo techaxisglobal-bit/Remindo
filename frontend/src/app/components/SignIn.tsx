@@ -69,22 +69,34 @@ export function SignIn({ onSignIn }: SignInProps) {
   }, [isSignUp, forgotStep, signupOtpStep]);
 
   const isValidEmail = (em: string) => {
-    return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(em);
+    return em.includes('@') && em.includes('.');
   };
 
   /**
    * Helper to fetch with a simple retry mechanism
    * Useful for Railway cold starts (server sleep)
    */
-  const fetchWithRetry = async (url: string, options: RequestInit, retries = 2): Promise<Response> => {
+  const fetchWithRetry = async (url: string, options: RequestInit, retries = 3): Promise<Response> => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
       return response;
-    } catch (err) {
-      if (retries > 0 && err instanceof TypeError && err.message === 'Failed to fetch') {
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      
+      if (err.name === 'AbortError') {
+        throw new Error('Server is taking too long to wake up. Please try again in a few seconds.');
+      }
+
+      if (retries > 0) {
         console.warn(`Fetch failed, retrying... (${retries} attempts left)`);
-        // Wait 1.5 seconds before retrying
-        await new Promise(res => setTimeout(res, 1500));
+        await new Promise(res => setTimeout(res, 2000));
         return fetchWithRetry(url, options, retries - 1);
       }
       throw err;

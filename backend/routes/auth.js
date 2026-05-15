@@ -12,6 +12,9 @@ const emailService = require('../services/emailService');
 // @access  Public
 router.post('/signup', async (req, res) => {
     let { name, email, password } = req.body;
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        return res.status(400).json({ msg: 'Please provide a valid email address' });
+    }
     email = email.toLowerCase();
 
     try {
@@ -174,6 +177,9 @@ router.post('/login', async (req, res) => {
 // @access  Public
 router.post('/forgot-password', async (req, res) => {
     let { email } = req.body;
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        return res.status(400).json({ msg: 'Please provide a valid email address' });
+    }
     email = email.toLowerCase();
 
     try {

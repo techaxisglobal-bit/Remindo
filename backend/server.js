@@ -19,13 +19,22 @@ const allowedOrigins = [
     'ionic://localhost',
     'https://remindo.app',
     'capacitor://remindo.app',
+    'http://remindo.app',
 ].filter(Boolean);
+
+// Helper to check if origin is a Capacitor/Mobile app
+const isMobileOrigin = (origin) => {
+    return !origin || 
+           origin.startsWith('capacitor://') || 
+           origin.startsWith('ionic://') || 
+           origin.includes('localhost') ||
+           origin.includes('remindo.app');
+};
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (native mobile apps, Postman, curl)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // Allow all mobile/localhost origins or specific production domains
+        if (isMobileOrigin(origin) || allowedOrigins.indexOf(origin) !== -1) {
             return callback(null, true);
         }
         console.error(`CORS blocked origin: ${origin}`);
