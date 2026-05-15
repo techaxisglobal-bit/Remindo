@@ -13,22 +13,32 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'http://localhost',
     'http://localhost:5173',
-    'capacitor://localhost'
+    'http://localhost:4173',
+    'https://localhost',
+    'capacitor://localhost',
+    'ionic://localhost',
+    'https://remindo.app',
+    'capacitor://remindo.app',
 ].filter(Boolean);
 
 app.use(cors({
     origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
+        // Allow requests with no origin (native mobile apps, Postman, curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            var msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        console.error(`CORS blocked origin: ${origin}`);
+        return callback(new Error(`CORS policy blocked: ${origin}`), false);
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'X-Requested-With'],
 }));
+
+// Handle preflight for all routes
+app.options('*', cors());
+
 app.use(express.json());
 
 // Routes
@@ -59,8 +69,8 @@ sequelize.sync({ alter: true })
     .then(() => {
         console.log('PostgreSQL connected and tables synced');
         startNotificationScheduler();
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on all interfaces at port ${PORT}`);
         });
     })
     .catch(err => {

@@ -240,7 +240,10 @@ router.post('/google', async (req, res) => {
         const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
         const ticket = await client.verifyIdToken({
             idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: [
+                process.env.GOOGLE_CLIENT_ID,
+                process.env.GOOGLE_ANDROID_CLIENT_ID,
+            ].filter(Boolean),
         });
 
         const payload = ticket.getPayload();

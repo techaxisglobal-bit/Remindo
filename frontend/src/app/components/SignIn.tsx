@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { API_BASE_URL } from '@/app/api';
+import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -40,22 +41,24 @@ export function SignIn({ onSignIn }: SignInProps) {
     setTheme(saved);
     document.documentElement.classList.toggle('dark', saved === 'dark');
 
-    // Initialize GoogleAuth
-    try {
-      GoogleAuth.initialize({
-        clientId: '733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-        grantOfflineAccess: true,
-      });
-    } catch (err) {
-      console.error('Failed to initialize Google Auth', err);
+    // Initialize GoogleAuth (native Android/iOS only)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        GoogleAuth.initialize({
+          clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com',
+          scopes: ['profile', 'email'],
+          grantOfflineAccess: true,
+        });
+      } catch (err) {
+        console.error('Failed to initialize Google Auth', err);
+      }
     }
   }, []);
 
   // Auto-clear error after 5 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(null), 5000);
+      const timer = setTimeout(() => setError(null), 2000);
       return () => clearTimeout(timer);
     }
   }, [error]);

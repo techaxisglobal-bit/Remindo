@@ -47,10 +47,16 @@ export default function App() {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     if (token && savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      fetchTasks(token);
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        fetchTasks(token);
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -320,7 +326,7 @@ export default function App() {
     return (
       <>
         <SignIn onSignIn={handleSignIn} />
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" richColors duration={2000} />
       </>
     );
   }
@@ -339,7 +345,7 @@ export default function App() {
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={handleToggleNotifications}
       />
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-center" richColors duration={2000} />
     </>
   );
 }

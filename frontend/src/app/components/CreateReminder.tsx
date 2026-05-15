@@ -574,7 +574,7 @@ export function CreateReminder({
     const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
     const endRange = endOfMonth(startRange);
 
-    const createSingleTask = (dateStr: string) => {
+    const createSingleTask = async (dateStr: string) => {
       const start = parse(`${dateStr} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
       const end = parse(`${dateStr} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
 
@@ -597,17 +597,17 @@ export function CreateReminder({
         notifyBefore: notifyBefore,
       };
 
-      onCreateTask(newTask);
+      await onCreateTask(newTask);
     };
 
     if (selectedDays.length === 0) {
       // Does not repeat - Create for startDate only
-      createSingleTask(startDate);
+      await createSingleTask(startDate);
       toast.success('Event scheduled');
     } else {
       // Create for all matching days from startDate to end of month
       const allDays = eachDayOfInterval({ start: startRange, end: endRange });
-      let count = 0;
+      const creationPromises: Promise<void>[] = [];
 
       for (const day of allDays) {
         const dayIndex = getDay(day);
@@ -616,11 +616,9 @@ export function CreateReminder({
         }
       }
 
-      const results = await Promise.all(creationPromises);
-      const successCount = results.filter(Boolean).length;
-      if (successCount > 0) {
-        toast.success(`${successCount} events scheduled for the month`);
-        if (onClose) onClose();
+      if (creationPromises.length > 0) {
+        await Promise.all(creationPromises);
+        toast.success(`${creationPromises.length} events scheduled for the month`);
       }
     }
     
