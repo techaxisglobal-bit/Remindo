@@ -345,10 +345,17 @@ export function CreateReminder({
           console.error('Speech error', event.error);
           setIsListening(false);
           setIsProcessing(false);
+          
+          if (event.error === 'not-allowed') {
+            toast.error("Microphone access denied. Please check your browser settings.");
+          } else if (event.error === 'no-speech') {
+            toast.error("No speech detected. Please try again.");
+          } else {
+            toast.error(`Speech recognition error: ${event.error}`);
+          }
         };
 
         recognitionRef.current.onend = () => {
-          // If browser automatically stops listening, ensure UI syncs
           setIsListening(false);
         };
       }
@@ -511,19 +518,30 @@ export function CreateReminder({
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
-      setIsProcessing(true);
-      setTimeout(() => {
-        if (voiceText) parseVoiceCommand(voiceText);
-        setIsProcessing(false);
-        setVoiceText('');
-      }, 1200);
+      
+      if (voiceText.trim()) {
+        setIsProcessing(true);
+        setTimeout(() => {
+          parseVoiceCommand(voiceText);
+          setIsProcessing(false);
+          setVoiceText('');
+          toast.success("Command processed");
+        }, 800);
+      }
     } else {
+      if (!recognitionRef.current) {
+        toast.error("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+        return;
+      }
+      
       setVoiceText('');
       try {
-        recognitionRef.current?.start();
+        recognitionRef.current.start();
         setIsListening(true);
       } catch (e) {
-        toast.error("Speech recognition not available or already listening.");
+        console.error('Start error:', e);
+        toast.error("Could not start microphone. It might be already in use.");
+        setIsListening(false);
       }
     }
   };
@@ -539,8 +557,9 @@ export function CreateReminder({
           parseVoiceCommand(voiceText);
           setIsProcessing(false);
           setVoiceText('');
-        }, 1200);
-      }, 4000);
+          toast.success("Done listening");
+        }, 800);
+      }, 3000); // Stop after 3 seconds of silence (down from 4s)
 
       return () => clearTimeout(timer);
     }

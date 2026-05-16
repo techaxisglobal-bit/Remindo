@@ -44,6 +44,7 @@ import {
   Clock,
   Video,
   ChevronDown,
+  ChevronUp,
   Keyboard,
   Sun,
   Moon,
@@ -857,24 +858,6 @@ return (
                     selected={currentDate}
                     onSelect={handleDateSelect}
                     className="w-full p-0"
-                    classNames={{
-                      months: "flex flex-col w-full",
-                      month: "flex flex-col w-full",
-                      caption: "flex justify-between items-center w-full mb-4 px-1",
-                      caption_label: "text-sm font-bold text-gray-700 dark:text-gray-200",
-                      nav: "flex items-center gap-1",
-                      nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 flex items-center justify-center rounded-md hover:bg-gray-200 dark:hover:bg-[#333] transition-colors",
-                      table: "w-full border-collapse space-y-1",
-                      head_row: "grid grid-cols-7 mb-2",
-                      head_cell: "text-gray-400 font-bold text-[10px] uppercase text-center w-full",
-                      row: "grid grid-cols-7 w-full",
-                      cell: "h-8 w-full text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-                      day: "h-8 w-8 p-0 font-medium aria-selected:opacity-100 rounded-full flex items-center justify-center mx-auto hover:bg-gray-200 dark:hover:bg-[#333] transition-all",
-                      day_today: "bg-black! text-white! dark:bg-white! dark:text-black! font-bold aria-selected:bg-black! aria-selected:text-white! dark:aria-selected:bg-white! dark:aria-selected:text-black!",
-                      day_selected: "bg-transparent! border-2! border-black! dark:border-white! text-black! dark:text-white! font-bold shadow-none hover:bg-gray-100 dark:hover:bg-[#292929]",
-                      day_outside: "text-gray-300 dark:text-gray-600 opacity-50",
-                      day_disabled: "text-gray-300 dark:text-gray-600 opacity-50",
-                    }}
                   />
                 </div>
               </div>
@@ -913,48 +896,37 @@ return (
 
             {/* Bottom Row: Month, Filters, Add */}
             <div className="flex items-center justify-between">
-              {/* Month Selector */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowMobileMiniCalendar(!showMobileMiniCalendar)}
-                  className="text-sm font-bold tracking-tight text-gray-700 dark:text-gray-200 flex items-center gap-1 bg-gray-100 dark:bg-[#292929] px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  {format(currentDate, 'MMMM yyyy')}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMobileMiniCalendar ? 'rotate-180' : ''}`} />
-                </button>
+              <div className="flex items-center gap-2">
+                {/* Month Selector */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMobileMiniCalendar(!showMobileMiniCalendar)}
+                    className="text-sm font-bold tracking-tight text-gray-700 dark:text-gray-200 flex items-center gap-1 bg-gray-100 dark:bg-[#292929] px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    {format(currentDate, 'MMMM yyyy')}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMobileMiniCalendar ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {showMobileMiniCalendar && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMobileMiniCalendar(false)} />
-                    <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[250px]">
-                      <DayPicker
-                        mode="single"
-                        month={currentMonth}
-                        onMonthChange={setCurrentMonth}
-                        selected={currentDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            handleDateSelect(date);
-                            setShowMobileMiniCalendar(false);
-                          }
-                        }}
-                        modifiers={{ today: new Date() }}
-                        modifiersStyles={{
-                          today: { border: '2px solid #e0b596', fontWeight: 'bold', borderRadius: '50%' },
-                          selected: { backgroundColor: '#e0b596', color: 'white' }
-                        }}
-                        styles={{
-                          root: { color: theme === 'dark' ? '#f5f5f5' : '#1f2937', width: '100%' },
-                          day: { width: '28px', height: '28px', fontSize: '11px' },
-                          caption: { fontSize: '12px' },
-                          nav_button: { width: '20px', height: '20px' },
-                          head_cell: { width: '28px', fontSize: '10px' }
-                        }}
-                        showOutsideDays
-                      />
-                    </div>
-                  </>
-                )}
+                  {showMobileMiniCalendar && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowMobileMiniCalendar(false)} />
+                      <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[260px]">
+                        <Calendar
+                          mode="single"
+                          month={currentMonth}
+                          onMonthChange={setCurrentMonth}
+                          selected={currentDate}
+                          onSelect={(date) => {
+                            if (date) {
+                              handleDateSelect(date);
+                              setShowMobileMiniCalendar(false);
+                            }
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1070,8 +1042,8 @@ return (
                     </button>
 
                     {showMiniCalendar && (
-                      <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[250px]">
-                        <DayPicker
+                      <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[260px]">
+                        <Calendar
                           mode="single"
                           month={currentMonth}
                           onMonthChange={setCurrentMonth}
@@ -1082,19 +1054,6 @@ return (
                               setShowMiniCalendar(false);
                             }
                           }}
-                          modifiers={{ today: new Date() }}
-                          modifiersStyles={{
-                            today: { border: '2px solid #e0b596', fontWeight: 'bold', borderRadius: '50%' },
-                            selected: { backgroundColor: '#e0b596', color: 'white' }
-                          }}
-                          styles={{
-                            root: { color: theme === 'dark' ? '#f5f5f5' : '#1f2937', width: '100%' },
-                            day: { width: '28px', height: '28px', fontSize: '11px' },
-                            caption: { fontSize: '12px' },
-                            nav_button: { width: '20px', height: '20px' },
-                            head_cell: { width: '28px', fontSize: '10px' }
-                          }}
-                          showOutsideDays
                         />
                       </div>
                     )}
@@ -1208,7 +1167,7 @@ return (
                         {weekDays.map((day, i) => (
                           <div key={i} className={`py-3 text-center border-r border-gray-200 dark:border-[#333] last:border-r-0 ${isSameDay(day, new Date()) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
                             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{format(day, 'EEE')}</div>
-                            <div className={`text-2xl mt-1 ${isSameDay(day, new Date()) ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-500 dark:text-gray-400 font-light'}`}>{format(day, 'd')}</div>
+                            <div className={`text-2xl mt-1 ${isSameDay(day, new Date()) ? 'text-[#e0b596] font-bold' : 'text-gray-500 dark:text-gray-400 font-light'}`}>{format(day, 'd')}</div>
                           </div>
                         ))}
                       </div>
@@ -1242,7 +1201,7 @@ return (
                             return (
                               <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className={`flex flex-col items-center gap-1 transition-all ${isSelected ? 'scale-110 active' : 'opacity-60'}`}>
                                 <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-[#e0b596]' : 'text-gray-400'}`}>{format(day, 'EEE')[0]}</span>
-                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg' : isSameDay(day, new Date()) ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                                <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596] text-[#e0b596]' : 'text-gray-700 dark:text-gray-300'}`}>
                                   {format(day, 'd')}
                                 </span>
                                 {sanitizedTasks.some(t => isSameDay(parseTaskDate(t.date), day)) && (
@@ -1270,7 +1229,7 @@ return (
                             return (
                               <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className="relative flex flex-col items-center justify-center py-1 group">
                                 {isFirstOfMonth && <span className="absolute -top-3 text-[9px] font-black text-gray-400 uppercase tracking-tighter">{format(day, 'MMM')}</span>}
-                                <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg scale-110' : isSameDay(day, new Date()) ? 'border-2 border-black dark:border-white text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'}`}>
+                                <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg scale-110' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596] text-[#e0b596]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'}`}>
                                   {format(day, 'd')}
                                 </span>
                                 {hasTasks && !isSelected && <div className="absolute bottom-0 w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />}
@@ -1402,7 +1361,23 @@ return (
                       );
                     });
                   })()}
-                  </div>
+                  {isMobile && mobileViewMode === 'schedule' && !isToday(currentDate) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
+                    >
+                      <button
+                        onClick={() => handleDateSelect(new Date())}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] hover:border-[#e0b596] shadow-[0_8px_25px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-[#e0b596] active:scale-95 transition-all group"
+                      >
+                        Today
+                        <ChevronUp className="w-3.5 h-3.5 transition-transform group-hover:-translate-y-0.5" />
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
                 ) : (calendarView !== 'month' || isMobile) ? (
                   <div
                     className="flex-1 overflow-y-auto relative custom-scrollbar touch-pan-y"
