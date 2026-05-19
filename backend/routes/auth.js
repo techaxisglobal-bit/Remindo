@@ -397,7 +397,7 @@ router.post('/save-subscription', auth, async (req, res) => {
 // @desc    Save FCM registration token for user
 // @access  Private
 router.post('/save-fcm-token', auth, async (req, res) => {
-    const { fcmToken } = req.body;
+    const { fcmToken, timezone } = req.body;
 
     try {
         let user = await User.findByPk(req.user.id);
@@ -406,9 +406,12 @@ router.post('/save-fcm-token', auth, async (req, res) => {
         }
 
         user.fcmToken = fcmToken;
+        if (timezone) {
+            user.timezone = timezone;
+        }
         await user.save();
 
-        res.json({ msg: 'FCM token saved successfully' });
+        res.json({ msg: 'FCM token and timezone saved successfully' });
     } catch (err) {
         console.error('Error saving FCM token:', err.message);
         res.status(500).send('Server error');

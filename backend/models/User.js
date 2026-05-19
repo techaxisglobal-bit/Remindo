@@ -56,6 +56,11 @@ const User = sequelize.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
     },
+    timezone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'UTC',
+    },
 }, {
     tableName: 'users',
     timestamps: true,

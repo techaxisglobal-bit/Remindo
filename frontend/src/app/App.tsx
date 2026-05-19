@@ -106,15 +106,16 @@ export default function App() {
     if (!token) return;
 
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await fetchWithRetry(`${API_BASE_URL}/api/auth/save-fcm-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': token
         },
-        body: JSON.stringify({ fcmToken })
+        body: JSON.stringify({ fcmToken, timezone })
       });
-      console.log('FCM token synchronized with backend successfully');
+      console.log('FCM token and timezone synchronized with backend successfully');
     } catch (err) {
       console.error('Failed to save FCM token to backend:', err);
     }
