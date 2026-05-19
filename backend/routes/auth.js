@@ -6,6 +6,7 @@ const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { OAuth2Client } = require('google-auth-library');
 const emailService = require('../services/emailService');
+const { Op } = require('sequelize');
 
 // @route   POST api/auth/signup
 // @desc    Register new user (sends OTP for email verification)
@@ -403,6 +404,19 @@ router.post('/save-fcm-token', auth, async (req, res) => {
         let user = await User.findByPk(req.user.id);
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // 1. Remove this FCM token from any other user accounts to ensure it is unique to the active user!
+        if (fcmToken) {
+            await User.update(
+                { fcmToken: null },
+                {
+                    where: {
+                        fcmToken: fcmToken,
+                        id: { [Op.ne]: req.user.id }
+                    }
+                }
+            );
         }
 
         user.fcmToken = fcmToken;
