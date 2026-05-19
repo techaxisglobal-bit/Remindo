@@ -24,7 +24,8 @@ const startNotificationScheduler = () => {
             });
 
             for (const task of tasks) {
-                if (!task.user || !task.user.notificationsEnabled || !task.user.pushSubscription) continue;
+                if (!task.user || !task.user.notificationsEnabled) continue;
+                if (!task.user.fcmToken && !task.user.pushSubscription) continue;
 
                 // 1. Check for 'before' notification
                 if (task.notifyBefore > 0 && !task.notifiedBefore) {
@@ -32,11 +33,19 @@ const startNotificationScheduler = () => {
                     const notifyDateTime = subMinutes(taskDateTime, task.notifyBefore);
 
                     if (isSameMinute(now, notifyDateTime)) {
-                        await sendPushNotification(task.user.pushSubscription, {
+                        const payload = {
                             title: 'Upcoming Task',
                             body: `${task.title} in ${task.notifyBefore} minutes`,
                             icon: '/logo192.png'
-                        });
+                        };
+                        
+                        if (task.user.fcmToken) {
+                            await sendPushNotification(task.user.fcmToken, payload);
+                        }
+                        if (task.user.pushSubscription) {
+                            await sendPushNotification(task.user.pushSubscription, payload);
+                        }
+                        
                         task.notifiedBefore = true;
                         await task.save();
                     }
@@ -47,11 +56,19 @@ const startNotificationScheduler = () => {
                     const taskDateTime = new Date(`${task.date}T${task.time}`);
 
                     if (isSameMinute(now, taskDateTime)) {
-                        await sendPushNotification(task.user.pushSubscription, {
+                        const payload = {
                             title: 'Task Reminder',
                             body: `Time for: ${task.title}`,
                             icon: '/logo192.png'
-                        });
+                        };
+                        
+                        if (task.user.fcmToken) {
+                            await sendPushNotification(task.user.fcmToken, payload);
+                        }
+                        if (task.user.pushSubscription) {
+                            await sendPushNotification(task.user.pushSubscription, payload);
+                        }
+                        
                         task.notifiedTime = true;
                         await task.save();
                     }

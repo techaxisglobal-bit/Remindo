@@ -393,6 +393,28 @@ router.post('/save-subscription', auth, async (req, res) => {
     }
 });
 
+// @route   POST api/auth/save-fcm-token
+// @desc    Save FCM registration token for user
+// @access  Private
+router.post('/save-fcm-token', auth, async (req, res) => {
+    const { fcmToken } = req.body;
+
+    try {
+        let user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        user.fcmToken = fcmToken;
+        await user.save();
+
+        res.json({ msg: 'FCM token saved successfully' });
+    } catch (err) {
+        console.error('Error saving FCM token:', err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route   PUT api/auth/update-notifications
 // @desc    Toggle notifications for user
 // @access  Private

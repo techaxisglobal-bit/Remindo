@@ -5,6 +5,8 @@ import { SignIn } from "@/app/components/SignIn";
 import { Dashboard } from "@/app/components/Dashboard";
 import { Task } from "@/app/types";
 import { toast } from "sonner";
+import { PushNotifications } from '@capacitor/push-notifications';
+import { Capacitor } from '@capacitor/core';
 
 export default function App() {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
@@ -99,45 +101,123 @@ export default function App() {
     return outputArray;
   };
 
-  const registerPush = async () => {
-    if (!('serviceWorker' in navigator)) return;
+  const saveFCMTokenToBackend = async (fcmToken: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
-      let registration = await navigator.serviceWorker.getRegistration();
-      if (!registration) {
-        registration = await navigator.serviceWorker.register('/sw.js');
-      }
+      await fetchWithRetry(`${API_BASE_URL}/api/auth/save-fcm-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ fcmToken })
+      });
+      console.log('FCM token synchronized with backend successfully');
+    } catch (err) {
+      console.error('Failed to save FCM token to backend:', err);
+    }
+  };
 
-      let subscription = await registration.pushManager.getSubscription();
-      if (!subscription) {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          console.warn('Notification permission not granted');
+  const registerPush = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        let permStatus = await PushNotifications.checkPermissions();
+
+        if (permStatus.receive === 'prompt') {
+          permStatus = await PushNotifications.requestPermissions();
+        }
+
+        if (permStatus.receive !== 'granted') {
+          console.warn('Push notification permissions denied by user');
           toast.warning('Push notification permissions are required.');
           return;
         }
 
-        const publicVapidKey = 'BDap98w3jlmZUFtlSo9rvFaMxjIUnipFKkCTAdJaE_KI_MIYPQJlHPBuUwEtqNN8gS-kNNdpUaMPnAj4DXk8OsY';
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-        });
-      }
+        await PushNotifications.register();
 
-      // Save to backend
-      if (subscription) {
-        const token = localStorage.getItem('token');
-        await fetchWithRetry(`${API_BASE_URL}/api/auth/save-subscription`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token || ''
-          },
-          body: JSON.stringify({ subscription })
+        await PushNotifications.addListener('registration', async (token) => {
+          console.log('Native FCM Token received:', token.value);
+          await saveFCMTokenToBackend(token.value);
         });
+
+        await PushNotifications.addListener('registrationError', (error) => {
+          console.error('Capacitor registration error:', error);
+          toast.error('Failed to register device for push notifications');
+        });
+
+        await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+          console.log('Foreground push notification received:', notification);
+          toast.info(`${notification.title}: ${notification.body || ''}`);
+        });
+
+        await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+          console.log('Push notification click action performed:', action);
+        });
+
+      } catch (err) {
+        console.error('Native push registration failed:', err);
       }
-    } catch (err) {
-      console.error('Push registration failed:', err);
+    } else {
+      if (!('serviceWorker' in navigator)) return;
+
+      try {
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        }
+
+        let subscription = await registration.pushManager.getSubscription();
+        
+        // Force unsubscribe from stale/cached tokens to guarantee fresh VAPID keys and user alignment!
+        if (subscription) {
+          try {
+            await subscription.unsubscribe();
+          } catch (e) {
+            console.warn('Failed to unsubscribe stale push token:', e);
+          }
+          subscription = null;
+        }
+
+        if (!subscription) {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') {
+            console.warn('Notification permission not granted');
+            toast.warning('Push notification permissions are required.');
+            return;
+          }
+
+          const publicVapidKey = 'BDap98w3jlmZUFtlSo9rvFaMxjIUnipFKkCTAdJaE_KI_MIYPQJlHPBuUwEtqNN8gS-kNNdpUaMPnAj4DXk8OsY';
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+          });
+        }
+
+        if (subscription) {
+          const token = localStorage.getItem('token');
+          const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/save-subscription`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-auth-token': token || ''
+            },
+            body: JSON.stringify({ subscription })
+          });
+          
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.msg || errData.error || `HTTP error ${res.status}`);
+          }
+
+          console.log('Web VAPID subscription synchronized successfully');
+          toast.success('Notification keys synchronized successfully! Ready to test!');
+        }
+      } catch (err: any) {
+        console.error('Web VAPID push registration failed:', err);
+        toast.error(`Push registration failed: ${err.message || err}`);
+      }
     }
   };
 

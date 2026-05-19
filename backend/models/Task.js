@@ -57,7 +57,7 @@ const Task = sequelize.define('Task', {
     },
     notifyBefore: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 15,
     },
     completed: {
         type: DataTypes.BOOLEAN,

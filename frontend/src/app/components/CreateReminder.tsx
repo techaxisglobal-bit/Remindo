@@ -301,7 +301,7 @@ export function CreateReminder({
   const [description, setDescription] = useState('');
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isSpecial, setIsSpecial] = useState(false);
-  const [notifyBefore, setNotifyBefore] = useState(5); // Default 5 min
+  const [notifyBefore, setNotifyBefore] = useState(15); // Default 15 min
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
@@ -590,6 +590,15 @@ export function CreateReminder({
       toast.error('Please enter a title');
       return;
     }
+
+    // Validation: Block creating tasks in the past
+    const taskDateTime = parse(`${startDate} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+    const now = new Date();
+    if (isBefore(taskDateTime, now)) {
+      toast.error('Cannot create a task in the past! Please select a future date or time.');
+      return;
+    }
+
     const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
     const endRange = endOfMonth(startRange);
 
