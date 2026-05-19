@@ -46,15 +46,14 @@ const startNotificationScheduler = () => {
 
                     if (isSameMinute(nowInUserTz, notifyDateTime)) {
                         const payload = {
-                            title: 'Upcoming Task',
-                            body: `${task.title} in ${task.notifyBefore} minutes`,
+                            title: task.title,
+                            body: `Starting in ${task.notifyBefore} minutes`,
                             icon: '/logo192.png'
                         };
                         
                         if (task.user.fcmToken) {
                             await sendPushNotification(task.user.fcmToken, payload);
-                        }
-                        if (task.user.pushSubscription) {
+                        } else if (task.user.pushSubscription) {
                             await sendPushNotification(task.user.pushSubscription, payload);
                         }
                         
@@ -69,15 +68,14 @@ const startNotificationScheduler = () => {
 
                     if (isSameMinute(nowInUserTz, taskDateTime)) {
                         const payload = {
-                            title: 'Task Reminder',
-                            body: `Time for: ${task.title}`,
+                            title: task.title,
+                            body: `This task is starting now!`,
                             icon: '/logo192.png'
                         };
                         
                         if (task.user.fcmToken) {
                             await sendPushNotification(task.user.fcmToken, payload);
-                        }
-                        if (task.user.pushSubscription) {
+                        } else if (task.user.pushSubscription) {
                             await sendPushNotification(task.user.pushSubscription, payload);
                         }
                         

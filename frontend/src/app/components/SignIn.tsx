@@ -47,7 +47,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         GoogleAuth.initialize({
           clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com',
           scopes: ['profile', 'email'],
-          grantOfflineAccess: true,
+          grantOfflineAccess: false,
         });
       } catch (err) {
         console.error('Failed to initialize Google Auth', err);
