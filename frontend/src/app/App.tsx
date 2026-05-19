@@ -137,8 +137,16 @@ export default function App() {
 
         await PushNotifications.register();
 
+        // Instantly synchronize if we already have a cached token in localStorage!
+        const cachedToken = localStorage.getItem('fcmToken');
+        if (cachedToken) {
+          console.log('Syncing cached native FCM Token:', cachedToken);
+          await saveFCMTokenToBackend(cachedToken);
+        }
+
         await PushNotifications.addListener('registration', async (token) => {
           console.log('Native FCM Token received:', token.value);
+          localStorage.setItem('fcmToken', token.value);
           await saveFCMTokenToBackend(token.value);
         });
 
