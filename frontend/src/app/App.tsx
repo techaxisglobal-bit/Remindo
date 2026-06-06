@@ -178,7 +178,7 @@ export default function App() {
         }
 
         let subscription = await registration.pushManager.getSubscription();
-        
+
         // Force unsubscribe from stale/cached tokens to guarantee fresh VAPID keys and user alignment!
         if (subscription) {
           try {
@@ -214,7 +214,7 @@ export default function App() {
             },
             body: JSON.stringify({ subscription })
           });
-          
+
           if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
             throw new Error(errData.msg || errData.error || `HTTP error ${res.status}`);

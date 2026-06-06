@@ -11,17 +11,28 @@ buildscript {
         classpath 'com.google.gms:google-services:4.4.4'
 
         // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
-apply from: "variables.gradle"
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+subprojects {
+    afterEvaluate { proj ->
+        if (proj.hasProperty('android')) {
+            proj.android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+        }
     }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+ext {
+    compileSdkVersion = 36
+    minSdkVersion = 24
+    targetSdkVersion = 36
 }
 
 task clean(type: Delete) {

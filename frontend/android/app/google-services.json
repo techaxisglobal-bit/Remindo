@@ -7,14 +7,22 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:733914668823:android:aa6810c72cb8d5c735a152",
+        "mobilesdk_app_id": "1:733914668823:android:f590be27d72f1d3b35a152",
         "android_client_info": {
-          "package_name": "com.remindo.app"
+          "package_name": "com.techaxisglobal.remindo"
         }
       },
       "oauth_client": [
         {
-          "client_id": "733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com",
+          "client_id": "733914668823-9vu7g5qec9bc3fhmcr3ech5v4t82ev9b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techaxisglobal.remindo",
+            "certificate_hash": "3c31794645e64458b7b41e742c725d6e738f4e37"
+          }
+        },
+        {
+          "client_id": "733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

@@ -1,4 +1,4 @@
-package com.remindo.app;
+package com.techaxisglobal.remindo;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

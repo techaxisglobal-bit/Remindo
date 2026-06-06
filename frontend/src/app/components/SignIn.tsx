@@ -461,7 +461,17 @@ export function SignIn({ onSignIn }: SignInProps) {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="bg-white/90 dark:bg-[#1b1b1b]/95 backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-[#292929]">
+        <div className="bg-white/90 dark:bg-[#1b1b1b]/95 backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-[#292929] relative overflow-hidden">
+
+          {/* Verification / Loading Overlay */}
+          {loading && (
+            <div className="absolute inset-0 bg-white/70 dark:bg-[#1b1b1b]/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
+              <div className="w-12 h-12 border-4 border-[#e0b596] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-sm font-bold text-gray-800 dark:text-gray-200 animate-pulse tracking-wide">
+                Verifying credentials...
+              </p>
+            </div>
+          )}
 
           {/* Error Alert */}
           <AnimatePresence>

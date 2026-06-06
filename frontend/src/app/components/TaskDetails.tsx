@@ -345,7 +345,7 @@ export function TaskDetails({
       setStartDate(task.date);
       setStartTime(task.time || '12:00');
       setEndDate(parsedMetadata?.endDate || task.date);
-      
+
       const calculatedEnd = parsedMetadata?.endTime || (() => {
         try {
           const start = parse(task.time || '12:00', 'HH:mm', new Date());
@@ -455,7 +455,7 @@ export function TaskDetails({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden space-y-2"
+                    className="space-y-2"
                   >
                     <div className="relative">
                       <button

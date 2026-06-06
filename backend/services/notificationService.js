@@ -45,6 +45,10 @@ const startNotificationScheduler = () => {
                     const notifyDateTime = subMinutes(taskDateTime, task.notifyBefore);
 
                     if (isSameMinute(nowInUserTz, notifyDateTime)) {
+                        // Mark as notified in database IMMEDIATELY to prevent race conditions!
+                        task.notifiedBefore = true;
+                        await task.save();
+
                         const payload = {
                             title: task.title,
                             body: `Starting in ${task.notifyBefore} minutes`,
@@ -56,9 +60,6 @@ const startNotificationScheduler = () => {
                         } else if (task.user.pushSubscription) {
                             await sendPushNotification(task.user.pushSubscription, payload);
                         }
-                        
-                        task.notifiedBefore = true;
-                        await task.save();
                     }
                 }
 
@@ -67,6 +68,10 @@ const startNotificationScheduler = () => {
                     const taskDateTime = new Date(`${task.date}T${task.time}`);
 
                     if (isSameMinute(nowInUserTz, taskDateTime)) {
+                        // Mark as notified in database IMMEDIATELY to prevent race conditions!
+                        task.notifiedTime = true;
+                        await task.save();
+
                         const payload = {
                             title: task.title,
                             body: `This task is starting now!`,
@@ -78,9 +83,6 @@ const startNotificationScheduler = () => {
                         } else if (task.user.pushSubscription) {
                             await sendPushNotification(task.user.pushSubscription, payload);
                         }
-                        
-                        task.notifiedTime = true;
-                        await task.save();
                     }
                 }
             }
