@@ -1,12 +1,8 @@
 const nodemailer = require('nodemailer');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+let transporter;
 
 /**
  * Send OTP to user's email
@@ -19,6 +15,16 @@ const sendOTP = async (email, otp, type = 'signup') => {
         console.warn('EMAIL_USER or EMAIL_PASS not set in .env. Falling back to console logging.');
         console.log(`\n\n=== OTP MOCK EMAIL ===\nTo: ${email}\nOTP: ${otp}\nType: ${type}\n======================\n\n`);
         return; // Don't throw error if not configured, just mock it
+    }
+
+    if (!transporter) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
     }
 
     const subject = type === 'signup' ? 'Email Verification - Remindo' : 'Password Reset - Remindo';
