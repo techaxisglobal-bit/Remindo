@@ -2112,10 +2112,10 @@ export function Dashboard({
                 tasks={sanitizedTasks}
                 initialEditMode={openInEditMode}
                 onClose={() => { setSelectedTask(null); setOpenInEditMode(false); }}
-                // Pass handlers...
                 onToggleComplete={onToggleComplete}
                 onDeleteTask={onDeleteTask}
                 onUpdateTask={onUpdateTask}
+                onCreateTask={onAddTask}
               />
             )
           }

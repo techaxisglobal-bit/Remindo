@@ -468,7 +468,7 @@ export function SignIn({ onSignIn }: SignInProps) {
             <div className="absolute inset-0 bg-white/70 dark:bg-[#1b1b1b]/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
               <div className="w-12 h-12 border-4 border-[#e0b596] border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200 animate-pulse tracking-wide">
-                Verifying credentials...
+                Please wait...
               </p>
             </div>
           )}

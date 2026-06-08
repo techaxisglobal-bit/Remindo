@@ -19,7 +19,7 @@ import {
   Check
 } from 'lucide-react';
 import { Task } from '@/app/types';
-import { format, parse, isSameDay, addMinutes, isBefore, subMinutes } from 'date-fns';
+import { format, parse, isSameDay, addMinutes, isBefore, subMinutes, eachDayOfInterval, endOfMonth, getDay } from 'date-fns';
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
 
@@ -30,6 +30,7 @@ interface TaskDetailsProps {
   onToggleComplete: (id: string) => void;
   onDeleteTask: (id: string) => void;
   onUpdateTask: (task: Task) => void;
+  onCreateTask?: (task: Task) => void;
   initialEditMode?: boolean;
 }
 
@@ -283,6 +284,7 @@ export function TaskDetails({
   onToggleComplete,
   onDeleteTask,
   onUpdateTask,
+  onCreateTask,
   initialEditMode = false,
 }: TaskDetailsProps) {
 
@@ -318,15 +320,8 @@ export function TaskDetails({
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
-  const [repeat, setRepeat] = useState(parsedMetadata?.repeat || 'never');
+  const [selectedDays, setSelectedDays] = useState<number[]>(parsedMetadata?.selectedDays || []);
   const [isSpecial, setIsSpecial] = useState(parsedMetadata?.isSpecial || false);
-
-  const REPEAT_OPTIONS = [
-    { value: 'never', label: 'Does not repeat' },
-    { value: 'daily', label: 'Every day' },
-    { value: 'weekly', label: 'Every week' },
-    { value: 'monthly', label: 'Every month' },
-  ];
 
   const NOTIFICATION_OPTIONS = [
     { value: 0, label: 'No reminder' },
@@ -355,7 +350,7 @@ export function TaskDetails({
       setEndTime(calculatedEnd);
 
       setDescription(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
-      setRepeat(parsedMetadata?.repeat || 'never');
+      setSelectedDays(parsedMetadata?.selectedDays || []);
       setIsSpecial(parsedMetadata?.isSpecial || false);
       setNotifyBefore(task.notifyBefore || 5);
     }
@@ -466,7 +461,11 @@ export function TaskDetails({
                         <div className="flex items-center gap-2">
                           <Repeat className="w-3.5 h-3.5 text-[#e0b596]" />
                           <span className="text-[13px] font-bold">
-                            {REPEAT_OPTIONS.find(opt => opt.value === repeat)?.label || 'Repeat'}
+                            {selectedDays.length === 0
+                              ? 'Does not repeat'
+                              : selectedDays.length === 7
+                                ? 'Every day'
+                                : `${selectedDays.length} days week`}
                           </span>
                         </div>
                         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showRepeatDropdown ? 'rotate-180' : ''}`} />
@@ -481,22 +480,70 @@ export function TaskDetails({
                               exit={{ opacity: 0, y: 5, scale: 0.98 }}
                               className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                             >
-                              <div className="p-2 space-y-1">
-                                {REPEAT_OPTIONS.map((option) => (
-                                  <div
-                                    key={option.value}
-                                    className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${repeat === option.value ? 'bg-[#e0b596]/10' : ''}`}
-                                    onClick={() => {
-                                      setRepeat(option.value);
-                                      setShowRepeatDropdown(false);
-                                    }}
-                                  >
-                                    <span className={`text-[12px] font-bold ${repeat === option.value ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
-                                      {option.label}
-                                    </span>
-                                    {repeat === option.value && <Check className="w-3.5 h-3.5 text-[#e0b596]" />}
+                              <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
+                                {/* Does not repeat option */}
+                                <div
+                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                  onClick={() => {
+                                    setSelectedDays([]);
+                                    setShowRepeatDropdown(false);
+                                  }}
+                                >
+                                  <span className={`text-[12px] font-bold transition-colors ${selectedDays.length === 0 ? 'text-[#e0b596]' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'}`}>
+                                    Does not repeat
+                                  </span>
+                                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${selectedDays.length === 0 ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                    {selectedDays.length === 0 && <Check className="w-3 h-3 text-white" />}
                                   </div>
-                                ))}
+                                </div>
+
+                                {/* Every day option */}
+                                <div
+                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                  onClick={() => {
+                                    if (selectedDays.length === 7) setSelectedDays([]);
+                                    else setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
+                                    setShowRepeatDropdown(false);
+                                  }}
+                                >
+                                  <span className={`text-[12px] font-bold transition-colors ${selectedDays.length === 7 ? 'text-[#e0b596]' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'}`}>
+                                    Every day
+                                  </span>
+                                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${selectedDays.length === 7 ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                    {selectedDays.length === 7 && <Check className="w-3 h-3 text-white" />}
+                                  </div>
+                                </div>
+
+                                <div className="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2" />
+
+                                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => {
+                                  const isSelected = selectedDays.includes(index);
+                                  return (
+                                    <div
+                                      key={index}
+                                      className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          setSelectedDays(prev => prev.filter(d => d !== index));
+                                        } else {
+                                          const newDays = [...selectedDays, index].sort();
+                                          if (newDays.length === 7) {
+                                            setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
+                                          } else {
+                                            setSelectedDays(newDays);
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <span className={`text-[12px] font-bold transition-colors ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'}`}>
+                                        {day}
+                                      </span>
+                                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </motion.div>
                           </>
@@ -663,9 +710,10 @@ export function TaskDetails({
                       }
 
                       const finalDuration = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60));
-                      const metaData = JSON.stringify({ duration: finalDuration, repeat, endDate, endTime, isSpecial });
+                      const metaData = JSON.stringify({ duration: finalDuration, selectedDays, endDate, endTime, isSpecial });
                       const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
-                      onUpdateTask({
+                      
+                      const updatedTask = {
                         ...task,
                         title,
                         description: finalDescription,
@@ -676,7 +724,40 @@ export function TaskDetails({
                         location: task.location || '',
                         isSpecial,
                         notifyBefore
-                      });
+                      };
+                      
+                      onUpdateTask(updatedTask);
+
+                      if (selectedDays.length > 0 && onCreateTask) {
+                        const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
+                        const endRange = endOfMonth(startRange);
+                        const allDays = eachDayOfInterval({ start: startRange, end: endRange });
+
+                        for (const day of allDays) {
+                          const dayIndex = getDay(day);
+                          const dayStr = format(day, 'yyyy-MM-dd');
+                          
+                          // Avoid duplicate creation for the currently edited date
+                          if (selectedDays.includes(dayIndex) && dayStr !== startDate) {
+                            // Check if a task with same title and date exists to prevent double creation? 
+                            // Since tasks are independent, we just spawn them.
+                            const newStart = parse(`${dayStr} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                            const newEnd = parse(`${dayStr} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                            const newDuration = Math.max(0, (newEnd.getTime() - newStart.getTime()) / (1000 * 60));
+                            const newMeta = JSON.stringify({ duration: newDuration, selectedDays, endDate: dayStr, endTime, isSpecial });
+                            const newDesc = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${newMeta} -->` : `<!-- metadata: ${newMeta} -->`;
+                            
+                            onCreateTask({
+                              ...updatedTask,
+                              id: (Date.now() + Math.random()).toString(),
+                              date: dayStr,
+                              description: newDesc,
+                              duration: newDuration,
+                            });
+                          }
+                        }
+                      }
+
                       toast.success('Changes saved');
                       setIsEditing(false);
                       onClose();

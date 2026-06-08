@@ -423,6 +423,10 @@ export default function App() {
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen bg-gray-50 dark:bg-[#1f1f1f]"></div>;
+  }
+
   if (!user) {
     return (
       <>
