@@ -56,8 +56,12 @@ const Task = sequelize.define('Task', {
         allowNull: true,
     },
     notifyBefore: {
-        type: DataTypes.INTEGER,
-        defaultValue: 15,
+        type: DataTypes.STRING,
+        defaultValue: '15',
+    },
+    notifiedBeforeList: {
+        type: DataTypes.STRING,
+        defaultValue: '',
     },
     completed: {
         type: DataTypes.BOOLEAN,

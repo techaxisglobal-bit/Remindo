@@ -316,7 +316,41 @@ export function TaskDetails({
   const [endDate, setEndDate] = useState(parsedMetadata?.endDate || task.date);
   const [endTime, setEndTime] = useState(initialEndTime);
   const [description, setDescription] = useState(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
-  const [notifyBefore, setNotifyBefore] = useState(task.notifyBefore || 5);
+  const [notifyBefore, setNotifyBefore] = useState<number[]>(() => {
+    if (task.notifyBefore === undefined || task.notifyBefore === null) return [15];
+    if (typeof task.notifyBefore === 'number') return [task.notifyBefore];
+    if (typeof task.notifyBefore === 'string') {
+      return (task.notifyBefore as string)
+        .split(',')
+        .map(x => parseInt(x.trim(), 10))
+        .filter(x => !isNaN(x));
+    }
+    return [15];
+  });
+
+  const getNotifyBeforeLabel = (values: number[]) => {
+    if (values.includes(0) || values.length === 0) {
+      return 'No reminder';
+    }
+    return 'Notify before';
+  };
+
+  const handleToggleNotifyBefore = (value: number) => {
+    if (value === 0) {
+      setNotifyBefore([0]);
+    } else {
+      setNotifyBefore(prev => {
+        const filtered = prev.filter(v => v !== 0);
+        if (filtered.includes(value)) {
+          const next = filtered.filter(v => v !== value);
+          return next.length === 0 ? [0] : next;
+        } else {
+          return [...filtered, value];
+        }
+      });
+    }
+  };
+
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
@@ -352,7 +386,17 @@ export function TaskDetails({
       setDescription(task.description ? task.description.replace(/<!-- metadata: .+ -->/, '').trim() : '');
       setSelectedDays(parsedMetadata?.selectedDays || []);
       setIsSpecial(parsedMetadata?.isSpecial || false);
-      setNotifyBefore(task.notifyBefore || 5);
+      setNotifyBefore(() => {
+        if (task.notifyBefore === undefined || task.notifyBefore === null) return [15];
+        if (typeof task.notifyBefore === 'number') return [task.notifyBefore];
+        if (typeof task.notifyBefore === 'string') {
+          return (task.notifyBefore as string)
+            .split(',')
+            .map(x => parseInt(x.trim(), 10))
+            .filter(x => !isNaN(x));
+        }
+        return [15];
+      });
     }
     // We only want to re-run this when the task itself changes or we START editing
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -560,7 +604,7 @@ export function TaskDetails({
                         <div className="flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
                           <span className="text-[13px] font-bold">
-                            {NOTIFICATION_OPTIONS.find(opt => opt.value === notifyBefore)?.label || 'Notification'}
+                            {getNotifyBeforeLabel(notifyBefore)}
                           </span>
                         </div>
                         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showNotifyDropdown ? 'rotate-180' : ''}`} />
@@ -576,21 +620,23 @@ export function TaskDetails({
                               className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                             >
                               <div className="p-2 space-y-1">
-                                {NOTIFICATION_OPTIONS.map((option) => (
-                                  <div
-                                    key={option.value}
-                                    className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${notifyBefore === option.value ? 'bg-[#e0b596]/10' : ''}`}
-                                    onClick={() => {
-                                      setNotifyBefore(option.value);
-                                      setShowNotifyDropdown(false);
-                                    }}
-                                  >
-                                    <span className={`text-[12px] font-bold ${notifyBefore === option.value ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
-                                      {option.label}
-                                    </span>
-                                    {notifyBefore === option.value && <Check className="w-3.5 h-3.5 text-[#e0b596]" />}
-                                  </div>
-                                ))}
+                                {NOTIFICATION_OPTIONS.map((option) => {
+                                  const isSelected = notifyBefore.includes(option.value);
+                                  return (
+                                    <div
+                                      key={option.value}
+                                      className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
+                                      onClick={() => handleToggleNotifyBefore(option.value)}
+                                    >
+                                      <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
+                                        {option.label}
+                                      </span>
+                                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </motion.div>
                           </>
@@ -723,7 +769,7 @@ export function TaskDetails({
                         category: task.category || 'general',
                         location: task.location || '',
                         isSpecial,
-                        notifyBefore
+                        notifyBefore: notifyBefore.join(',')
                       };
                       
                       onUpdateTask(updatedTask);

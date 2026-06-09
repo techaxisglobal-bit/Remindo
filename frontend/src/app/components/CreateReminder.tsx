@@ -301,7 +301,31 @@ export function CreateReminder({
   const [description, setDescription] = useState('');
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isSpecial, setIsSpecial] = useState(false);
-  const [notifyBefore, setNotifyBefore] = useState(15); // Default 15 min
+  const [notifyBefore, setNotifyBefore] = useState<number[]>([15]); // Default 15 min
+
+  const getNotifyBeforeLabel = (values: number[]) => {
+    if (values.includes(0) || values.length === 0) {
+      return 'No reminder';
+    }
+    return 'Notify before';
+  };
+
+  const handleToggleNotifyBefore = (value: number) => {
+    if (value === 0) {
+      setNotifyBefore([0]);
+    } else {
+      setNotifyBefore(prev => {
+        const filtered = prev.filter(v => v !== 0);
+        if (filtered.includes(value)) {
+          const next = filtered.filter(v => v !== value);
+          return next.length === 0 ? [0] : next;
+        } else {
+          return [...filtered, value];
+        }
+      });
+    }
+  };
+
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
@@ -622,7 +646,7 @@ export function CreateReminder({
         createdAt: new Date().toISOString(),
         duration: finalDuration,
         isSpecial: isSpecial,
-        notifyBefore: notifyBefore,
+        notifyBefore: notifyBefore.join(','),
       };
 
       await onCreateTask(newTask);
@@ -878,7 +902,7 @@ return (
                   <div className="flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
                     <span className="text-[13px] font-bold">
-                      {NOTIFICATION_OPTIONS.find(opt => opt.value === notifyBefore)?.label || 'Notification'}
+                      {getNotifyBeforeLabel(notifyBefore)}
                     </span>
                   </div>
                   <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showNotifyDropdown ? 'rotate-180' : ''}`} />
@@ -895,21 +919,23 @@ return (
                         className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                       >
                         <div className="p-2 space-y-1">
-                          {NOTIFICATION_OPTIONS.map((option) => (
-                            <div
-                              key={option.value}
-                              className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${notifyBefore === option.value ? 'bg-[#e0b596]/10' : ''}`}
-                              onClick={() => {
-                                setNotifyBefore(option.value);
-                                setShowNotifyDropdown(false);
-                              }}
-                            >
-                              <span className={`text-[12px] font-bold ${notifyBefore === option.value ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
-                                {option.label}
-                              </span>
-                              {notifyBefore === option.value && <Check className="w-3.5 h-3.5 text-[#e0b596]" />}
-                            </div>
-                          ))}
+                          {NOTIFICATION_OPTIONS.map((option) => {
+                            const isSelected = notifyBefore.includes(option.value);
+                            return (
+                              <div
+                                key={option.value}
+                                className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
+                                onClick={() => handleToggleNotifyBefore(option.value)}
+                              >
+                                <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
+                                  {option.label}
+                                </span>
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                                  {isSelected && <Check className="w-3 h-3 text-white" />}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     </>

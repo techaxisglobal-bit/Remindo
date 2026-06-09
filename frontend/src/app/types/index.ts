@@ -9,7 +9,7 @@ export interface Task {
   createdAt?: string;
   completed?: boolean;
   notifyAt?: string;
-  notifyBefore?: number;
+  notifyBefore?: string | number;
   // Frontend-only or metadata-mapped fields
   duration?: number; // in minutes
   location?: string;

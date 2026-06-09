@@ -4,6 +4,15 @@ const auth = require('../middleware/auth');
 const Task = require('../models/Task');
 const ActivityLog = require('../models/ActivityLog');
 
+const sanitizeNotifyBefore = (val) => {
+    if (val === undefined || val === null) return '15';
+    if (Array.isArray(val)) {
+        return val.map(v => String(v).trim()).filter(Boolean).join(',');
+    }
+    return String(val).trim();
+};
+
+
 // @route   GET api/tasks
 // @desc    Get all tasks for a user
 // @access  Private
@@ -40,7 +49,7 @@ router.post('/', auth, async (req, res) => {
             isSpecial,
             specialType,
             notifyAt,
-            notifyBefore,
+            notifyBefore: sanitizeNotifyBefore(notifyBefore),
             completed,
         });
 
@@ -89,7 +98,7 @@ router.put('/:id', auth, async (req, res) => {
                 isSpecial: isSpecial !== undefined ? isSpecial : task.isSpecial,
                 specialType: specialType !== undefined ? specialType : task.specialType,
                 notifyAt: notifyAt !== undefined ? notifyAt : task.notifyAt,
-                notifyBefore: notifyBefore !== undefined ? notifyBefore : task.notifyBefore,
+                notifyBefore: notifyBefore !== undefined ? sanitizeNotifyBefore(notifyBefore) : task.notifyBefore,
                 completed: false, // New task should be fresh
             });
 
@@ -104,19 +113,35 @@ router.put('/:id', auth, async (req, res) => {
         }
 
         // Update fields (normal update on same date)
+        let notifyBeforeChanged = false;
+        if (notifyBefore !== undefined) {
+            const sanitized = sanitizeNotifyBefore(notifyBefore);
+            if (sanitized !== task.notifyBefore) {
+                task.notifyBefore = sanitized;
+                notifyBeforeChanged = true;
+            }
+        }
+        
+        let timeChanged = false;
+        if (time !== undefined && time !== task.time) {
+            task.time = time;
+            timeChanged = true;
+            task.notifiedTime = false;
+        }
+
+        if (timeChanged || notifyBeforeChanged) {
+            task.notifiedBeforeList = '';
+        }
+
         if (title !== undefined) task.title = title;
         if (description !== undefined) task.description = description;
         if (category !== undefined) task.category = category;
-        // date update is handled above by duplication, so we don't need to update it here
-        // but for safety if it reaches here it means date was undefined or same
-        if (time !== undefined) task.time = time;
         if (duration !== undefined) task.duration = duration;
         if (location !== undefined) task.location = location;
         if (isAllDay !== undefined) task.isAllDay = isAllDay;
         if (isSpecial !== undefined) task.isSpecial = isSpecial;
         if (specialType !== undefined) task.specialType = specialType;
         if (notifyAt !== undefined) task.notifyAt = notifyAt;
-        if (notifyBefore !== undefined) task.notifyBefore = notifyBefore;
         if (completed !== undefined) task.completed = completed;
 
         await task.save();

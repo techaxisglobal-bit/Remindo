@@ -39,26 +39,49 @@ const startNotificationScheduler = () => {
                     nowInUserTz = new Date(localTimeString);
                 }
 
-                // 1. Check for 'before' notification
-                if (task.notifyBefore > 0 && !task.notifiedBefore) {
-                    const taskDateTime = new Date(`${task.date}T${task.time}`);
-                    const notifyDateTime = subMinutes(taskDateTime, task.notifyBefore);
+                // 1. Check for 'before' notifications (supports multiple comma-separated offsets)
+                if (task.notifyBefore) {
+                    const minutesList = String(task.notifyBefore)
+                        .split(',')
+                        .map(m => parseInt(m.trim(), 10))
+                        .filter(m => !isNaN(m) && m > 0);
 
-                    if (isSameMinute(nowInUserTz, notifyDateTime)) {
-                        // Mark as notified in database IMMEDIATELY to prevent race conditions!
-                        task.notifiedBefore = true;
-                        await task.save();
+                    if (minutesList.length > 0) {
+                        const taskDateTime = new Date(`${task.date}T${task.time}`);
+                        const notifiedMinutesList = (task.notifiedBeforeList || '')
+                            .split(',')
+                            .map(m => parseInt(m.trim(), 10))
+                            .filter(m => !isNaN(m));
 
-                        const payload = {
-                            title: task.title,
-                            body: `Starting in ${task.notifyBefore} minutes`,
-                            icon: '/logo192.png'
-                        };
-                        
-                        if (task.user.fcmToken) {
-                            await sendPushNotification(task.user.fcmToken, payload);
-                        } else if (task.user.pushSubscription) {
-                            await sendPushNotification(task.user.pushSubscription, payload);
+                        let updated = false;
+
+                        for (const minute of minutesList) {
+                            if (!notifiedMinutesList.includes(minute)) {
+                                const notifyDateTime = subMinutes(taskDateTime, minute);
+
+                                if (isSameMinute(nowInUserTz, notifyDateTime)) {
+                                    // Mark this minute as notified immediately
+                                    notifiedMinutesList.push(minute);
+                                    task.notifiedBeforeList = notifiedMinutesList.join(',');
+                                    updated = true;
+
+                                    const payload = {
+                                        title: task.title,
+                                        body: `Starting in ${minute} minutes`,
+                                        icon: '/logo192.png'
+                                    };
+                                    
+                                    if (task.user.fcmToken) {
+                                        await sendPushNotification(task.user.fcmToken, payload);
+                                    } else if (task.user.pushSubscription) {
+                                        await sendPushNotification(task.user.pushSubscription, payload);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (updated) {
+                            await task.save();
                         }
                     }
                 }
