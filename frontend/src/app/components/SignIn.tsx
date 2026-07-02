@@ -45,7 +45,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     if (Capacitor.isNativePlatform()) {
       try {
         GoogleAuth.initialize({
-          clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com',
+          clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com',
           scopes: ['profile', 'email'],
           grantOfflineAccess: false,
         });
@@ -340,7 +340,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     const initGoogle = () => {
       if ((window as any).google?.accounts?.id) {
         (window as any).google.accounts.id.initialize({
-          client_id: clientId,
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com',
           callback: handleGoogleResponse,
         });
       }
