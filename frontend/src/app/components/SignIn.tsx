@@ -157,7 +157,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         onSignIn(data.user.email);
       }
     } catch (err: any) {
-      // toast.error(err.message); // We use the banner now, but toast can also stay for variety
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -188,7 +188,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       toast.success('Email verified! Welcome!');
       onSignIn(data.user.email);
     } catch (err: any) {
-      // setError handled in block
+      setError(err.message || 'Verification failed');
     } finally {
       setLoading(false);
     }
@@ -215,7 +215,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       toast.success('OTP sent! Check your email (or server console).');
       setForgotStep('otp');
     } catch (err: any) {
-      // setError handled
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -243,7 +243,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       toast.success('Password reset successful! Please log in.');
       resetForgotFlow();
     } catch (err: any) {
-      // setError handled
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
