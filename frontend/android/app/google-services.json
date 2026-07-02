@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "733914668823-eck1dolj5cmpjp12nbrh7cek66iap6e3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techaxisglobal.remindo",
+            "certificate_hash": "7d9de2b715ad64e1d59951571a407ae3a4960d88"
+          }
+        },
+        {
           "client_id": "733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com",
           "client_type": 3
         }

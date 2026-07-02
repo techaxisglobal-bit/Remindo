@@ -16,6 +16,7 @@ export interface Task {
   isAllDay?: boolean;
   isSpecial?: boolean;
   specialType?: 'birthday' | 'anniversary' | 'cultural' | 'other';
+  attendees?: string[] | { email: string; status: string }[];
 }
 
 

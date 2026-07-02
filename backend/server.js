@@ -20,6 +20,9 @@ const allowedOrigins = [
     'https://remindo.app',
     'capacitor://remindo.app',
     'http://remindo.app',
+    'https://web.remaindo.com',
+    'http://web.remaindo.com',
+    'https://app.remaindo.com'
 ].filter(Boolean);
 
 // Helper to check if origin is a Capacitor/Mobile app
@@ -28,7 +31,8 @@ const isMobileOrigin = (origin) => {
            origin.startsWith('capacitor://') || 
            origin.startsWith('ionic://') || 
            origin.includes('localhost') ||
-           origin.includes('remindo.app');
+           origin.includes('remindo.app') ||
+           origin.includes('remaindo.com');
 };
 
 app.use(cors({
@@ -54,6 +58,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/attendees', require('./routes/attendees'));
 
 app.get('/', (req, res) => {
     res.send('Backend running');

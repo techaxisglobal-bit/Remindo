@@ -56,6 +56,56 @@ const sendOTP = async (email, otp, type = 'signup') => {
     }
 };
 
+const sendInvitation = async (email, task, creatorName, backendUrl) => {
+    const acceptUrl = `${backendUrl}/api/attendees/respond?taskId=${task.id}&email=${encodeURIComponent(email)}&status=Accepted`;
+    const declineUrl = `${backendUrl}/api/attendees/respond?taskId=${task.id}&email=${encodeURIComponent(email)}&status=Declined`;
+    
+    if (!process.env.RESEND_API_KEY) {
+        console.warn('RESEND_API_KEY not set in .env. Falling back to console logging for invitation.');
+        console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
+        return;
+    }
+
+    if (!resend) {
+        resend = new Resend(process.env.RESEND_API_KEY);
+    }
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Remindo <contact@techaxisglobal.com>',
+            to: email,
+            subject: `Invitation: ${task.title}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                    <h2 style="color: #4A90E2; text-align: center;">You have been invited to a reminder!</h2>
+                    <hr>
+                    <p><strong>Creator:</strong> ${creatorName}</p>
+                    <p><strong>Title:</strong> ${task.title}</p>
+                    <p><strong>Date:</strong> ${task.date}</p>
+                    <p><strong>Time:</strong> ${task.time}</p>
+                    ${task.location ? `<p><strong>Location:</strong> ${task.location}</p>` : ''}
+                    ${task.description ? `<p><strong>Description:</strong><br/>${task.description.replace(/\\n/g, '<br/>')}</p>` : ''}
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <a href="${acceptUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Accept</a>
+                        <a href="${declineUrl}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Decline</a>
+                    </div>
+                </div>
+            `,
+        });
+
+        if (error) {
+            console.error('Resend error:', error);
+            throw new Error(error.message);
+        }
+
+        console.log(`Invitation sent successfully to ${email}. ID: ${data.id}`);
+    } catch (error) {
+        console.error('Error sending invitation via Resend:', error);
+    }
+};
+
 module.exports = {
     sendOTP,
+    sendInvitation,
 };

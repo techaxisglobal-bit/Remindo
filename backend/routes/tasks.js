@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const Task = require('../models/Task');
+const { Task, TaskAttendee } = require('../models');
 const ActivityLog = require('../models/ActivityLog');
+const { sendInvitation } = require('../services/emailService');
+const User = require('../models/User');
 
 const sanitizeNotifyBefore = (val) => {
     if (val === undefined || val === null) return '15';
@@ -21,6 +23,7 @@ router.get('/', auth, async (req, res) => {
         const tasks = await Task.findAll({
             where: { userId: req.user.id },
             order: [['createdAt', 'DESC']],
+            include: [{ model: TaskAttendee, as: 'attendees' }]
         });
         res.json(tasks);
     } catch (err) {
@@ -33,7 +36,7 @@ router.get('/', auth, async (req, res) => {
 // @desc    Create a new task
 // @access  Private
 router.post('/', auth, async (req, res) => {
-    const { title, description, category, date, time, duration, location, isAllDay, isSpecial, specialType, notifyAt, notifyBefore, completed } = req.body;
+    const { title, description, category, date, time, duration, location, isAllDay, isSpecial, specialType, notifyAt, notifyBefore, completed, attendees } = req.body;
 
     try {
         const task = await Task.create({
@@ -60,7 +63,51 @@ router.post('/', auth, async (req, res) => {
             ipAddress: req.ip
         });
 
-        res.json(task);
+        if (attendees && Array.isArray(attendees) && attendees.length > 0) {
+            const attendeeRecords = attendees.map(email => ({
+                taskId: task.id,
+                email,
+                status: 'Pending'
+            }));
+            await TaskAttendee.bulkCreate(attendeeRecords);
+
+            const user = await User.findByPk(req.user.id);
+            const creatorName = user ? user.name : 'A Remindo User';
+            const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+
+            for (const email of attendees) {
+                sendInvitation(email, task, creatorName, backendUrl).catch(err => console.error('Error sending invitation in background:', err));
+            }
+        }
+
+        const taskWithAttendees = await Task.findByPk(task.id, {
+            include: [{ model: TaskAttendee, as: 'attendees' }]
+        });
+
+        res.json(taskWithAttendees);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/tasks/:id/resend
+// @desc    Resend invitation to an attendee
+// @access  Private
+router.post('/:id/resend', auth, async (req, res) => {
+    try {
+        const task = await Task.findByPk(req.params.id);
+        if (!task || task.userId !== req.user.id) return res.status(404).json({ msg: 'Task not found' });
+
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ msg: 'Email is required' });
+
+        const user = await User.findByPk(req.user.id);
+        const creatorName = user ? user.name : 'A Remindo User';
+        const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+
+        await sendInvitation(email, task, creatorName, backendUrl);
+        res.json({ msg: 'Invitation resent' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

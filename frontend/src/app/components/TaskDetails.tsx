@@ -727,6 +727,53 @@ export function TaskDetails({
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Attendees Display */}
+              {!isEditing && task.attendees && task.attendees.length > 0 && (
+                <div className="space-y-2 mt-4 pt-2 border-t border-gray-100 dark:border-[#333]">
+                  <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-wider">Attendees</h3>
+                  <div className="flex flex-col gap-2">
+                    {(task.attendees as any[]).map((attendee, idx) => {
+                      const email = typeof attendee === 'string' ? attendee : attendee.email;
+                      const status = typeof attendee === 'string' ? 'Pending' : attendee.status;
+                      let statusColor = "bg-gray-100 text-gray-500 dark:bg-[#333] dark:text-gray-400";
+                      if (status === 'Accepted') statusColor = "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+                      else if (status === 'Declined') statusColor = "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+                      return (
+                        <div key={idx} className="flex items-center justify-between bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-xl border border-gray-100 dark:border-[#333] shadow-sm">
+                          <span className="text-[13px] font-bold">{email}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge className={`border-none px-2 py-0.5 text-[10px] ${statusColor}`}>
+                              {status}
+                            </Badge>
+                            {status !== 'Accepted' && (
+                              <Button 
+                                variant="ghost" 
+                                className="h-6 px-2 text-[10px] font-bold text-[#e0b596] hover:bg-[#e0b596]/10" 
+                                onClick={async () => {
+                                  try {
+                                    const token = localStorage.getItem('token');
+                                    await fetch(`http://localhost:5000/api/tasks/${task.id}/resend`, {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json', 'x-auth-token': token || '' },
+                                      body: JSON.stringify({ email })
+                                    });
+                                    toast.success('Invitation resent!');
+                                  } catch (e) {
+                                    toast.error('Failed to resend invitation');
+                                  }
+                                }}
+                              >
+                                Resend
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -1,0 +1,110 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><title>Remindo Project Overview & Architecture</title>
+<style>
+body { font-family: 'Calibri', sans-serif; line-height: 1.6; }
+h1 { color: #2C3E50; border-bottom: 2px solid #34495E; padding-bottom: 5px; }
+h2 { color: #34495E; margin-top: 20px; border-bottom: 1px solid #BDC3C7; padding-bottom: 3px; }
+h3 { color: #2980B9; margin-top: 15px; }
+h4 { color: #16A085; margin-bottom: 5px; margin-top: 10px; }
+ul { margin-bottom: 15px; margin-top: 5px; }
+li { margin-bottom: 5px; }
+.code { font-family: 'Courier New', monospace; background-color: #F8F9FA; padding: 2px 4px; border-radius: 3px; border: 1px solid #E9ECEF; }
+</style>
+</head>
+<body>
+
+<h1>Remindo Project Overview & Architecture Details</h1>
+<p>Remindo (also known as Smart App) is a modern, full-stack task management and reminder application designed for seamless cross-platform availability. It features secure user authentication, persistent data storage, real-time synchronization, and a highly responsive, aesthetic user interface.</p>
+
+<h2>1. Pin-to-Pin Architecture Breakdown</h2>
+<p>The application follows a decoupled Client-Server architecture where the frontend (React/Vite) communicates with the backend (Node/Express) via a RESTful API.</p>
+
+<h3>A. Backend Architecture (Node.js & Express)</h3>
+<p>The backend is structured using a clear separation of concerns (Routes, Models, Middleware). It connects to a PostgreSQL database via Sequelize.</p>
+<ul>
+    <li><h4>Entry Point</h4>
+        <ul>
+            <li><span class="code">server.js</span>: Initializes the Express app, configures CORS, handles JSON parsing, syncs the Sequelize database, and binds all route modules.</li>
+        </ul>
+    </li>
+    <li><h4>Routing (<span class="code">routes/</span>)</h4>
+        <ul>
+            <li><span class="code">auth.js</span>: Handles user registration, login, OTP verification, Google OAuth, Apple Sign-In, and JWT generation.</li>
+            <li><span class="code">tasks.js</span>: Exposes endpoints for CRUD operations (Create, Read, Update, Delete) on user tasks/reminders.</li>
+            <li><span class="code">chat.js</span>: Manages endpoints related to customer support chat integration.</li>
+        </ul>
+    </li>
+    <li><h4>Data Models (<span class="code">models/</span>)</h4>
+        <p>Defines the PostgreSQL schema using Sequelize ORM:</p>
+        <ul>
+            <li><span class="code">User.js</span>: Schema for user accounts (email, hashed password, auth providers).</li>
+            <li><span class="code">Task.js</span>: Schema for tasks/reminders (title, description, due dates, user relationship).</li>
+            <li><span class="code">ActivityLog.js</span>: Tracks user interactions and system events for auditing.</li>
+        </ul>
+    </li>
+    <li><h4>Middleware (<span class="code">middleware/</span>)</h4>
+        <ul>
+            <li><span class="code">auth.js</span>: Intercepts requests to protected routes, extracts the JWT from the <span class="code">Authorization</span> header, verifies it, and attaches the user payload to the request object.</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>B. Frontend Architecture (React & Vite)</h3>
+<p>The frontend is a Single Page Application (SPA) utilizing React with functional components and hooks.</p>
+<ul>
+    <li><h4>Entry Point & Core</h4>
+        <ul>
+            <li><span class="code">src/main.tsx</span>: Bootstraps the React DOM tree.</li>
+            <li><span class="code">src/app/App.tsx</span>: The main application container that handles top-level routing, global state, and layout wrappers.</li>
+            <li><span class="code">src/app/api.ts</span> & <span class="code">config.ts</span>: Manages global API configurations and Axios instances for communicating with the backend.</li>
+        </ul>
+    </li>
+    <li><h4>Core Components (<span class="code">src/app/components/</span>)</h4>
+        <p>The UI is heavily modularized into distinct, purpose-driven components:</p>
+        <ul>
+            <li><span class="code">SignIn.tsx</span>: The comprehensive authentication interface handling email/password, OTP, and third-party provider logins.</li>
+            <li><span class="code">Dashboard.tsx</span>: The primary hub where users view their active reminders, task lists, and summary metrics.</li>
+            <li><span class="code">CreateReminder.tsx</span> & <span class="code">TaskDetails.tsx</span>: Interactive components for managing specific task data, including forms and detailed views.</li>
+            <li><span class="code">SettingsPanel.tsx</span> & <span class="code">ProfileMenu.tsx</span>: User account management, preferences, and theme toggling.</li>
+            <li><span class="code">CustomerSupportChat.tsx</span>: The integrated chat widget for user assistance.</li>
+        </ul>
+    </li>
+    <li><h4>UI System (<span class="code">ui/</span> & <span class="code">figma/</span>)</h4>
+        <ul>
+            <li>Contains reusable UI primitives (buttons, dialogs, inputs) utilizing Tailwind CSS and Radix UI to ensure consistency and accessibility across the app.</li>
+        </ul>
+    </li>
+</ul>
+
+<h2>2. Technologies & Tools Summary</h2>
+
+<h3>Frontend (User Interface)</h3>
+<ul>
+<li><b>React & Vite:</b> Core framework and lightning-fast build tool.</li>
+<li><b>Tailwind CSS:</b> Utility-first styling framework.</li>
+<li><b>UI Libraries:</b> <b>Radix UI</b> primitives, <b>Framer Motion</b> for animations, and <b>Lucide React</b> for iconography.</li>
+</ul>
+
+<h3>Backend (Server & API)</h3>
+<ul>
+<li><b>Node.js & Express.js:</b> RESTful API infrastructure.</li>
+<li><b>Sequelize (ORM):</b> Object-Relational Mapper for secure SQL query generation.</li>
+<li><b>PostgreSQL:</b> Relational database for persistent storage.</li>
+</ul>
+
+<h3>Security & Authentication</h3>
+<ul>
+<li><b>JWT & Bcryptjs:</b> Stateless session tokens and cryptographic password hashing.</li>
+<li><b>OAuth:</b> Google Sign-In and Apple Sign-In integrations.</li>
+</ul>
+
+<h2>3. Deployments & Platforms</h2>
+<p>The application is architected to be deployed across multiple environments from a unified codebase.</p>
+<ul>
+<li><b>Web:</b> Compiled via Vite (<code>npm run build</code>) into the <code>dist/</code> directory for static hosting.</li>
+<li><b>Desktop (Windows/macOS/Linux):</b> Wrapped using <b>Electron</b> and built via <b>Electron-builder</b> (<code>npm run electron:build</code>), producing <code>.exe</code>, <code>.dmg</code>, and AppImages.</li>
+<li><b>Mobile (Android):</b> Uses <b>Capacitor</b> (<code>cap sync</code>) to bridge the web view with native Android APIs, outputting an <code>.apk</code> via Android Studio/Gradle.</li>
+</ul>
+
+</body>
+</html>

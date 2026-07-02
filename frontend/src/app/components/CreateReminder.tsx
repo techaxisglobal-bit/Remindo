@@ -302,6 +302,8 @@ export function CreateReminder({
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isSpecial, setIsSpecial] = useState(false);
   const [notifyBefore, setNotifyBefore] = useState<number[]>([15]); // Default 15 min
+  const [attendees, setAttendees] = useState<string[]>([]);
+  const [attendeeInput, setAttendeeInput] = useState('');
 
   const getNotifyBeforeLabel = (values: number[]) => {
     if (values.includes(0) || values.length === 0) {
@@ -647,6 +649,7 @@ export function CreateReminder({
         duration: finalDuration,
         isSpecial: isSpecial,
         notifyBefore: notifyBefore.join(','),
+        attendees: attendees,
       };
 
       await onCreateTask(newTask);
@@ -780,7 +783,53 @@ return (
           </div>
         </div>
 
-
+        {/* Attendees Row */}
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#252525]/80 p-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px]">
+            {attendees.map((email) => (
+              <div key={email} className="flex items-center gap-1.5 bg-white dark:bg-[#333] border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full text-[12px] font-bold shadow-sm">
+                <span>{email}</span>
+                <button type="button" onClick={() => setAttendees(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            <input
+              type="email"
+              placeholder={attendees.length === 0 ? "Add email invitations..." : ""}
+              className="flex-1 bg-transparent text-[13px] font-medium placeholder:text-gray-400 focus:outline-none border-none min-w-[150px] p-1"
+              value={attendeeInput}
+              onChange={(e) => setAttendeeInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
+                  e.preventDefault();
+                  const email = attendeeInput.trim();
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (email && emailRegex.test(email) && !attendees.includes(email)) {
+                    setAttendees(prev => [...prev, email]);
+                    setAttendeeInput('');
+                  } else if (email && !emailRegex.test(email)) {
+                    // Just clear it if they press space on invalid, or ignore
+                    if (e.key === 'Enter') {
+                       // Could show toast but let's just ignore for now to keep it simple
+                       setAttendeeInput('');
+                    }
+                  }
+                } else if (e.key === 'Backspace' && !attendeeInput && attendees.length > 0) {
+                  setAttendees(prev => prev.slice(0, -1));
+                }
+              }}
+              onBlur={() => {
+                const email = attendeeInput.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (email && emailRegex.test(email) && !attendees.includes(email)) {
+                  setAttendees(prev => [...prev, email]);
+                  setAttendeeInput('');
+                }
+              }}
+            />
+          </div>
+        </div>
 
         <button
           type="button"
