@@ -901,30 +901,33 @@ export function Dashboard({
 
         {/* Header */}
         <header 
-          className={`${isMobile ? 'h-auto pb-3' : 'h-24'} border-b border-gray-200 dark:border-[#292929] flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-[#1f1f1f] sticky top-0 z-40`}
+          className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-[#292929]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-[#1f1f1f] sticky top-0 z-40`}
           style={isMobile ? { paddingTop: 'max(env(safe-area-inset-top), 16px)' } : {}}
         >
           {isMobile ? (
             /* --- Mobile Header Layout --- */
             <div className="flex flex-col gap-3">
-              {/* Top Row: Menu, Greetings, Profile */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight line-clamp-1">
-                    {new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 18 ? 'Good Afternoon' : 'Good Evening'}, {userName}
+              {/* Top Row: Greetings, Actions */}
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col">
+                  <h1 className="text-[28px] font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2 leading-none">
+                    {userName} <span className="text-2xl">👋🏻</span>
                   </h1>
+                  <h2 className="text-sm font-medium text-gray-500 dark:text-[#e0b596] mt-2">
+                    {new Date().getHours() < 12 ? 'Good Morning,' : new Date().getHours() < 18 ? 'Good Afternoon,' : 'Good Evening,'}
+                  </h2>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 mt-1">
                   <button
                     onClick={toggleTheme}
-                    className="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#292929] rounded-lg transition-colors"
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                   >
                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </button>
                   <button
                     onClick={() => setShowProfileMenu(true)}
-                    className="h-9 w-9 rounded-full bg-gradient-to-br from-[#e0b596] to-[#dcb49a] flex items-center justify-center text-xs font-bold text-[#1f1f1f] border-2 border-white dark:border-[#333] shadow-md flex-shrink-0"
+                    className="h-9 w-9 rounded-full bg-[#e0b596] flex items-center justify-center text-sm font-bold text-[#1f1f1f] shadow-sm flex-shrink-0"
                   >
                     {userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'}
                   </button>
@@ -938,7 +941,7 @@ export function Dashboard({
                   <div className="relative">
                     <button
                       onClick={() => setShowMobileMiniCalendar(!showMobileMiniCalendar)}
-                      className="text-sm font-bold tracking-tight text-gray-700 dark:text-gray-200 flex items-center gap-1 bg-gray-100 dark:bg-[#292929] px-3 py-1.5 rounded-lg transition-colors"
+                      className="text-[13px] font-semibold tracking-tight text-gray-800 dark:text-gray-200 flex items-center gap-1.5 bg-gray-100/80 dark:bg-[#252525] px-3 py-2 rounded-[12px] transition-colors"
                     >
                       {format(currentDate, 'MMMM yyyy')}
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMobileMiniCalendar ? 'rotate-180' : ''}`} />
@@ -971,9 +974,9 @@ export function Dashboard({
                   <div className="relative">
                     <button
                       onClick={() => setShowFilters(!showFilters)}
-                      className={`flex items-center justify-center p-2 border rounded-lg transition-all ${showFilters || showSpecialsOnly
-                        ? 'bg-[#e0b596]/10 border-[#e0b596] text-[#e0b596]'
-                        : 'bg-white dark:bg-[#292929] border-gray-200 dark:border-[#333]'
+                      className={`flex items-center justify-center p-2 rounded-[12px] transition-all ${showFilters || showSpecialsOnly
+                        ? 'bg-[#e0b596]/10 text-[#e0b596]'
+                        : 'bg-gray-100/80 dark:bg-[#252525] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2a2a2a]'
                         }`}
                     >
                       <SlidersHorizontal className="w-4 h-4" />
@@ -1035,7 +1038,7 @@ export function Dashboard({
 
                   {/* Add Button */}
                   <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#e0b596] text-[#1f1f1f] shadow-md rounded-lg text-sm font-bold active:scale-95 transition-transform"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e0b596]/20 dark:bg-[#e0b596]/10 text-[#8c5a3c] dark:text-[#e0b596] rounded-[12px] text-[13px] font-bold active:scale-95 transition-transform"
                     onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
                   >
                     <Plus className="w-4 h-4" />
@@ -1242,10 +1245,28 @@ export function Dashboard({
                   // --- Mobile Calendar Header ---
                   <div className="flex flex-col bg-white dark:bg-[#1f1f1f] shrink-0 relative">
                     {/* Mobile View Mode Toggle */}
-                    <div className="px-4 py-2 flex items-center justify-center bg-gray-50/80 dark:bg-[#252525]/80 backdrop-blur-sm border-b border-gray-200 dark:border-[#333]">
-                      <div className="flex bg-gray-200 dark:bg-[#1b1b1b] p-1 rounded-full shadow-inner border border-gray-300 dark:border-[#2a2a2a]">
-                        <button onClick={() => setMobileViewMode('schedule')} className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${mobileViewMode === 'schedule' ? 'bg-white dark:bg-[#3d3d45] text-[#e0b596] shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Schedule</button>
-                        <button onClick={() => setMobileViewMode('day')} className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all ${mobileViewMode === 'day' ? 'bg-white dark:bg-[#3d3d45] text-[#e0b596] shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Day</button>
+                    <div className="px-4 py-2.5 flex items-center justify-center bg-white/95 dark:bg-[#1f1f1f]/95 backdrop-blur-md z-10">
+                      <div className="flex w-full max-w-[240px] bg-gray-100/80 dark:bg-[#141414] p-1 rounded-[14px] shadow-inner border border-gray-200/60 dark:border-[#222]">
+                        {['schedule', 'day'].map((mode) => {
+                          const isActive = mobileViewMode === mode;
+                          return (
+                            <button
+                              key={mode}
+                              onClick={() => setMobileViewMode(mode as 'schedule' | 'day')}
+                              className={`relative flex-1 py-1.5 text-[13px] font-semibold tracking-wide transition-colors duration-300 ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}`}
+                            >
+                              {isActive && (
+                                <motion.div
+                                  layoutId="mobileViewSlider"
+                                  className="absolute inset-0 bg-white dark:bg-[#2d2d2d] rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-gray-200/50 dark:border-[#3d3d3d]"
+                                  initial={false}
+                                  transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                                />
+                              )}
+                              <span className="relative z-10 capitalize">{mode}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -1257,13 +1278,13 @@ export function Dashboard({
                             {week.map((day, i) => {
                               const isSelected = isSameDay(day, currentDate);
                               return (
-                                <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className={`flex flex-col items-center gap-1 transition-all ${isSelected ? 'scale-110 active' : 'opacity-60'}`}>
-                                  <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-[#e0b596]' : 'text-gray-400'}`}>{format(day, 'EEE')[0]}</span>
-                                  <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596] text-[#e0b596]' : 'text-gray-700 dark:text-gray-300'}`}>
+                                <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className={`flex flex-col items-center gap-1.5 transition-all ${isSelected ? 'scale-110 active' : 'opacity-60 hover:opacity-100'}`}>
+                                  <span className={`text-[10px] font-bold uppercase tracking-wide ${isSelected ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500'}`}>{format(day, 'EEE')[0]}</span>
+                                  <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-[#1f1f1f] shadow-[0_0_15px_rgba(224,181,150,0.5)]' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596]/50 text-[#e0b596]' : 'text-gray-800 dark:text-gray-200'}`}>
                                     {format(day, 'd')}
                                   </span>
                                   {sanitizedTasks.some(t => isSameDay(parseTaskDate(t.date), day)) && (
-                                    <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e0b596]' : 'bg-gray-400'}`} />
+                                    <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e0b596]' : 'bg-gray-300 dark:bg-gray-600'}`} />
                                   )}
                                 </button>
                               );
@@ -1328,10 +1349,10 @@ export function Dashboard({
                       return listDays.map((day, i) => {
                         const dayTasks = sanitizedTasks.filter(t => isSameDay(parseTaskDate(t.date), day));
                         return (
-                          <div key={i} data-schedule-date={format(day, 'yyyy-MM-dd')} className="space-y-4 pt-2">
-                            <h3 className="flex items-baseline gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                          <div key={i} data-schedule-date={format(day, 'yyyy-MM-dd')} className="space-y-5 pt-3">
+                            <h3 className="flex items-baseline gap-2.5 text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                               {format(day, 'd MMM')}
-                              <span className="text-sm font-medium text-gray-400">
+                              <span className="text-[13px] font-medium text-[#e0b596] tracking-normal">
                                 {isToday(day) ? 'Today' : format(day, 'EEEE')}
                               </span>
                             </h3>
@@ -1412,7 +1433,7 @@ export function Dashboard({
                                   );
                                 })()
                               ) : (
-                                <p className="text-sm italic text-gray-400 pl-6">No events</p>
+                                <p className="text-[13px] italic font-light text-gray-400 dark:text-gray-500 pl-4 py-2">No events</p>
                               )}
                             </div>
                           </div>
@@ -2065,8 +2086,8 @@ export function Dashboard({
         <AnimatePresence>
           {/* Mobile Bottom Navigation */}
           <div 
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-[#292929]/50 flex justify-between items-center rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] transition-colors"
-            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)', paddingTop: '12px', paddingLeft: '8px', paddingRight: '8px' }}
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-100 dark:border-[#2a2a2a] flex justify-between items-center rounded-t-[28px] shadow-[0_-12px_40px_rgba(0,0,0,0.04)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.2)] transition-colors"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)', paddingTop: '8px', paddingLeft: '8px', paddingRight: '8px' }}
           >
             {[
               { id: 'calendar', icon: Home, label: 'Home' },
@@ -2080,22 +2101,17 @@ export function Dashboard({
                 <button
                   key={item.id}
                   onClick={() => item.isAction ? setShowSettings(true) : setActiveView(item.id as View)}
-                  className={`flex flex-col items-center justify-center w-1/5 py-1 rounded-xl transition-all duration-300 relative ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                  className={`flex flex-col items-center justify-center w-1/5 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
                 >
-                  <motion.div 
-                    animate={{ y: isActive && !item.isAction ? -6 : 0, scale: isActive && !item.isAction ? 1.15 : 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  >
-                    <item.icon className={`w-6 h-6 mb-1 transition-all ${isActive && !item.isAction ? 'drop-shadow-[0_2px_8px_rgba(224,181,150,0.5)] stroke-[2.5px]' : 'stroke-2'}`} />
-                  </motion.div>
-                  <span className={`text-[10px] leading-none tracking-tight transition-all duration-300 ${isActive && !item.isAction ? 'font-bold opacity-100 translate-y-[-2px]' : 'font-medium opacity-80'}`}>{item.label}</span>
                   {isActive && !item.isAction && (
                     <motion.div 
-                      layoutId="activeBottomNav"
-                      className="absolute bottom-[-4px] w-1 h-1 rounded-full bg-[#e0b596]"
+                      layoutId="activeBottomNavPill"
+                      className="absolute inset-x-2 inset-y-0.5 bg-gradient-to-b from-[#e0b596]/15 to-transparent dark:from-[#e0b596]/15 dark:to-transparent rounded-[20px] -z-10"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
+                  <item.icon className={`w-[22px] h-[22px] mb-1 transition-all ${isActive && !item.isAction ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
+                  <span className={`text-[10px] leading-none tracking-tight transition-all duration-300 ${isActive && !item.isAction ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                 </button>
               );
             })}
