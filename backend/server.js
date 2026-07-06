@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const sequelize = require('./config/db');
+const path = require('path');
 
 dotenv.config();
 
@@ -53,12 +54,14 @@ app.use(cors({
 app.options('*', cors());
 
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/attendees', require('./routes/attendees'));
+app.use('/api/merchants', require('./routes/merchants'));
 
 app.get('/', (req, res) => {
     res.send('Backend running');

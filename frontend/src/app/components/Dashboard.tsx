@@ -63,7 +63,9 @@ import {
   Columns3,
   PanelLeft,
   Bell,
-  BellOff
+  BellOff,
+  Store,
+  ShieldCheck
 } from 'lucide-react';
 
 import { Task } from '@/app/types';
@@ -72,6 +74,9 @@ import { SettingsPanel } from '@/app/components/SettingsPanel';
 import { CreateReminder } from '@/app/components/CreateReminder';
 import { CustomerSupportChat } from '@/app/components/CustomerSupportChat';
 import { ProfileMenu } from '@/app/components/ProfileMenu';
+import { MerchantList } from '@/app/components/MerchantList';
+import { MerchantForm } from '@/app/components/MerchantForm';
+import { MerchantAdmin } from '@/app/components/MerchantAdmin';
 
 import { Calendar } from '@/app/components/ui/calendar';
 import { Checkbox } from '@/app/components/ui/checkbox';
@@ -97,7 +102,7 @@ interface DashboardProps {
   onToggleNotifications: () => void;
 }
 
-type View = 'settings' | 'pending' | 'completed' | 'calendar';
+type View = 'settings' | 'pending' | 'completed' | 'calendar' | 'merchants' | 'merchantAdmin' | 'merchantForm';
 type DragMode = 'none' | 'create' | 'move' | 'resize';
 
 // Constants
@@ -812,6 +817,30 @@ export function Dashboard({
             <TooltipContent side="right" hideArrow>Completed</TooltipContent>
           </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setActiveView('merchants')}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchants' || activeView === 'merchantForm' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+              >
+                <Store className="w-6 h-6" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" hideArrow>Merchants</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setActiveView('merchantAdmin')}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchantAdmin' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+              >
+                <ShieldCheck className="w-6 h-6" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" hideArrow>Admin</TooltipContent>
+          </Tooltip>
+
           <div className="mt-auto flex flex-col items-center gap-4 mb-4">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -881,20 +910,25 @@ export function Dashboard({
               {/* Top Row: Menu, Greetings, Profile */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <button className="text-gray-500 dark:text-gray-400 p-1" onClick={() => setShowSidebar(true)}>
-                    <Menu className="w-6 h-6" />
-                  </button>
                   <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight line-clamp-1">
                     {new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 18 ? 'Good Afternoon' : 'Good Evening'}, {userName}
                   </h1>
                 </div>
 
-                <button
-                  onClick={() => setShowProfileMenu(true)}
-                  className="h-9 w-9 rounded-full bg-gradient-to-br from-[#e0b596] to-[#dcb49a] flex items-center justify-center text-xs font-bold text-[#1f1f1f] border-2 border-white dark:border-[#333] shadow-md flex-shrink-0"
-                >
-                  {userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={toggleTheme}
+                    className="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#292929] rounded-lg transition-colors"
+                  >
+                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={() => setShowProfileMenu(true)}
+                    className="h-9 w-9 rounded-full bg-gradient-to-br from-[#e0b596] to-[#dcb49a] flex items-center justify-center text-xs font-bold text-[#1f1f1f] border-2 border-white dark:border-[#333] shadow-md flex-shrink-0"
+                  >
+                    {userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'}
+                  </button>
+                </div>
               </div>
 
               {/* Bottom Row: Month, Filters, Add */}
@@ -1014,10 +1048,6 @@ export function Dashboard({
             /* --- Desktop Header Layout (Original) --- */
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-6">
-                <button className="lg:hidden text-gray-500 dark:text-gray-400" onClick={() => setShowSidebar(true)}>
-                  <Menu className="w-6 h-6" />
-                </button>
-
                 <div className="flex flex-col">
                   <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                     {new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 18 ? 'Good Afternoon' : 'Good Evening'}, {userName}
@@ -1157,7 +1187,32 @@ export function Dashboard({
         </AnimatePresence>
 
         <div className="flex-1 relative flex overflow-hidden bg-gray-50 dark:bg-[#1f1f1f]">
-          <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''}`}>
+          <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''} pb-[88px] lg:pb-0`}>
+            
+            {activeView === 'merchants' && (
+              <div className="h-full overflow-y-auto custom-scrollbar">
+                <div className="flex justify-end px-4 md:px-8 pt-6 max-w-7xl mx-auto">
+                  <button onClick={() => setActiveView('merchantForm')} className="flex items-center gap-2 px-4 py-2 bg-[#e0b596] text-white rounded-lg shadow-sm font-semibold hover:bg-[#cda283] transition-colors"><Plus className="w-4 h-4"/> Register Business</button>
+                </div>
+                <MerchantList />
+              </div>
+            )}
+            
+            {activeView === 'merchantForm' && (
+              <div className="h-full overflow-y-auto custom-scrollbar">
+                  <div className="flex px-4 md:px-8 pt-6 max-w-4xl mx-auto">
+                    <button onClick={() => setActiveView('merchants')} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 font-semibold transition-colors"><ChevronLeft className="w-4 h-4" /> Back to Listings</button>
+                  </div>
+                  <MerchantForm onSuccess={() => setActiveView('merchants')} />
+              </div>
+            )}
+            
+            {activeView === 'merchantAdmin' && (
+              <div className="h-full overflow-y-auto custom-scrollbar">
+                <MerchantAdmin />
+              </div>
+            )}
+
             {activeView === 'calendar' && (
               <div className="flex flex-col h-full bg-white dark:bg-[#1f1f1f]">
                 {!isMobile ? (
@@ -2008,83 +2063,43 @@ export function Dashboard({
 
         {/* Render Modals */}
         <AnimatePresence>
-          {/* Mobile Sidebar Overlay */}
-          {
-            showSidebar && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setShowSidebar(false)}
-                  className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-                />
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "-100%" }}
-                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                  className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#1b1b1b] shadow-2xl p-6 lg:hidden flex flex-col border-r border-gray-200 dark:border-[#292929]"
+          {/* Mobile Bottom Navigation */}
+          <div 
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-[#292929]/50 flex justify-between items-center rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] transition-colors"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)', paddingTop: '12px', paddingLeft: '8px', paddingRight: '8px' }}
+          >
+            {[
+              { id: 'calendar', icon: Home, label: 'Home' },
+              { id: 'pending', icon: Hourglass, label: 'Pending' },
+              { id: 'merchants', icon: Store, label: 'Merchants' },
+              { id: 'completed', icon: Check, label: 'Done' },
+              { id: 'settings', icon: Settings, label: 'Settings', isAction: true }
+            ].map((item) => {
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => item.isAction ? setShowSettings(true) : setActiveView(item.id as View)}
+                  className={`flex flex-col items-center justify-center w-1/5 py-1 rounded-xl transition-all duration-300 relative ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 >
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Menu</h2>
-                    <button
-                      onClick={() => setShowSidebar(false)}
-                      className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#292929] rounded-lg transition-colors"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                  </div>
-
-                  <nav className="flex flex-col gap-2 space-y-1">
-                    <button
-                      onClick={() => { setActiveView('calendar'); setShowSidebar(false); }}
-                      className={`flex items-center gap-4 p-3 rounded-xl transition-all ${activeView === 'calendar' ? 'bg-gray-100 dark:bg-[#292929] text-[#e0b596] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#292929]/50'}`}
-                    >
-                      <Home className="w-5 h-5" />
-                      <span>Home</span>
-                    </button>
-
-
-
-                    <button
-                      onClick={() => { setActiveView('pending'); setShowSidebar(false); }}
-                      className={`flex items-center gap-4 p-3 rounded-xl transition-all ${activeView === 'pending' ? 'bg-gray-100 dark:bg-[#292929] text-[#e0b596] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#292929]/50'}`}
-                    >
-                      <Hourglass className="w-5 h-5" />
-                      <span>Pending Tasks</span>
-                    </button>
-
-                    <button
-                      onClick={() => { setActiveView('completed'); setShowSidebar(false); }}
-                      className={`flex items-center gap-4 p-3 rounded-xl transition-all ${activeView === 'completed' ? 'bg-gray-100 dark:bg-[#292929] text-[#e0b596] font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#292929]/50'}`}
-                    >
-                      <Check className="w-5 h-5" />
-                      <span>Completed</span>
-                    </button>
-                  </nav>
-
-                  <div className="mt-auto border-t border-gray-100 dark:border-[#292929] pt-6 space-y-2">
-                    <button
-                      onClick={() => { toggleTheme(); }}
-                      className="w-full flex items-center gap-4 p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#292929]/50 transition-all"
-                    >
-                      {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                      <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => { setShowSettings(true); setShowSidebar(false); }}
-                      className="w-full flex items-center gap-4 p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#292929]/50 transition-all"
-                    >
-                      <Settings className="w-5 h-5" />
-                      <span>Settings</span>
-                    </button>
-                  </div>
-                </motion.div>
-              </>
-            )
-          }
+                  <motion.div 
+                    animate={{ y: isActive && !item.isAction ? -6 : 0, scale: isActive && !item.isAction ? 1.15 : 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  >
+                    <item.icon className={`w-6 h-6 mb-1 transition-all ${isActive && !item.isAction ? 'drop-shadow-[0_2px_8px_rgba(224,181,150,0.5)] stroke-[2.5px]' : 'stroke-2'}`} />
+                  </motion.div>
+                  <span className={`text-[10px] leading-none tracking-tight transition-all duration-300 ${isActive && !item.isAction ? 'font-bold opacity-100 translate-y-[-2px]' : 'font-medium opacity-80'}`}>{item.label}</span>
+                  {isActive && !item.isAction && (
+                    <motion.div 
+                      layoutId="activeBottomNav"
+                      className="absolute bottom-[-4px] w-1 h-1 rounded-full bg-[#e0b596]"
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
           {
             createModal.isOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

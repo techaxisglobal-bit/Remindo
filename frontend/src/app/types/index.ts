@@ -32,3 +32,31 @@ export interface Festival {
   name: string;
   type: 'public' | 'religious' | 'seasonal' | 'other' | 'birthday' | 'anniversary' | 'cultural';
 }
+
+export interface Merchant {
+  id: number;
+  userId: number;
+  businessName: string;
+  category: string;
+  location: string;
+  serviceArea?: string;
+  description?: string;
+  website?: string;
+  phone: string;
+  email: string;
+  logoUrl?: string;
+  photoUrls?: string[];
+  proofDocumentUrl?: string;
+  keywords?: string[];
+  topPlacementBid?: number;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  whatsappNumber?: string;
+  businessHours?: any;
+  deliveryAvailable?: boolean;
+  onlineServiceAvailable?: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  isFeatured?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
