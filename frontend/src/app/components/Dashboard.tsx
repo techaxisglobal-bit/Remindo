@@ -2086,7 +2086,7 @@ export function Dashboard({
         <AnimatePresence>
           {/* Mobile Bottom Navigation */}
           <div 
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-100 dark:border-[#2a2a2a] flex justify-between items-center rounded-t-[28px] shadow-[0_-12px_40px_rgba(0,0,0,0.04)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.2)] transition-colors"
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-100 dark:border-[#2a2a2a] flex justify-between items-center rounded-t-[28px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)', paddingTop: '8px', paddingLeft: '8px', paddingRight: '8px' }}
           >
             {[
@@ -2106,7 +2106,7 @@ export function Dashboard({
                   {isActive && !item.isAction && (
                     <motion.div 
                       layoutId="activeBottomNavPill"
-                      className="absolute inset-x-2 inset-y-0.5 bg-gradient-to-b from-[#e0b596]/15 to-transparent dark:from-[#e0b596]/15 dark:to-transparent rounded-[20px] -z-10"
+                      className="absolute inset-x-2 inset-y-1 bg-[#e0b596]/10 dark:bg-[#e0b596]/15 rounded-[16px] -z-10"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
