@@ -122,7 +122,7 @@ export function CustomerSupportChat() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-4 bg-[#e0b596] text-white rounded-full shadow-2xl hover:bg-[#d4a37f] hover:-translate-y-1 transition-all z-40 ${isOpen ? 'hidden' : 'block'}`}
+        className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+80px)] lg:bottom-6 right-6 p-4 bg-[#e0b596] text-white rounded-full shadow-2xl hover:bg-[#d4a37f] hover:-translate-y-1 transition-all z-40 ${isOpen ? 'hidden' : 'block'}`}
       >
         <MessageCircle className="w-6 h-6" />
       </button>
@@ -133,7 +133,7 @@ export function CustomerSupportChat() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 w-80 md:w-96 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden z-50 h-[600px] max-h-[calc(100vh-5rem)]"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom,16px)+80px)] lg:bottom-6 right-6 w-80 md:w-96 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden z-50 h-[600px] max-h-[calc(100vh-8rem)] lg:max-h-[calc(100vh-5rem)]"
           >
             <div className="p-4 bg-[#e0b596] text-white flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2">

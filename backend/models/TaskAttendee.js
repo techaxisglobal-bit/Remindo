@@ -16,8 +16,24 @@ const TaskAttendee = sequelize.define('TaskAttendee', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('Pending', 'Accepted', 'Declined'),
+        type: DataTypes.ENUM('Pending', 'Accepted', 'Declined', 'Cancelled'),
         defaultValue: 'Pending',
+    },
+    token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    expiresAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    acceptedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    sharedTaskId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
     }
 }, {
     tableName: 'task_attendees',

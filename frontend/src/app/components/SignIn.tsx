@@ -63,6 +63,43 @@ export function SignIn({ onSignIn }: SignInProps) {
     }
   }, [error]);
 
+  // Check for invite intent
+  useEffect(() => {
+    const inviteEmail = sessionStorage.getItem('inviteEmail');
+    const inviteAction = sessionStorage.getItem('inviteAction');
+    if (inviteEmail) {
+      setEmail(inviteEmail);
+      if (inviteAction === 'accept') {
+        setIsSignUp(true);
+      }
+    }
+  }, []);
+
+  const processPendingInvitation = async (token: string) => {
+    const inviteToken = sessionStorage.getItem('inviteToken');
+    const inviteAction = sessionStorage.getItem('inviteAction');
+    if (inviteToken && inviteAction) {
+      try {
+        await fetch(`${API_BASE_URL}/api/invitations/respond`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          },
+          body: JSON.stringify({ token: inviteToken, action: inviteAction })
+        });
+        toast.success(`Invitation ${inviteAction}ed successfully!`);
+      } catch (err) {
+        console.error('Failed to process pending invitation', err);
+        toast.error('Failed to process invitation automatically. Please check your dashboard.');
+      } finally {
+        sessionStorage.removeItem('inviteToken');
+        sessionStorage.removeItem('inviteAction');
+        sessionStorage.removeItem('inviteEmail');
+      }
+    }
+  };
+
   // Clear error when user starts typing
   const handleInputChange = (setter: (val: string) => void, value: string) => {
     setter(value);
@@ -154,6 +191,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Welcome back!');
+        await processPendingInvitation(data.token);
         onSignIn(data.user.email);
       }
     } catch (err: any) {
@@ -186,6 +224,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Email verified! Welcome!');
+      await processPendingInvitation(data.token);
       onSignIn(data.user.email);
     } catch (err: any) {
       setError(err.message || 'Verification failed');
@@ -275,6 +314,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Signed in with Apple!');
+      await processPendingInvitation(data.token);
       onSignIn(data.user.email);
     } catch (err: any) {
       toast.error(err.message);
@@ -324,6 +364,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Signed in with Google!');
+      await processPendingInvitation(data.token);
       onSignIn(data.user.email);
     } catch (err: any) {
       toast.error(err.message);
@@ -398,6 +439,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Signed in with Google!');
+        await processPendingInvitation(data.token);
         onSignIn(data.user.email);
       } catch (err: any) {
         console.error('Google Native Error:', err);

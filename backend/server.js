@@ -62,6 +62,7 @@ app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/attendees', require('./routes/attendees'));
 app.use('/api/merchants', require('./routes/merchants'));
+app.use('/api/invitations', require('./routes/invitations'));
 
 app.get('/', (req, res) => {
     res.send('Backend running');

@@ -3,6 +3,7 @@ import { API_BASE_URL } from "@/app/api";
 import { Toaster } from "@/app/components/ui/sonner";
 import { SignIn } from "@/app/components/SignIn";
 import { Dashboard } from "@/app/components/Dashboard";
+import InvitationHandler from "@/app/components/InvitationHandler";
 import { Task } from "@/app/types";
 import { toast } from "sonner";
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -425,6 +426,16 @@ export default function App() {
 
   if (loading) {
     return <div className="min-h-screen bg-gray-50 dark:bg-[#1f1f1f]"></div>;
+  }
+
+  // Handle invitation route
+  if (window.location.pathname === '/invite') {
+    return (
+      <>
+        <InvitationHandler onNavigate={(path) => window.location.href = path} />
+        <Toaster position="top-center" richColors duration={2000} />
+      </>
+    );
   }
 
   if (!user) {

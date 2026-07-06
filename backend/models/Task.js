@@ -75,6 +75,18 @@ const Task = sequelize.define('Task', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    isShared: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    sharedBy: {
+        type: DataTypes.STRING,
+        defaultValue: '',
+    },
+    originalTaskId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    }
 }, {
     tableName: 'tasks',
     timestamps: true,

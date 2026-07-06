@@ -86,13 +86,14 @@ const sendOTP = async (email, otp, type = 'signup') => {
     }
 };
 
-const sendInvitation = async (email, task, creatorName, backendUrl) => {
-    const acceptUrl = `${backendUrl}/api/attendees/respond?taskId=${task.id}&email=${encodeURIComponent(email)}&status=Accepted`;
-    const declineUrl = `${backendUrl}/api/attendees/respond?taskId=${task.id}&email=${encodeURIComponent(email)}&status=Declined`;
+const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
+    // Generate secure links to frontend
+    const acceptUrl = `${frontendUrl}/invite?token=${token}&action=accept`;
+    const declineUrl = `${frontendUrl}/invite?token=${token}&action=decline`;
     
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for invitation.');
-        console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
+        console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nToken: ${token}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
         return;
     }
 

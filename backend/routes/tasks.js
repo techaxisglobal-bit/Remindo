@@ -5,6 +5,7 @@ const { Task, TaskAttendee } = require('../models');
 const ActivityLog = require('../models/ActivityLog');
 const { sendInvitation } = require('../services/emailService');
 const User = require('../models/User');
+const crypto = require('crypto');
 
 const sanitizeNotifyBefore = (val) => {
     if (val === undefined || val === null) return '15';
@@ -67,16 +68,19 @@ router.post('/', auth, async (req, res) => {
             const attendeeRecords = attendees.map(email => ({
                 taskId: task.id,
                 email,
-                status: 'Pending'
+                status: 'Pending',
+                token: crypto.randomBytes(32).toString('hex'),
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
             }));
             await TaskAttendee.bulkCreate(attendeeRecords);
 
             const user = await User.findByPk(req.user.id);
             const creatorName = user ? user.name : 'A Remindo User';
             const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-            for (const email of attendees) {
-                sendInvitation(email, task, creatorName, backendUrl).catch(err => console.error('Error sending invitation in background:', err));
+            for (const record of attendeeRecords) {
+                sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
             }
         }
 
@@ -104,9 +108,19 @@ router.post('/:id/resend', auth, async (req, res) => {
 
         const user = await User.findByPk(req.user.id);
         const creatorName = user ? user.name : 'A Remindo User';
-        const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-        await sendInvitation(email, task, creatorName, backendUrl);
+        const attendee = await TaskAttendee.findOne({ where: { taskId: task.id, email } });
+        if (!attendee) return res.status(404).json({ msg: 'Attendee not found' });
+        
+        // Generate new token if it doesn't exist
+        if (!attendee.token) {
+            attendee.token = crypto.randomBytes(32).toString('hex');
+            attendee.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            await attendee.save();
+        }
+
+        await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
         res.json({ msg: 'Invitation resent' });
     } catch (err) {
         console.error(err.message);
