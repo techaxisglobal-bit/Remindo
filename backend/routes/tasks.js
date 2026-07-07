@@ -33,6 +33,23 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/tasks/:id
+// @desc    Get single task for a user
+// @access  Private
+router.get('/:id', auth, async (req, res) => {
+    try {
+        const task = await Task.findOne({
+            where: { id: req.params.id, userId: req.user.id },
+            include: [{ model: TaskAttendee, as: 'attendees' }]
+        });
+        if (!task) return res.status(404).json({ msg: 'Task not found' });
+        res.json(task);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   POST api/tasks
 // @desc    Create a new task
 // @access  Private
@@ -113,12 +130,17 @@ router.post('/:id/resend', auth, async (req, res) => {
         const attendee = await TaskAttendee.findOne({ where: { taskId: task.id, email } });
         if (!attendee) return res.status(404).json({ msg: 'Attendee not found' });
         
-        // Generate new token if it doesn't exist
-        if (!attendee.token) {
-            attendee.token = crypto.randomBytes(32).toString('hex');
-            attendee.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-            await attendee.save();
+        if (attendee.status === 'Accepted') {
+            return res.status(400).json({ msg: 'Invitation has already been accepted' });
         }
+
+        // Generate new token if it doesn't exist, or if it's expired/declined to give a fresh start
+        if (!attendee.token || attendee.status === 'Declined' || attendee.status === 'Expired') {
+            attendee.token = crypto.randomBytes(32).toString('hex');
+            attendee.status = 'Pending';
+        }
+        attendee.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await attendee.save();
 
         await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
         res.json({ msg: 'Invitation resent' });

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { API_BASE_URL } from '@/app/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
@@ -16,7 +17,8 @@ import {
   ChevronRight,
   Info,
   CircleAlert,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Task } from '@/app/types';
 import { format, parse, isSameDay, addMinutes, isBefore, subMinutes, eachDayOfInterval, endOfMonth, getDay } from 'date-fns';
@@ -289,10 +291,32 @@ export function TaskDetails({
 }: TaskDetailsProps) {
 
   const [isEditing, setIsEditing] = useState(initialEditMode);
+  const [localTask, setLocalTask] = useState<Task>(task);
+  const [isResending, setIsResending] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isEditing) return;
+    const fetchLatestTask = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/api/tasks/${task.id}`, {
+          headers: { 'x-auth-token': token || '' }
+        });
+        if (res.ok) {
+          const updatedTask = await res.json();
+          setLocalTask(updatedTask);
+        }
+      } catch (error) {
+        // silently fail polling
+      }
+    };
+    const intervalId = setInterval(fetchLatestTask, 3000);
+    return () => clearInterval(intervalId);
+  }, [task.id, isEditing]);
 
   // Helper to parse metadata
   const parsedMetadata = useMemo(() => {
-    const desc = task.description || '';
+    const desc = localTask.description || '';
     const match = desc.match(/<!-- metadata: (.+) -->/);
     if (match) {
       try { return JSON.parse(match[1]); } catch (e) { return null; }
@@ -672,7 +696,7 @@ export function TaskDetails({
           ) : (
             <div className="space-y-5">
               <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold leading-tight">{task.title}</h1>
+                <h1 className="text-3xl font-bold leading-tight">{localTask.title}</h1>
                 <div className="flex items-center gap-2">
 
                   {isSpecial && (
@@ -710,8 +734,6 @@ export function TaskDetails({
                 </div>
               </div>
 
-
-
               <AnimatePresence>
                 {true && (
                   <motion.div
@@ -729,43 +751,111 @@ export function TaskDetails({
               </AnimatePresence>
 
               {/* Attendees Display */}
-              {!isEditing && task.attendees && task.attendees.length > 0 && (
-                <div className="space-y-2 mt-4 pt-2 border-t border-gray-100 dark:border-[#333]">
-                  <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-wider">Attendees</h3>
-                  <div className="flex flex-col gap-2">
-                    {(task.attendees as any[]).map((attendee, idx) => {
+              {!isEditing && localTask.attendees && localTask.attendees.length > 0 && (
+                <div className="space-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-[#333]">
+                  <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
+                    Invited Attendees
+                    <Badge className="bg-gray-100 text-gray-500 dark:bg-[#333] dark:text-gray-400 border-none">{localTask.attendees.length}</Badge>
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {(localTask.attendees as any[]).map((attendee, idx) => {
                       const email = typeof attendee === 'string' ? attendee : attendee.email;
                       const status = typeof attendee === 'string' ? 'Pending' : attendee.status;
-                      let statusColor = "bg-gray-100 text-gray-500 dark:bg-[#333] dark:text-gray-400";
-                      if (status === 'Accepted') statusColor = "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-                      else if (status === 'Declined') statusColor = "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+                      const attendeeId = typeof attendee === 'string' ? null : attendee.id;
+                      
+                      let statusBadge = null;
+                      switch(status) {
+                        case 'Accepted': statusBadge = <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-none px-2 py-0.5 text-[10px]">🟢 Accepted</Badge>; break;
+                        case 'Declined': statusBadge = <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-none px-2 py-0.5 text-[10px]">🔴 Declined</Badge>; break;
+                        case 'Expired': statusBadge = <Badge className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-none px-2 py-0.5 text-[10px]">⚪ Expired</Badge>; break;
+                        default: statusBadge = <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-none px-2 py-0.5 text-[10px]">🟠 Pending</Badge>;
+                      }
+
                       return (
-                        <div key={idx} className="flex items-center justify-between bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-xl border border-gray-100 dark:border-[#333] shadow-sm">
-                          <span className="text-[13px] font-bold">{email}</span>
-                          <div className="flex items-center gap-2">
-                            <Badge className={`border-none px-2 py-0.5 text-[10px] ${statusColor}`}>
-                              {status}
-                            </Badge>
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#252525] p-3 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e0b596] to-[#c29675] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                              {email[0].toUpperCase()}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[13px] font-bold text-gray-900 dark:text-white truncate">{email}</span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {statusBadge}
+                                {status === 'Accepted' && <span className="text-[10px] text-gray-400 flex items-center gap-1"><Check className="w-3 h-3"/> Shared</span>}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 sm:ml-auto self-end sm:self-auto">
                             {status !== 'Accepted' && (
                               <Button 
                                 variant="ghost" 
-                                className="h-6 px-2 text-[10px] font-bold text-[#e0b596] hover:bg-[#e0b596]/10" 
+                                className="h-8 px-3 text-[11px] font-bold text-[#e0b596] hover:bg-[#e0b596]/10 rounded-xl transition-colors" 
+                                disabled={isResending === email}
                                 onClick={async () => {
+                                  setIsResending(email);
                                   try {
                                     const token = localStorage.getItem('token');
-                                    await fetch(`http://localhost:5000/api/tasks/${task.id}/resend`, {
+                                    const res = await fetch(`${API_BASE_URL}/api/tasks/${localTask.id}/resend`, {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json', 'x-auth-token': token || '' },
                                       body: JSON.stringify({ email })
                                     });
-                                    toast.success('Invitation resent!');
+                                    const data = await res.json();
+                                    if (res.ok) {
+                                      toast.success('Invitation resent!');
+                                      if (status === 'Declined' || status === 'Expired') {
+                                        setLocalTask(prev => ({
+                                          ...prev,
+                                          attendees: prev.attendees?.map((a: any) => a.email === email ? { ...a, status: 'Pending' } : a)
+                                        }));
+                                      }
+                                    } else {
+                                      toast.error(data.msg || 'Failed to resend invitation');
+                                    }
                                   } catch (e) {
-                                    toast.error('Failed to resend invitation');
+                                    toast.error('Network error. Failed to resend.');
+                                  } finally {
+                                    setIsResending(null);
                                   }
                                 }}
                               >
-                                Resend
+                                {isResending === email ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (status === 'Pending' ? 'Resend' : 'Generate New')}
                               </Button>
+                            )}
+                            {(status === 'Pending' || status === 'Expired') && attendeeId && (
+                              <Button
+                                variant="ghost"
+                                className="h-8 px-3 text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                                onClick={async () => {
+                                  if (!window.confirm('Are you sure you want to cancel this invitation?')) return;
+                                  try {
+                                    const token = localStorage.getItem('token');
+                                    const res = await fetch(`${API_BASE_URL}/api/invitations/${attendeeId}`, {
+                                      method: 'DELETE',
+                                      headers: { 'x-auth-token': token || '' }
+                                    });
+                                    if (res.ok) {
+                                      toast.success('Invitation cancelled');
+                                      setLocalTask(prev => ({
+                                        ...prev,
+                                        attendees: prev.attendees?.filter((a: any) => a.id !== attendeeId)
+                                      }));
+                                    } else {
+                                      toast.error('Failed to cancel invitation');
+                                    }
+                                  } catch (e) {
+                                    toast.error('Network error');
+                                  }
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            )}
+                            {status === 'Accepted' && (
+                               <Button variant="ghost" className="h-8 px-3 text-[11px] font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-[#333] rounded-xl transition-colors" disabled>
+                                   View Recipient
+                               </Button>
                             )}
                           </div>
                         </div>
@@ -807,14 +897,14 @@ export function TaskDetails({
                       const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
                       
                       const updatedTask = {
-                        ...task,
+                        ...localTask,
                         title,
                         description: finalDescription,
                         date: startDate,
                         time: startTime,
                         duration: finalDuration,
-                        category: task.category || 'general',
-                        location: task.location || '',
+                        category: localTask.category || 'general',
+                        location: localTask.location || '',
                         isSpecial,
                         notifyBefore: notifyBefore.join(',')
                       };
