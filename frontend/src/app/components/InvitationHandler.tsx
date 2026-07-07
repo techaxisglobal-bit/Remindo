@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
 
@@ -9,9 +9,12 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
     const [loading, setLoading] = useState(true);
     const [inviteDetails, setInviteDetails] = useState<any>(null);
     const [error, setError] = useState('');
+    const processingRef = useRef(false);
 
     useEffect(() => {
         const processInvitation = async () => {
+            if (processingRef.current) return;
+            processingRef.current = true;
             if (!token || !action) {
                 setError('Invalid invitation link.');
                 setLoading(false);

@@ -123,6 +123,7 @@ export function Dashboard({
   notificationsEnabled,
   onToggleNotifications,
 }: DashboardProps) {
+  const isAdmin = userEmail === 'techaxisglobal@gmail.com';
   const [activeView, setActiveView] = useState<View>('calendar');
   const isMobile = useIsMobile();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -829,17 +830,19 @@ export function Dashboard({
             <TooltipContent side="right" hideArrow>Merchants</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveView('merchantAdmin')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchantAdmin' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
-              >
-                <ShieldCheck className="w-6 h-6" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" hideArrow>Admin</TooltipContent>
-          </Tooltip>
+          {isAdmin && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setActiveView('merchantAdmin')}
+                  className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchantAdmin' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                >
+                  <ShieldCheck className="w-6 h-6" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" hideArrow>Admin</TooltipContent>
+            </Tooltip>
+          )}
 
           <div className="mt-auto flex flex-col items-center gap-4 mb-4">
             <Tooltip>
@@ -1212,7 +1215,15 @@ export function Dashboard({
             
             {activeView === 'merchantAdmin' && (
               <div className="h-full overflow-y-auto custom-scrollbar">
-                <MerchantAdmin />
+                {isAdmin ? (
+                  <MerchantAdmin />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-60">
+                    <ShieldCheck className="w-16 h-16 text-red-500 mb-4 opacity-50" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+                    <p className="text-gray-500 dark:text-gray-400">You do not have permission to view the Admin Dashboard.</p>
+                  </div>
+                )}
               </div>
             )}
 

@@ -63,78 +63,99 @@ router.post('/respond', auth, async (req, res) => {
         const user = await User.findByPk(req.user.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
 
-        const attendee = await TaskAttendee.findOne({
-            where: { token }
+        const sequelize = require('../config/db');
+
+        const result = await sequelize.transaction(async (t) => {
+            const attendee = await TaskAttendee.findOne({
+                where: { token },
+                lock: t.LOCK.UPDATE,
+                transaction: t
+            });
+
+            if (!attendee) {
+                return { status: 404, data: { msg: 'Invitation not found' } };
+            }
+
+            // Check if token expired
+            if (attendee.expiresAt && new Date() > new Date(attendee.expiresAt)) {
+                return { status: 400, data: { msg: 'Invitation has expired' } };
+            }
+
+            // Verify the authenticated user's email matches the invited email
+            if (user.email.toLowerCase() !== attendee.email.toLowerCase()) {
+                return { status: 403, data: { msg: 'This invitation is not for your account' } };
+            }
+
+            if (action === 'decline') {
+                if (attendee.status === 'Declined') {
+                    return { status: 400, data: { msg: 'Invitation already declined', attendee } };
+                }
+                attendee.status = 'Declined';
+                await attendee.save({ transaction: t });
+                return { status: 200, data: { msg: 'Invitation declined', attendee } };
+            }
+
+            // Accept flow
+            if (attendee.status === 'Accepted') {
+                return { status: 400, data: { msg: 'Invitation already accepted' } };
+            }
+
+            const originalTask = await Task.findByPk(attendee.taskId, { transaction: t });
+            if (!originalTask) {
+                return { status: 404, data: { msg: 'Original reminder no longer exists' } };
+            }
+
+            // Also check if user already has a reminder created from this invitation (safety net)
+            // It could be that the task was cloned but attendee status update failed (unlikely in tx, but good for idempotent APIs)
+            if (attendee.sharedTaskId) {
+                 const existingSharedTask = await Task.findByPk(attendee.sharedTaskId, { transaction: t });
+                 if (existingSharedTask) {
+                     return { status: 400, data: { msg: 'Invitation already accepted' } };
+                 }
+            }
+
+            const originalOwner = await User.findByPk(originalTask.userId, { transaction: t });
+            const originalOwnerName = originalOwner ? originalOwner.name : 'Unknown User';
+
+            // Clone the task for the current user
+            const clonedTask = await Task.create({
+                userId: user.id,
+                title: originalTask.title,
+                description: originalTask.description,
+                category: originalTask.category,
+                date: originalTask.date,
+                time: originalTask.time,
+                duration: originalTask.duration,
+                location: originalTask.location,
+                isAllDay: originalTask.isAllDay,
+                isSpecial: originalTask.isSpecial,
+                specialType: originalTask.specialType,
+                notifyAt: originalTask.notifyAt,
+                notifyBefore: originalTask.notifyBefore,
+                completed: false,
+                isShared: true,
+                sharedBy: originalOwnerName,
+                originalTaskId: originalTask.id
+            }, { transaction: t });
+
+            // Update attendee status
+            attendee.status = 'Accepted';
+            attendee.acceptedAt = new Date();
+            attendee.sharedTaskId = clonedTask.id;
+            await attendee.save({ transaction: t });
+
+            await ActivityLog.create({
+                userId: user.id,
+                action: 'INVITATION_ACCEPTED',
+                details: { originalTaskId: originalTask.id, clonedTaskId: clonedTask.id, title: clonedTask.title },
+                ipAddress: req.ip
+            }, { transaction: t });
+
+            return { status: 200, data: { msg: 'Invitation accepted and reminder added', task: clonedTask, attendee } };
         });
 
-        if (!attendee) {
-            return res.status(404).json({ msg: 'Invitation not found' });
-        }
+        return res.status(result.status).json(result.data);
 
-        // Check if token expired
-        if (attendee.expiresAt && new Date() > new Date(attendee.expiresAt)) {
-            return res.status(400).json({ msg: 'Invitation has expired' });
-        }
-
-        // Verify the authenticated user's email matches the invited email
-        if (user.email.toLowerCase() !== attendee.email.toLowerCase()) {
-            return res.status(403).json({ msg: 'This invitation is not for your account' });
-        }
-
-        if (action === 'decline') {
-            attendee.status = 'Declined';
-            await attendee.save();
-            return res.json({ msg: 'Invitation declined', attendee });
-        }
-
-        // Accept flow
-        if (attendee.status === 'Accepted') {
-            return res.status(400).json({ msg: 'Invitation already accepted' });
-        }
-
-        const originalTask = await Task.findByPk(attendee.taskId);
-        if (!originalTask) {
-            return res.status(404).json({ msg: 'Original reminder no longer exists' });
-        }
-
-        const originalOwner = await User.findByPk(originalTask.userId);
-        const originalOwnerName = originalOwner ? originalOwner.name : 'Unknown User';
-
-        // Clone the task for the current user
-        const clonedTask = await Task.create({
-            userId: user.id,
-            title: originalTask.title,
-            description: originalTask.description,
-            category: originalTask.category,
-            date: originalTask.date,
-            time: originalTask.time,
-            duration: originalTask.duration,
-            location: originalTask.location,
-            isAllDay: originalTask.isAllDay,
-            isSpecial: originalTask.isSpecial,
-            specialType: originalTask.specialType,
-            notifyAt: originalTask.notifyAt,
-            notifyBefore: originalTask.notifyBefore,
-            completed: false,
-            isShared: true,
-            sharedBy: originalOwnerName,
-            originalTaskId: originalTask.id
-        });
-
-        // Update attendee status
-        attendee.status = 'Accepted';
-        attendee.acceptedAt = new Date();
-        attendee.sharedTaskId = clonedTask.id;
-        await attendee.save();
-
-        await ActivityLog.create({
-            userId: user.id,
-            action: 'INVITATION_ACCEPTED',
-            details: { originalTaskId: originalTask.id, clonedTaskId: clonedTask.id, title: clonedTask.title },
-            ipAddress: req.ip
-        });
-
-        res.json({ msg: 'Invitation accepted and reminder added', task: clonedTask, attendee });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

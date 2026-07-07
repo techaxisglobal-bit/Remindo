@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { Merchant } = require('../models');
+const adminAuth = require('../middleware/adminAuth');
+const { Merchant, User } = require('../models');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -102,10 +103,9 @@ router.get('/', async (req, res) => {
 
 // @route   GET api/merchants/admin
 // @desc    Get all merchants for admin
-// @access  Private (should ideally have an admin check)
-router.get('/admin', auth, async (req, res) => {
+// @access  Private Admin
+router.get('/admin', adminAuth, async (req, res) => {
     try {
-        // Ideally, check if req.user is an admin here. 
         // For now, assuming anyone accessing this route through the admin dashboard is authorized or we will add basic protection later.
         const merchants = await Merchant.findAll({
             order: [['createdAt', 'DESC']]
@@ -119,8 +119,8 @@ router.get('/admin', auth, async (req, res) => {
 
 // @route   PUT api/merchants/:id/status
 // @desc    Update merchant status (admin only)
-// @access  Private
-router.put('/:id/status', auth, async (req, res) => {
+// @access  Private Admin
+router.put('/:id/status', adminAuth, async (req, res) => {
     try {
         const { status, isFeatured } = req.body;
         const merchant = await Merchant.findByPk(req.params.id);
@@ -145,9 +145,12 @@ router.put('/:id', auth, async (req, res) => {
         const merchant = await Merchant.findByPk(req.params.id);
         if (!merchant) return res.status(404).json({ msg: 'Merchant not found' });
 
-        // Ensure user owns the listing
-        if (merchant.userId !== req.user.id) {
-            return res.status(401).json({ msg: 'Not authorized' });
+        const user = await User.findByPk(req.user.id);
+        const isAdmin = user && user.email === 'techaxisglobal@gmail.com';
+
+        // Ensure user owns the listing or is admin
+        if (merchant.userId !== req.user.id && !isAdmin) {
+            return res.status(403).json({ msg: 'Not authorized' });
         }
 
         const updatableFields = [
@@ -179,10 +182,12 @@ router.delete('/:id', auth, async (req, res) => {
         const merchant = await Merchant.findByPk(req.params.id);
         if (!merchant) return res.status(404).json({ msg: 'Merchant not found' });
 
+        const user = await User.findByPk(req.user.id);
+        const isAdmin = user && user.email === 'techaxisglobal@gmail.com';
+
         // Admin can delete any, or owner can delete theirs
-        // For simplicity, checking owner
-        if (merchant.userId !== req.user.id) {
-            return res.status(401).json({ msg: 'Not authorized' });
+        if (merchant.userId !== req.user.id && !isAdmin) {
+            return res.status(403).json({ msg: 'Not authorized' });
         }
 
         await merchant.destroy();
