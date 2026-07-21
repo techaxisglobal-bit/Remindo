@@ -353,10 +353,14 @@ export function SignIn({ onSignIn }: SignInProps) {
   const handleGoogleResponse = async (response: any) => {
     setLoading(true);
     try {
+      const body = response.credential 
+        ? { credential: response.credential } 
+        : { access_token: response.access_token };
+
       const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || 'Google authentication failed');
@@ -450,19 +454,26 @@ export function SignIn({ onSignIn }: SignInProps) {
       return;
     }
 
-    // Web Google Sign In (Original flow)
+    // Web Google Sign In (Explicit flow for button click)
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
       toast.error('Google Client ID not configured. Please add it to the .env file.');
       return;
     }
 
-    if ((window as any).google?.accounts?.id) {
-      (window as any).google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          toast.info('Please allow the Google popup or check your browser settings.');
-        }
+    if ((window as any).google?.accounts?.oauth2) {
+      const client = (window as any).google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'email profile',
+        callback: (response: any) => {
+          if (response.error) {
+             toast.error('Google Sign-In failed or was cancelled');
+             return;
+          }
+          handleGoogleResponse(response);
+        },
       });
+      client.requestAccessToken();
     } else {
       toast.error('Google Sign-In is still loading. Try again in a moment.');
     }

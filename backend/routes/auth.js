@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 const emailService = require('../services/emailService');
 const { Op } = require('sequelize');
 
@@ -247,20 +248,33 @@ router.post('/reset-password', async (req, res) => {
 // @desc    Authenticate via Google OAuth
 // @access  Public
 router.post('/google', async (req, res) => {
-    const { credential } = req.body;
+    const { credential, access_token } = req.body;
 
     try {
-        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-        const ticket = await client.verifyIdToken({
-            idToken: credential,
-            audience: [
-                process.env.GOOGLE_CLIENT_ID,
-                process.env.GOOGLE_ANDROID_CLIENT_ID,
-            ].filter(Boolean),
-        });
+        let email, name;
 
-        const payload = ticket.getPayload();
-        const { email, name } = payload;
+        if (credential) {
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            const ticket = await client.verifyIdToken({
+                idToken: credential,
+                audience: [
+                    process.env.GOOGLE_CLIENT_ID,
+                    process.env.GOOGLE_ANDROID_CLIENT_ID,
+                ].filter(Boolean),
+            });
+
+            const payload = ticket.getPayload();
+            email = payload.email;
+            name = payload.name;
+        } else if (access_token) {
+            const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${access_token}` }
+            });
+            email = response.data.email;
+            name = response.data.name;
+        } else {
+            return res.status(400).json({ msg: 'No credential or access token provided' });
+        }
 
         let user = await User.findOne({ where: { email: email.toLowerCase() } });
 
