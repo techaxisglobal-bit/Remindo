@@ -9,10 +9,12 @@ import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import type { User as UserType } from '@/app/types';
+import { EditProfileModal } from './EditProfileModal';
+import { AvatarImage } from '@/app/components/ui/avatar';
 
 interface SettingsPanelProps {
-  userEmail: string;
-  initialName: string;
+  user: UserType;
   onClose: () => void;
   notificationsEnabled: boolean;
   onNotificationChange: () => void;
@@ -20,8 +22,7 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({
-  userEmail,
-  initialName,
+  user,
   onClose,
   notificationsEnabled,
   onNotificationChange,
@@ -29,6 +30,7 @@ export function SettingsPanel({
 }: SettingsPanelProps) {
 
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme');
@@ -39,10 +41,7 @@ export function SettingsPanel({
   }, []);
 
 
-  const [name, setName] = useState(initialName);
-  const [editingName, setEditingName] = useState(false);
-  const [showSaveTick, setShowSaveTick] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  // Removed inline name editing state
 
   // Change Password State
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -72,41 +71,7 @@ export function SettingsPanel({
     onNotificationChange();
   };
 
-  const handleUpdateName = async () => {
-    if (!name.trim()) {
-      toast.error('Name cannot be empty');
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/auth/update-name`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token || '',
-        },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        onUpdateUser(name.trim());
-        setEditingName(false);
-        setShowSaveTick(false);
-        toast.success('Name updated');
-      } else {
-        toast.error(data.msg || 'Failed to update name');
-      }
-    } catch (error) {
-      console.error('Update name error:', error);
-      toast.error('Server error');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  // Update name handler removed, replaced by EditProfileModal onUpdateUser
 
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -167,13 +132,15 @@ export function SettingsPanel({
     window.location.reload();
   };
 
-  const userInitials = userEmail
+  const userInitials = user.email
     .split('@')[0]
     .split(/[._]/)
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
+
+  const avatarUrl = user.profilePictureUrl ? `${API_BASE_URL}${user.profilePictureUrl}` : '';
 
   return (
     <motion.div
@@ -206,70 +173,26 @@ export function SettingsPanel({
 
           {/* Profile Section */}
           <section>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-1">Profile</h3>
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Profile</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowEditProfile(true)} className="h-8 text-[#e0b596] hover:text-[#d4a37f] hover:bg-[#e0b596]/10">
+                <Pencil className="w-3.5 h-3.5 mr-1" /> Edit Profile
+              </Button>
+            </div>
             <div className="flex items-center gap-4 px-1">
               <Avatar className="w-16 h-16 border-2 border-white/20 dark:border-white/10 shadow-lg bg-[#e0b596]/90 backdrop-blur-sm">
+                <AvatarImage src={avatarUrl} className="object-cover" />
                 <AvatarFallback className="text-[#1f1f1f] text-xl font-bold bg-[#e0b596]/90 backdrop-blur-sm">
-                  {name.slice(0, 2).toUpperCase()}
+                  {user.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
               <div className="flex-1 space-y-1">
-                <Label className="text-xs text-gray-500 dark:text-gray-400 font-normal">Display Name</Label>
-
-                {!editingName ? (
-                  <div className="flex items-center gap-2 group">
-                    <p className="font-semibold text-lg text-gray-900 dark:text-white">{name}</p>
-                    <button
-                      onClick={() => {
-                        setEditingName(true);
-                        setShowSaveTick(false);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 text-[#e0b596] p-1 hover:bg-[#e0b596]/10 rounded transition-all"
-                      title="Edit name"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      autoFocus
-                      value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        setShowSaveTick(true);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleUpdateName();
-                        if (e.key === 'Escape') {
-                          setName(initialName);
-                          setEditingName(false);
-                          setShowSaveTick(false);
-                        }
-                      }}
-                      className="w-full bg-transparent border-b border-[#e0b596] text-lg font-semibold text-gray-900 dark:text-white focus:outline-none py-0.5 px-0"
-                      disabled={isUpdating}
-                    />
-                    {showSaveTick && (
-                      <button
-                        onClick={handleUpdateName}
-                        disabled={isUpdating}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-600 p-1 disabled:opacity-50"
-                      >
-                        {isUpdating ? (
-                          <div className="w-4 h-4 border-2 border-green-500 border-t-transparent animate-spin rounded-full" />
-                        ) : (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                )}
-
+                <p className="font-semibold text-lg text-gray-900 dark:text-white leading-tight">{user.name}</p>
+                {user.username && <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>}
                 <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                   <Mail className="w-3.5 h-3.5" />
-                  <span>{userEmail}</span>
+                  <span>{user.email}</span>
                 </div>
               </div>
             </div>
@@ -436,6 +359,16 @@ export function SettingsPanel({
 
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showEditProfile && (
+          <EditProfileModal
+            user={user}
+            onClose={() => setShowEditProfile(false)}
+            onUpdateUser={onUpdateUser}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

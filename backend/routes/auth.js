@@ -116,7 +116,18 @@ router.post('/verify', async (req, res) => {
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+                res.json({ token, user: { 
+                    id: user.id, 
+                    name: user.name, 
+                    email: user.email,
+                    username: user.username,
+                    phoneNumber: user.phoneNumber,
+                    phoneVerified: user.phoneVerified,
+                    dateOfBirth: user.dateOfBirth,
+                    anniversary: user.anniversary,
+                    gender: user.gender,
+                    profilePictureUrl: user.profilePictureUrl
+                } });
             }
         );
     } catch (err) {
@@ -169,7 +180,18 @@ router.post('/login', async (req, res) => {
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+                res.json({ token, user: { 
+                    id: user.id, 
+                    name: user.name, 
+                    email: user.email,
+                    username: user.username,
+                    phoneNumber: user.phoneNumber,
+                    phoneVerified: user.phoneVerified,
+                    dateOfBirth: user.dateOfBirth,
+                    anniversary: user.anniversary,
+                    gender: user.gender,
+                    profilePictureUrl: user.profilePictureUrl
+                } });
             }
         );
     } catch (err) {
@@ -299,7 +321,18 @@ router.post('/google', async (req, res) => {
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+                res.json({ token, user: { 
+                    id: user.id, 
+                    name: user.name, 
+                    email: user.email,
+                    username: user.username,
+                    phoneNumber: user.phoneNumber,
+                    phoneVerified: user.phoneVerified,
+                    dateOfBirth: user.dateOfBirth,
+                    anniversary: user.anniversary,
+                    gender: user.gender,
+                    profilePictureUrl: user.profilePictureUrl
+                } });
             }
         );
     } catch (err) {
@@ -349,7 +382,18 @@ router.post('/apple', async (req, res) => {
             { expiresIn: 360000 },
             (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+                res.json({ token, user: { 
+                    id: user.id, 
+                    name: user.name, 
+                    email: user.email,
+                    username: user.username,
+                    phoneNumber: user.phoneNumber,
+                    phoneVerified: user.phoneVerified,
+                    dateOfBirth: user.dateOfBirth,
+                    anniversary: user.anniversary,
+                    gender: user.gender,
+                    profilePictureUrl: user.profilePictureUrl
+                } });
             }
         );
     } catch (err) {
@@ -379,7 +423,18 @@ router.put('/update-name', auth, async (req, res) => {
         user.name = name;
         await user.save();
 
-        res.json({ msg: 'Name updated successfully', user: { id: user.id, name: user.name, email: user.email } });
+        res.json({ msg: 'Name updated successfully', user: { 
+                    id: user.id, 
+                    name: user.name, 
+                    email: user.email,
+                    username: user.username,
+                    phoneNumber: user.phoneNumber,
+                    phoneVerified: user.phoneVerified,
+                    dateOfBirth: user.dateOfBirth,
+                    anniversary: user.anniversary,
+                    gender: user.gender,
+                    profilePictureUrl: user.profilePictureUrl
+                } });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -510,6 +565,233 @@ router.put('/change-password', auth, async (req, res) => {
     console.error(err.message);
     res.status(500).send('Server error');
   }
+});
+
+// Profile Management Routes
+
+// @route   GET api/auth/check-username/:username
+// @desc    Check if username is available
+// @access  Private (or Public, but usually restricted to auth or logged-in users)
+router.get('/check-username/:username', auth, async (req, res) => {
+    try {
+        const username = req.params.username.trim().toLowerCase();
+        if (!/^[a-z0-9_.]+$/.test(username)) {
+            return res.status(400).json({ msg: 'Invalid username format' });
+        }
+        
+        const existingUser = await User.findOne({ where: { username: { [Op.iLike]: username } } });
+        
+        if (existingUser && existingUser.id !== req.user.id) {
+            return res.json({ available: false });
+        }
+        
+        res.json({ available: true });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route   PUT api/auth/update-profile
+// @desc    Update user profile information
+// @access  Private
+router.put('/update-profile', auth, async (req, res) => {
+    const { name, username, dateOfBirth, anniversary, gender } = req.body;
+
+    try {
+        let user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        if (name) user.name = name;
+        if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+        if (anniversary !== undefined) user.anniversary = anniversary;
+        if (gender !== undefined) user.gender = gender;
+
+        if (username) {
+            const formattedUsername = username.trim().toLowerCase();
+            const existingUser = await User.findOne({ where: { username: { [Op.iLike]: formattedUsername } } });
+            
+            if (existingUser && existingUser.id !== req.user.id) {
+                return res.status(400).json({ msg: 'Username is already taken' });
+            }
+            user.username = formattedUsername;
+        }
+
+        await user.save();
+
+        res.json({ msg: 'Profile updated successfully', user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+            dateOfBirth: user.dateOfBirth,
+            anniversary: user.anniversary,
+            gender: user.gender,
+            phoneNumber: user.phoneNumber,
+            phoneVerified: user.phoneVerified,
+            profilePictureUrl: user.profilePictureUrl
+        }});
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route   POST api/auth/send-phone-otp
+// @desc    Mock sending an OTP to a phone number
+// @access  Private
+router.post('/send-phone-otp', auth, async (req, res) => {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) return res.status(400).json({ msg: 'Phone number is required' });
+
+    try {
+        let user = await User.findByPk(req.user.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        // Generate mock OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Mock sending SMS (log to console)
+        console.log(`\n\n--- MOCK SMS ---`);
+        console.log(`To: ${phoneNumber}`);
+        console.log(`OTP: ${otp}`);
+        console.log(`----------------\n\n`);
+
+        // We can temporarily store this OTP in the user model using the existing otp fields, or add phoneOtp.
+        // For simplicity, we will use the existing email otp fields, or better yet, since it's just for phone, let's reuse otp/otpExpires.
+        user.otp = otp;
+        user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        await user.save();
+
+        res.json({ msg: 'OTP sent to phone' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route   POST api/auth/verify-phone-otp
+// @desc    Verify phone OTP and update phone number
+// @access  Private
+router.post('/verify-phone-otp', auth, async (req, res) => {
+    const { phoneNumber, otp } = req.body;
+    if (!phoneNumber || !otp) return res.status(400).json({ msg: 'Phone number and OTP are required' });
+
+    try {
+        let user = await User.findByPk(req.user.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        if (user.otp !== otp || user.otpExpires < new Date()) {
+            return res.status(400).json({ msg: 'Invalid or expired OTP' });
+        }
+
+        user.phoneNumber = phoneNumber;
+        user.phoneVerified = true;
+        user.otp = null;
+        user.otpExpires = null;
+        await user.save();
+
+        res.json({ msg: 'Phone number verified successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Multer setup for profile picture upload
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, `profile-${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|webp/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error("Error: Images Only!"));
+    }
+});
+
+// @route   POST api/auth/upload-profile-picture
+// @desc    Upload user profile picture
+// @access  Private
+router.post('/upload-profile-picture', auth, upload.single('profilePicture'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ msg: 'No file uploaded' });
+        }
+
+        let user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Delete old profile picture if exists
+        if (user.profilePictureUrl) {
+            const oldImagePath = path.join(__dirname, '..', user.profilePictureUrl);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+
+        const imageUrl = `/uploads/${req.file.filename}`;
+        user.profilePictureUrl = imageUrl;
+        await user.save();
+
+        res.json({ msg: 'Profile picture uploaded successfully', profilePictureUrl: imageUrl });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: err.message || 'Server error' });
+    }
+});
+
+// @route   DELETE api/auth/remove-profile-picture
+// @desc    Remove user profile picture
+// @access  Private
+router.delete('/remove-profile-picture', auth, async (req, res) => {
+    try {
+        let user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        if (user.profilePictureUrl) {
+            const oldImagePath = path.join(__dirname, '..', user.profilePictureUrl);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+            user.profilePictureUrl = null;
+            await user.save();
+        }
+
+        res.json({ msg: 'Profile picture removed successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
 });
 
 module.exports = router;

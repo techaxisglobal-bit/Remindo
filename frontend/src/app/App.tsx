@@ -4,13 +4,13 @@ import { Toaster } from "@/app/components/ui/sonner";
 import { SignIn } from "@/app/components/SignIn";
 import { Dashboard } from "@/app/components/Dashboard";
 import InvitationHandler from "@/app/components/InvitationHandler";
-import { Task } from "@/app/types";
+import { Task, User } from "@/app/types";
 import { toast } from "sonner";
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 
 export default function App() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   // Store tasks with pre-parsed metadata and dates for performance
   const processedTasks = useMemo(() => {
@@ -285,9 +285,9 @@ export default function App() {
     }
   };
 
-  const handleUpdateUser = (newName: string) => {
+  const handleUpdateUser = (updatedUserData: Partial<User>) => {
     if (user) {
-      const updatedUser = { ...user, name: newName };
+      const updatedUser = { ...user, ...updatedUserData };
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
     }
@@ -450,8 +450,7 @@ export default function App() {
   return (
     <>
       <Dashboard
-        userEmail={user.email}
-        userName={user.name}
+        user={user}
         tasks={tasks}
         onAddTask={handleAddTask}
         onDeleteTask={handleDeleteTask}

@@ -61,6 +61,38 @@ const User = sequelize.define('User', {
         allowNull: true,
         defaultValue: 'UTC',
     },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+        validate: {
+            is: /^[a-zA-Z0-9_.]+$/i
+        }
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    phoneVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    dateOfBirth: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+    },
+    anniversary: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    profilePictureUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     tableName: 'users',
     timestamps: true,

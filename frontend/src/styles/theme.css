@@ -53,6 +53,7 @@
 /* ===== DARK MODE ===== */
 [data-theme='dark'],
 .dark {
+  color-scheme: dark;
   --background: #000000;
   /* Pure Black */
   --foreground: #e5e7eb;

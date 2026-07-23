@@ -68,7 +68,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-import { Task } from '@/app/types';
+import { Task, User as UserType } from '@/app/types';
 import { TaskDetails } from '@/app/components/TaskDetails';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
 import { CreateReminder } from '@/app/components/CreateReminder';
@@ -90,14 +90,13 @@ import {
 import { toast } from 'sonner';
 
 interface DashboardProps {
-  userEmail: string;
-  userName: string;
+  user: UserType;
   tasks: Task[];
   onAddTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
   onToggleComplete: (id: string) => void;
   onUpdateTask: (task: Task) => void;
-  onUpdateUser: (newName: string) => void;
+  onUpdateUser: (updatedData: Partial<UserType>) => void;
   notificationsEnabled: boolean;
   onToggleNotifications: () => void;
 }
@@ -112,8 +111,7 @@ const COL_WIDTH_PERCENT = 100 / 7;
 const SNAP_MINUTES = 30;
 
 export function Dashboard({
-  userEmail,
-  userName,
+  user,
   tasks,
   onAddTask,
   onDeleteTask,
@@ -123,6 +121,8 @@ export function Dashboard({
   notificationsEnabled,
   onToggleNotifications,
 }: DashboardProps) {
+  const userEmail = user?.email || '';
+  const userName = user?.name || '';
   const isAdmin = userEmail === 'techaxisglobal@gmail.com';
   const [activeView, setActiveView] = useState<View>('calendar');
   const isMobile = useIsMobile();
@@ -953,7 +953,12 @@ export function Dashboard({
                     {showMobileMiniCalendar && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowMobileMiniCalendar(false)} />
-                        <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[260px]">
+                        <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
+                          <div className="flex justify-end mb-2">
+                            <button onClick={() => setShowMobileMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-[#2a2a2a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full text-gray-500 dark:text-gray-400 transition-colors">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                           <Calendar
                             mode="single"
                             month={currentMonth}
@@ -1081,20 +1086,28 @@ export function Dashboard({
                       </button>
 
                       {showMiniCalendar && (
-                        <div className="absolute top-full left-0 mt-2 p-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[260px]">
-                          <Calendar
-                            mode="single"
-                            month={currentMonth}
-                            onMonthChange={setCurrentMonth}
-                            selected={currentDate}
-                            onSelect={(date) => {
-                              if (date) {
-                                handleDateSelect(date);
-                                setShowMiniCalendar(false);
-                              }
-                            }}
-                          />
-                        </div>
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setShowMiniCalendar(false)} />
+                          <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
+                            <div className="flex justify-end mb-2">
+                              <button onClick={() => setShowMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-[#2a2a2a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full text-gray-500 dark:text-gray-400 transition-colors">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <Calendar
+                              mode="single"
+                              month={currentMonth}
+                              onMonthChange={setCurrentMonth}
+                              selected={currentDate}
+                              onSelect={(date) => {
+                                if (date) {
+                                  handleDateSelect(date);
+                                  setShowMiniCalendar(false);
+                                }
+                              }}
+                            />
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -1175,8 +1188,7 @@ export function Dashboard({
         <AnimatePresence>
           {showProfileMenu && (
             <ProfileMenu
-              userEmail={userEmail}
-              userName={userName}
+              user={user}
               onClose={() => setShowProfileMenu(false)}
               onLogout={async () => {
                 try {
@@ -1489,7 +1501,7 @@ export function Dashboard({
                         {/* Current Time Indicator */}
                         {isToday(currentDate) && (
                           <div
-                            className="absolute w-full z-40 pointer-events-none flex items-center -translate-y-1/2"
+                            className="absolute w-full z-10 pointer-events-none flex items-center -translate-y-1/2"
                             style={{
                               top: (new Date().getHours() * 60 + new Date().getMinutes()) + 'px'
                             }}
@@ -2165,8 +2177,7 @@ export function Dashboard({
           {
             showSettings && (
               <SettingsPanel
-                userEmail={userEmail}
-                initialName={userName}
+                user={user}
                 notificationsEnabled={notificationsEnabled}
                 onNotificationChange={onToggleNotifications}
                 onClose={() => setShowSettings(false)}

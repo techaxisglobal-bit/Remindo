@@ -24,7 +24,13 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  phone?: string;
+  username?: string;
+  phoneNumber?: string;
+  phoneVerified?: boolean;
+  dateOfBirth?: string;
+  anniversary?: string;
+  gender?: string;
+  profilePictureUrl?: string;
 }
 
 export interface Festival {

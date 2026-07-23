@@ -1,19 +1,21 @@
 import { motion } from 'motion/react';
 import { X, User, Plus, LogOut, Check } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 import { toast } from 'sonner';
 
+import { User as UserType } from '@/app/types';
+import { API_BASE_URL } from '@/app/api';
+
 interface ProfileMenuProps {
-    userEmail: string;
-    userName: string;
+    user: UserType;
     onClose: () => void;
     onLogout: () => void;
 }
 
-export function ProfileMenu({ userEmail, userName, onClose, onLogout }: ProfileMenuProps) {
+export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
     const accounts = [
-        { email: userEmail, name: userName, active: true },
+        { email: user.email, name: user.name, active: true },
         // Mock previous account if any
         // { email: 'demo@example.com', name: 'Demo User', active: false }
     ];
@@ -54,12 +56,14 @@ export function ProfileMenu({ userEmail, userName, onClose, onLogout }: ProfileM
                     {/* Current User Info */}
                     <div className="flex flex-col items-center text-center">
                         <Avatar className="w-20 h-20 border-2 border-white/20 dark:border-white/10 shadow-xl bg-[#e0b596]/90 backdrop-blur-sm mb-3">
+                            <AvatarImage src={user.profilePictureUrl ? `${API_BASE_URL}${user.profilePictureUrl}` : ''} className="object-cover" />
                             <AvatarFallback className="text-[#1f1f1f] text-3xl font-bold bg-[#e0b596]/90 backdrop-blur-sm">
-                                {userName.slice(0, 2).toUpperCase()}
+                                {user.name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{userName}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{userEmail}</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h3>
+                        {user.username && <p className="text-sm font-medium text-[#e0b596] mb-1">@{user.username}</p>}
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
 
                     {/* Accounts List */}
