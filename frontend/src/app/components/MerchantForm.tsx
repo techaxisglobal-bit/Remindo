@@ -53,10 +53,24 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     const handleUseCurrentLocation = () => {
         if ('geolocation' in navigator) {
             toast.info('Fetching location...');
-            navigator.geolocation.getCurrentPosition((position) => {
+            navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
-                setFormData(prev => ({ ...prev, location: `${latitude}, ${longitude}` }));
-                toast.success('Location updated');
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    
+                    if (data && data.display_name) {
+                        setFormData(prev => ({ ...prev, location: data.display_name }));
+                        toast.success('Address updated');
+                    } else {
+                        setFormData(prev => ({ ...prev, location: `${latitude}, ${longitude}` }));
+                        toast.success('Coordinates updated');
+                    }
+                } catch (error) {
+                    console.error('Reverse geocoding error:', error);
+                    setFormData(prev => ({ ...prev, location: `${latitude}, ${longitude}` }));
+                    toast.success('Coordinates retrieved (address lookup failed)');
+                }
             }, () => {
                 toast.error('Failed to get location');
             });
