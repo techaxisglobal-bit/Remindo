@@ -30,6 +30,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
         onlineServiceAvailable: false
     });
     
+    const [customCategory, setCustomCategory] = useState('');
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [proofFile, setProofFile] = useState<File | null>(null);
 
@@ -70,6 +71,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
             website: '', phone: '', email: '', topPlacementBid: '', facebookUrl: '',
             instagramUrl: '', whatsappNumber: '', deliveryAvailable: false, onlineServiceAvailable: false
         });
+        setCustomCategory('');
         setLogoFile(null);
         setProofFile(null);
     };
@@ -77,7 +79,9 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!formData.businessName || !formData.category || !formData.location || !formData.phone || !formData.email) {
+        const finalCategory = formData.category === 'Other' ? customCategory : formData.category;
+        
+        if (!formData.businessName || !finalCategory || !formData.location || !formData.phone || !formData.email) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -87,7 +91,11 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
         
         const submitData = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
-            submitData.append(key, String(value));
+            if (key === 'category') {
+                submitData.append(key, finalCategory);
+            } else {
+                submitData.append(key, String(value));
+            }
         });
         
         if (logoFile) submitData.append('logo', logoFile);
@@ -140,8 +148,46 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="category">Category *</Label>
-                            <Input id="category" name="category" value={formData.category} onChange={handleChange} placeholder="e.g. Restaurant, Retail" required />
+                            <select 
+                                id="category" 
+                                name="category" 
+                                value={formData.category} 
+                                onChange={handleChange} 
+                                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#292929] dark:bg-[#1b1b1b] dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300" 
+                                required
+                            >
+                                <option value="" disabled>Select a category</option>
+                                <option value="Retail & FMCG">Retail & FMCG (Supermarkets, Groceries, Clothing)</option>
+                                <option value="Food & Beverage">Food & Beverage (Restaurants, Cafes, Bakeries)</option>
+                                <option value="Health & Wellness">Health & Wellness (Hospitals, Clinics, Pharmacies, Gyms)</option>
+                                <option value="IT & Technology Services">IT & Technology Services</option>
+                                <option value="Education & Training">Education & Training (Schools, Tutors, Institutes)</option>
+                                <option value="Real Estate & Construction">Real Estate & Construction</option>
+                                <option value="Automotive">Automotive (Dealerships, Garages, Spares)</option>
+                                <option value="Financial & Legal Services">Financial & Legal Services (CA, Insurance, Lawyers)</option>
+                                <option value="Travel & Hospitality">Travel & Hospitality (Hotels, Tours, Travel Agents)</option>
+                                <option value="Logistics & Transport">Logistics & Transport</option>
+                                <option value="Manufacturing & Industrial">Manufacturing & Industrial</option>
+                                <option value="Beauty & Personal Care">Beauty & Personal Care (Salons, Spas)</option>
+                                <option value="Event Management & Entertainment">Event Management & Entertainment</option>
+                                <option value="Home Services">Home Services (Plumbing, Electrical, Cleaning)</option>
+                                <option value="Agriculture & Farming">Agriculture & Farming</option>
+                                <option value="Other">Other (Request new category)</option>
+                            </select>
                         </div>
+                        {formData.category === 'Other' && (
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="customCategory">Please specify your category *</Label>
+                                <Input 
+                                    id="customCategory" 
+                                    value={customCategory} 
+                                    onChange={(e) => setCustomCategory(e.target.value)} 
+                                    placeholder="e.g. Pet Grooming, Specialized Tech" 
+                                    required={formData.category === 'Other'} 
+                                />
+                                <p className="text-xs text-gray-500">This category will be sent to our team for approval.</p>
+                            </div>
+                        )}
                         <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="description">Description</Label>
                             <textarea id="description" name="description" value={formData.description} onChange={handleChange} className="flex min-h-[80px] w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300" placeholder="Briefly describe your business..." />
