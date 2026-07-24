@@ -333,6 +333,77 @@ export function CreateReminder({
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
+  const [location, setLocation] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto location suggestion effect
+  useEffect(() => {
+    const textToAnalyze = `${title} ${description}`.trim();
+    if (textToAnalyze.length < 4) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+
+    searchTimeout.current = setTimeout(() => {
+      const cleanWords = textToAnalyze.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/\s+/);
+      const stopWords = ['remind', 'me', 'to', 'buy', 'get', 'visit', 'go', 'a', 'an', 'the', 'some', 'my', 'at', 'in', 'on', 'with', 'for'];
+      const keywords = cleanWords.filter(w => w.length > 2 && !stopWords.includes(w));
+      
+      if (keywords.length > 0) {
+        const query = keywords.join(' ');
+        searchLocations(query);
+      } else {
+        setLocationSuggestions([]);
+      }
+    }, 1000);
+
+    return () => {
+      if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    };
+  }, [title, description]);
+
+  const searchLocations = async (query: string) => {
+    setIsSearchingLocation(true);
+    try {
+      let lat = userCoords?.lat;
+      let lon = userCoords?.lon;
+      
+      if (!lat || !lon) {
+        if ('geolocation' in navigator) {
+          try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+            });
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+            setUserCoords({ lat, lon });
+          } catch (e) {
+            console.warn("Could not get location for suggestions", e);
+          }
+        }
+      }
+
+      let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=3`;
+      if (lat && lon) {
+         url += `&lat=${lat}&lon=${lon}`;
+      }
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      setLocationSuggestions(data);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+      setLocationSuggestions([]);
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
 
   const NOTIFICATION_OPTIONS = [
     { value: 0, label: 'No reminder' },
@@ -643,7 +714,7 @@ export function CreateReminder({
         date: dateStr,
         time: startTime,
         category: 'general',
-        location: '',
+        location: location,
         completed: false,
         createdAt: new Date().toISOString(),
         duration: finalDuration,
@@ -1009,6 +1080,41 @@ return (
           )}
         </AnimatePresence>
       </div>
+
+      {/* Location Suggestions */}
+      {(locationSuggestions.length > 0 || isSearchingLocation || location) && (
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-[#252525] rounded-2xl border border-gray-100 dark:border-white/5">
+          <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <MapPin className="w-3.5 h-3.5" />
+            {location ? 'Selected Location' : 'Suggested Locations Nearby'}
+            {isSearchingLocation && <Loader2 className="w-3.5 h-3.5 animate-spin ml-auto" />}
+          </div>
+          
+          {location ? (
+            <div className="flex items-center justify-between p-2.5 bg-white dark:bg-[#1f1f1f] border border-[#e0b596] rounded-xl">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate pr-2">
+                {location}
+              </span>
+              <button type="button" onClick={() => setLocation('')} className="p-1 hover:bg-gray-100 dark:hover:bg-[#333] rounded-full text-gray-400">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {locationSuggestions.map((place, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => setLocation(place.display_name)}
+                  className="p-2 bg-white dark:bg-[#1f1f1f] border border-gray-100 dark:border-[#333] rounded-xl cursor-pointer hover:border-[#e0b596]/50 hover:shadow-sm transition-all"
+                >
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{place.name || place.display_name.split(',')[0]}</p>
+                  <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{place.display_name}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="pt-2 flex items-center justify-between mt-4">
         <Button variant="ghost" onClick={handleCloseAttempt} className="text-gray-400 text-[13px] font-bold hover:text-gray-600 dark:hover:text-white">
