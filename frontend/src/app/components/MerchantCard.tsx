@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Merchant } from '@/app/types';
 import { MapPin, Phone, Globe, Star, ShoppingBag, Clock, Edit, Trash, Check, X, Shield, PhoneForwarded } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/app/components/ui/dropdown-menu';
 import { API_BASE_URL } from '@/app/api';
 
 interface MerchantCardProps {
@@ -16,6 +15,7 @@ interface MerchantCardProps {
 }
 
 export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFeature, onEdit, onDelete }: MerchantCardProps) {
+    const [showContactModal, setShowContactModal] = useState(false);
     const logoUrl = merchant.logoUrl ? (merchant.logoUrl.startsWith('http') ? merchant.logoUrl : `${API_BASE_URL}${merchant.logoUrl}`) : null;
 
     const statusColors = {
@@ -129,43 +129,61 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                     </>
                 ) : (
                     <>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="default" size="sm" className="h-8 bg-[#e0b596] hover:bg-[#cda283] text-white">
-                                    Contact Options
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-800">
-                                <DropdownMenuItem onClick={() => window.location.href = `tel:${merchant.phone}`} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
-                                    <Phone className="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" /> 
-                                    <div className="flex flex-col">
-                                        <span className="font-medium text-gray-900 dark:text-gray-100">Call Mobile</span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">{merchant.phone}</span>
-                                    </div>
-                                </DropdownMenuItem>
-                                {merchant.whatsappNumber && (
-                                    <DropdownMenuItem onClick={() => window.open(`https://wa.me/${merchant.whatsappNumber?.replace(/[^0-9]/g, '')}`, '_blank')} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
-                                        <PhoneForwarded className="w-4 h-4 mr-3 text-green-600 dark:text-green-500" />
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-gray-900 dark:text-gray-100">WhatsApp</span>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">{merchant.whatsappNumber}</span>
-                                        </div>
-                                    </DropdownMenuItem>
-                                )}
-                                {merchant.website && (
-                                    <DropdownMenuItem onClick={() => window.open(merchant.website?.startsWith('http') ? merchant.website : `https://${merchant.website}`, '_blank')} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
-                                        <Globe className="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400" />
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-gray-900 dark:text-gray-100">Visit Website</span>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">{merchant.website.replace(/^https?:\/\//, '')}</span>
-                                        </div>
-                                    </DropdownMenuItem>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button variant="default" size="sm" className="h-8 bg-[#e0b596] hover:bg-[#cda283] text-white" onClick={() => setShowContactModal(true)}>
+                            Contact
+                        </Button>
                     </>
                 )}
             </div>
+
+            {/* Custom Contact Modal */}
+            {showContactModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-[#1b1b1b] rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-[#202020]">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">Contact Options</h3>
+                            <button onClick={() => setShowContactModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors bg-white dark:bg-[#2a2a2a] rounded-full p-1 border border-gray-200 dark:border-gray-700">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="p-5 space-y-3">
+                            <a href={`tel:${merchant.phone}`} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:border-blue-200 dark:hover:border-blue-900/30 transition-all group">
+                                <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full group-hover:scale-110 transition-transform">
+                                    <Phone className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-gray-900 dark:text-gray-100">Call Mobile</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{merchant.phone}</div>
+                                </div>
+                            </a>
+                            
+                            {merchant.whatsappNumber && (
+                                <a href={`https://wa.me/${merchant.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-green-50 dark:hover:bg-green-900/10 hover:border-green-200 dark:hover:border-green-900/30 transition-all group">
+                                    <div className="p-2.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full group-hover:scale-110 transition-transform">
+                                        <PhoneForwarded className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-gray-900 dark:text-gray-100">WhatsApp</div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">{merchant.whatsappNumber}</div>
+                                    </div>
+                                </a>
+                            )}
+
+                            {merchant.website && (
+                                <a href={merchant.website.startsWith('http') ? merchant.website : `https://${merchant.website}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-purple-50 dark:hover:bg-purple-900/10 hover:border-purple-200 dark:hover:border-purple-900/30 transition-all group">
+                                    <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full group-hover:scale-110 transition-transform">
+                                        <Globe className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-gray-900 dark:text-gray-100">Visit Website</div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{merchant.website.replace(/^https?:\/\//, '')}</div>
+                                    </div>
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
