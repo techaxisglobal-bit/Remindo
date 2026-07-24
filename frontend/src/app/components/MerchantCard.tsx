@@ -2,6 +2,7 @@ import React from 'react';
 import { Merchant } from '@/app/types';
 import { MapPin, Phone, Globe, Star, ShoppingBag, Clock, Edit, Trash, Check, X, Shield, PhoneForwarded } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/app/components/ui/dropdown-menu';
 import { API_BASE_URL } from '@/app/api';
 
 interface MerchantCardProps {
@@ -128,14 +129,40 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                     </>
                 ) : (
                     <>
-                        {merchant.whatsappNumber && (
-                            <Button variant="outline" size="sm" className="h-8 text-green-600 hover:bg-green-50 border-green-200" onClick={() => window.open(`https://wa.me/${merchant.whatsappNumber.replace(/[^0-9]/g, '')}`, '_blank')}>
-                                <PhoneForwarded className="w-4 h-4 mr-1" /> WhatsApp
-                            </Button>
-                        )}
-                        <Button variant="default" size="sm" className="h-8 bg-[#e0b596] hover:bg-[#cda283] text-white" onClick={() => window.location.href = `tel:${merchant.phone}`}>
-                            Contact
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="default" size="sm" className="h-8 bg-[#e0b596] hover:bg-[#cda283] text-white">
+                                    Contact Options
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-800">
+                                <DropdownMenuItem onClick={() => window.location.href = `tel:${merchant.phone}`} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
+                                    <Phone className="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" /> 
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-gray-900 dark:text-gray-100">Call Mobile</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">{merchant.phone}</span>
+                                    </div>
+                                </DropdownMenuItem>
+                                {merchant.whatsappNumber && (
+                                    <DropdownMenuItem onClick={() => window.open(`https://wa.me/${merchant.whatsappNumber?.replace(/[^0-9]/g, '')}`, '_blank')} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
+                                        <PhoneForwarded className="w-4 h-4 mr-3 text-green-600 dark:text-green-500" />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">WhatsApp</span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{merchant.whatsappNumber}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                )}
+                                {merchant.website && (
+                                    <DropdownMenuItem onClick={() => window.open(merchant.website?.startsWith('http') ? merchant.website : `https://${merchant.website}`, '_blank')} className="cursor-pointer py-2 focus:bg-gray-100 dark:focus:bg-[#333]">
+                                        <Globe className="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400" />
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">Visit Website</span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">{merchant.website.replace(/^https?:\/\//, '')}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </>
                 )}
             </div>
