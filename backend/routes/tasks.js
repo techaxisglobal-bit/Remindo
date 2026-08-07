@@ -132,7 +132,8 @@ router.post('/', auth, async (req, res) => {
 router.post('/:id/resend', auth, async (req, res) => {
     try {
         const task = await Task.findByPk(req.params.id);
-        if (!task || task.userId !== req.user.id) return res.status(404).json({ msg: 'Task not found' });
+        if (!task) return res.status(404).json({ msg: `Task ${req.params.id} not found in database` });
+        if (task.userId != req.user.id) return res.status(404).json({ msg: `You do not own this task. task.userId: ${task.userId}, req.user.id: ${req.user.id}` });
 
         const { email } = req.body;
         if (!email) return res.status(400).json({ msg: 'Email is required' });
