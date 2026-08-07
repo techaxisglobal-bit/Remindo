@@ -97,7 +97,21 @@ router.post('/', auth, async (req, res) => {
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
             for (const record of attendeeRecords) {
-                sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
+                const existingUser = await User.findOne({ where: { email: record.email.toLowerCase() } });
+                if (existingUser) {
+                    const { createAppNotification } = require('../services/notificationService');
+                    await createAppNotification(req.app.get('io'), {
+                        userId: existingUser.id,
+                        senderId: req.user.id,
+                        type: 'Invitation',
+                        title: 'New Invitation',
+                        message: `${creatorName} invited you to "${task.title}"`,
+                        relatedTaskId: task.id,
+                        actionUrl: `/invitation/${record.token}`
+                    }).catch(err => console.error('Error creating app notification:', err));
+                } else {
+                    sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
+                }
             }
         }
 
@@ -142,7 +156,21 @@ router.post('/:id/resend', auth, async (req, res) => {
         attendee.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         await attendee.save();
 
-        await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
+        const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
+        if (existingUser) {
+            const { createAppNotification } = require('../services/notificationService');
+            await createAppNotification(req.app.get('io'), {
+                userId: existingUser.id,
+                senderId: req.user.id,
+                type: 'Invitation',
+                title: 'Invitation Reminder',
+                message: `${creatorName} sent you a reminder to join "${task.title}"`,
+                relatedTaskId: task.id,
+                actionUrl: `/invitation/${attendee.token}`
+            });
+        } else {
+            await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
+        }
         res.json({ msg: 'Invitation resent' });
     } catch (err) {
         console.error(err.message);

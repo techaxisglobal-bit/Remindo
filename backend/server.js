@@ -7,6 +7,10 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -56,6 +60,43 @@ app.options('*', cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Socket.io setup
+const io = new Server(server, {
+    cors: {
+        origin: function (origin, callback) {
+            if (isMobileOrigin(origin) || allowedOrigins.indexOf(origin) !== -1) {
+                return callback(null, true);
+            }
+            return callback(new Error(`CORS policy blocked: ${origin}`), false);
+        },
+        credentials: true
+    }
+});
+
+const jwt = require('jsonwebtoken');
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
+    if (!token) return next(new Error('Authentication error'));
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.user = decoded.user;
+        next();
+    } catch (err) {
+        next(new Error('Authentication error'));
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log(`Socket user connected: ${socket.user.id}`);
+    socket.join(`user_${socket.user.id}`);
+    socket.on('disconnect', () => {
+        console.log(`Socket user disconnected: ${socket.user.id}`);
+    });
+});
+
+app.set('io', io);
+
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
@@ -63,6 +104,7 @@ app.use('/api/chat', require('./routes/chat'));
 app.use('/api/attendees', require('./routes/attendees'));
 app.use('/api/merchants', require('./routes/merchants'));
 app.use('/api/invitations', require('./routes/invitations'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 app.get('/', (req, res) => {
     res.send('Backend running');
@@ -87,7 +129,7 @@ sequelize.sync({ alter: true })
     .then(() => {
         console.log('PostgreSQL connected and tables synced');
         startNotificationScheduler();
-        app.listen(PORT, '0.0.0.0', () => {
+        server.listen(PORT, '0.0.0.0', () => {
             console.log(`Server running on all interfaces at port ${PORT}`);
         });
     })

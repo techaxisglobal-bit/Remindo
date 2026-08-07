@@ -77,6 +77,10 @@ import { ProfileMenu } from '@/app/components/ProfileMenu';
 import { MerchantList } from '@/app/components/MerchantList';
 import { MerchantForm } from '@/app/components/MerchantForm';
 import { MerchantAdmin } from '@/app/components/MerchantAdmin';
+import { NotificationCenter } from '@/app/components/NotificationCenter';
+import { notificationSocket } from '@/app/services/NotificationSocket';
+import { PushNotifications } from '@capacitor/push-notifications';
+import { api } from '@/app/api';
 
 import { Calendar } from '@/app/components/ui/calendar';
 import { Checkbox } from '@/app/components/ui/checkbox';
@@ -132,6 +136,8 @@ export function Dashboard({
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   // Live clock — updates every 30s so the red line stays accurate
   const [currentNow, setCurrentNow] = useState(new Date());
   const [showMiniCalendar, setShowMiniCalendar] = useState(false);
@@ -306,6 +312,49 @@ export function Dashboard({
       return () => clearTimeout(timer);
     }
   }, [activeView, mobileViewMode, currentDate]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      notificationSocket.connect(token);
+      
+      const unsubscribe = notificationSocket.subscribe((notification) => {
+          setUnreadCount(prev => prev + 1);
+      });
+
+      api.get('/notifications?limit=1').then((res: any) => {
+          if (res.data && res.data.notifications) {
+              const unread = res.data.notifications.filter((n: any) => n.status === 'Unread').length;
+              setUnreadCount(unread);
+          }
+      }).catch(console.error);
+
+      const setupPush = async () => {
+         try {
+             let permStatus = await PushNotifications.checkPermissions();
+             if (permStatus.receive === 'prompt') {
+                 permStatus = await PushNotifications.requestPermissions();
+             }
+             if (permStatus.receive === 'granted') {
+                 await PushNotifications.register();
+             }
+         } catch(e) {
+             console.log("Push notifications not supported on web/dev", e);
+         }
+      };
+      
+      setupPush();
+
+      PushNotifications.addListener('registration', (token) => {
+          api.put('/auth/profile', { fcmToken: token.value }).catch(console.error);
+      });
+
+      return () => {
+          unsubscribe();
+          notificationSocket.disconnect();
+      };
+    }
+  }, []);
 
   // Auto-scroll the vertical schedule list to the selected date
   useEffect(() => {
@@ -929,6 +978,15 @@ export function Dashboard({
                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </button>
                   <button
+                    onClick={() => { setShowNotifications(true); setUnreadCount(0); }}
+                    className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+                    )}
+                  </button>
+                  <button
                     onClick={() => setShowProfileMenu(true)}
                     className="h-9 w-9 rounded-full bg-[#e0b596] flex items-center justify-center text-sm font-bold text-[#1f1f1f] shadow-sm flex-shrink-0"
                   >
@@ -1169,6 +1227,16 @@ export function Dashboard({
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add reminder</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setShowNotifications(true); setUnreadCount(0); }}
+                    className="relative p-2.5 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-[14px] hover:bg-gray-100 dark:hover:bg-[#252525] transition-all ml-2"
+                  >
+                    <Bell className="w-[20px] h-[20px]" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#1f1f1f]" />
+                    )}
                   </button>
 
                   <button
@@ -2185,6 +2253,11 @@ export function Dashboard({
               />
             )
           }
+
+          <NotificationCenter
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+          />
         </AnimatePresence >
 
         <CustomerSupportChat />

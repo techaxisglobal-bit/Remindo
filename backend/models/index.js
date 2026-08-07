@@ -2,6 +2,7 @@ const User = require('./User');
 const Task = require('./Task');
 const TaskAttendee = require('./TaskAttendee');
 const Merchant = require('./Merchant');
+const Notification = require('./Notification');
 
 
 // Associations
@@ -14,9 +15,17 @@ TaskAttendee.belongsTo(Task, { foreignKey: 'taskId', as: 'task' });
 User.hasMany(Merchant, { foreignKey: 'userId', as: 'merchants' });
 Merchant.belongsTo(User, { foreignKey: 'userId', as: 'owner' });
 
+User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'userId', as: 'recipient' });
+
+User.hasMany(Notification, { foreignKey: 'senderId', as: 'sentNotifications' });
+Notification.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+
+
 module.exports = {
     User,
     Task,
     TaskAttendee,
-    Merchant
+    Merchant,
+    Notification
 };

@@ -115,4 +115,50 @@ const startNotificationScheduler = () => {
     });
 };
 
-module.exports = { startNotificationScheduler };
+const createAppNotification = async (io, { userId, senderId, type, title, message, relatedTaskId, actionUrl }) => {
+    try {
+        // Require Notification dynamically or at the top. Let's do it here or add to top.
+        const { Notification } = require('../models');
+        const notification = await Notification.create({
+            userId,
+            senderId,
+            type,
+            title,
+            message,
+            relatedTaskId,
+            actionUrl,
+            status: 'Unread'
+        });
+
+        // Emit via Socket.io if the user is connected
+        if (io) {
+            io.to(`user_${userId}`).emit('new_notification', notification);
+        }
+
+        // Send FCM push notification
+        const user = await User.findByPk(userId);
+        if (user && user.notificationsEnabled) {
+            const payload = {
+                title,
+                body: message,
+                data: {
+                    type,
+                    relatedTaskId: relatedTaskId ? String(relatedTaskId) : '',
+                    actionUrl: actionUrl || ''
+                }
+            };
+            if (user.fcmToken) {
+                await sendPushNotification(user.fcmToken, payload);
+            } else if (user.pushSubscription) {
+                await sendPushNotification(user.pushSubscription, payload);
+            }
+        }
+
+        return notification;
+    } catch (err) {
+        console.error('Error creating app notification:', err);
+        throw err;
+    }
+};
+
+module.exports = { startNotificationScheduler, createAppNotification };

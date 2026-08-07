@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { Task, TaskAttendee } = require('../models');
+const { Task, TaskAttendee, Notification } = require('../models');
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { Op } = require('sequelize');
@@ -92,6 +92,12 @@ router.post('/respond', auth, async (req, res) => {
                 }
                 attendee.status = 'Declined';
                 await attendee.save({ transaction: t });
+
+                await Notification.update(
+                    { status: 'Declined' },
+                    { where: { userId: user.id, type: 'Invitation', relatedTaskId: attendee.taskId }, transaction: t }
+                );
+
                 return { status: 200, data: { msg: 'Invitation declined', attendee } };
             }
 
@@ -150,6 +156,11 @@ router.post('/respond', auth, async (req, res) => {
                 details: { originalTaskId: originalTask.id, clonedTaskId: clonedTask.id, title: clonedTask.title },
                 ipAddress: req.ip
             }, { transaction: t });
+
+            await Notification.update(
+                { status: 'Accepted' },
+                { where: { userId: user.id, type: 'Invitation', relatedTaskId: attendee.taskId }, transaction: t }
+            );
 
             return { status: 200, data: { msg: 'Invitation accepted and reminder added', task: clonedTask, attendee } };
         });
