@@ -182,7 +182,7 @@ router.post('/:id/resend', auth, async (req, res) => {
 // @desc    Update a task
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
-    const { title, description, category, date, time, duration, location, isAllDay, isSpecial, specialType, notifyAt, notifyBefore, completed } = req.body;
+    const { title, description, category, date, time, duration, location, isAllDay, isSpecial, specialType, notifyAt, notifyBefore, completed, attendees } = req.body;
 
     try {
         let task = await Task.findByPk(req.params.id);
@@ -263,6 +263,53 @@ router.put('/:id', auth, async (req, res) => {
             details: { taskId: task.id, title: task.title },
             ipAddress: req.ip
         });
+
+        // Handle attendees if provided
+        if (attendees && Array.isArray(attendees)) {
+            const TaskAttendee = require('../models/TaskAttendee');
+            const User = require('../models/User');
+            const crypto = require('crypto');
+            const { sendInvitation } = require('../services/emailService');
+            
+            const existingAttendees = await TaskAttendee.findAll({ where: { taskId: task.id } });
+            const existingEmails = existingAttendees.map(a => a.email);
+
+            const newAttendees = attendees.filter(email => !existingEmails.includes(email));
+
+            if (newAttendees.length > 0) {
+                const attendeeRecords = newAttendees.map(email => ({
+                    taskId: task.id,
+                    email,
+                    status: 'Pending',
+                    token: crypto.randomBytes(32).toString('hex'),
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                }));
+                await TaskAttendee.bulkCreate(attendeeRecords);
+
+                const user = await User.findByPk(req.user.id);
+                const creatorName = user ? user.name : 'A Remindo User';
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+                for (const record of attendeeRecords) {
+                    const existingUser = await User.findOne({ where: { email: record.email.toLowerCase() } });
+                    if (existingUser) {
+                        const { createAppNotification } = require('../services/notificationService');
+                        await createAppNotification(req.app.get('io'), {
+                            userId: existingUser.id,
+                            senderId: req.user.id,
+                            type: 'Invitation',
+                            title: 'New Invitation',
+                            message: `${creatorName} invited you to "${task.title}"`,
+                            relatedTaskId: task.id,
+                            actionUrl: `/invitation/${record.token}`
+                        }).catch(err => console.error('Error creating app notification:', err));
+                    } else {
+                        sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation:', err));
+                    }
+                }
+            }
+        }
+
 
         res.json(task);
     } catch (err) {
