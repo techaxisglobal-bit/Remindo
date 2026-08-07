@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MerchantLogo } from './MerchantLogo';
 
 // Simple tooltip component inline to avoid extra dependencies if not available
 const Tooltip = ({ children, content }: { children: React.ReactNode, content: string }) => {
@@ -316,11 +317,12 @@ export function MerchantAdmin() {
                                         {/* Info Section */}
                                         <div className="flex items-center gap-4 w-full lg:w-[35%]">
                                             <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {merchant.logoUrl ? (
-                                                    <img src={merchant.logoUrl} alt={merchant.businessName} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Store className="w-6 h-6 text-gray-400" />
-                                                )}
+                                                <MerchantLogo 
+                                                    url={merchant.logoUrl} 
+                                                    name={merchant.businessName} 
+                                                    iconClassName="w-5 h-5 mb-0.5 opacity-40 text-gray-500"
+                                                    initialsClassName="text-[8px] font-bold tracking-widest text-gray-500"
+                                                />
                                             </div>
                                             <div className="min-w-0">
                                                 <h4 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">{merchant.businessName}</h4>
@@ -431,12 +433,13 @@ export function MerchantAdmin() {
                             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                                 {/* Profile Header */}
                                 <div className="flex items-center gap-5 mb-8">
-                                    <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-[#252525] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden shadow-sm">
-                                        {selectedMerchant.logoUrl ? (
-                                            <img src={selectedMerchant.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Store className="w-8 h-8 text-gray-400" />
-                                        )}
+                                    <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-[#252525] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+                                        <MerchantLogo 
+                                            url={selectedMerchant.logoUrl} 
+                                            name={selectedMerchant.businessName} 
+                                            iconClassName="w-8 h-8 mb-1 opacity-40 text-gray-400"
+                                            initialsClassName="text-[10px] font-bold tracking-widest text-gray-400"
+                                        />
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedMerchant.businessName}</h2>

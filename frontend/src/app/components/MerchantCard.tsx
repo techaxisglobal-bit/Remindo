@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Merchant } from '@/app/types';
 import { MapPin, Phone, Globe, Star, ShoppingBag, Clock, Edit, Trash, Check, X, Shield, PhoneForwarded } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { API_BASE_URL } from '@/app/api';
+import { MerchantLogo } from './MerchantLogo';
 
 interface MerchantCardProps {
     merchant: Merchant;
@@ -16,7 +16,6 @@ interface MerchantCardProps {
 
 export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFeature, onEdit, onDelete }: MerchantCardProps) {
     const [showContactModal, setShowContactModal] = useState(false);
-    const logoUrl = merchant.logoUrl ? (merchant.logoUrl.startsWith('http') ? merchant.logoUrl : `${API_BASE_URL}${merchant.logoUrl}`) : null;
 
     const statusColors = {
         PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500',
@@ -37,11 +36,12 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                 <div className="flex gap-4 items-start">
                     {/* Logo */}
                     <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-[#333] border border-gray-200 dark:border-[#444] flex-shrink-0 overflow-hidden flex items-center justify-center text-gray-400">
-                        {logoUrl ? (
-                            <img src={logoUrl} alt={merchant.businessName} className="w-full h-full object-cover" />
-                        ) : (
-                            <ShoppingBag className="w-8 h-8 opacity-50" />
-                        )}
+                        <MerchantLogo 
+                            url={merchant.logoUrl} 
+                            name={merchant.businessName} 
+                            iconClassName="w-6 h-6 mb-0.5 opacity-40 text-gray-500"
+                            initialsClassName="text-[10px] font-bold tracking-widest text-gray-500"
+                        />
                     </div>
                     
                     {/* Info */}
