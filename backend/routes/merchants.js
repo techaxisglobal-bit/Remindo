@@ -80,8 +80,25 @@ router.post('/', [auth, upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'p
 // @access  Public
 router.get('/', async (req, res) => {
     try {
+        let userId = null;
+        const token = req.header('x-auth-token');
+        if (token) {
+            try {
+                const jwt = require('jsonwebtoken');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+                userId = decoded.user.id;
+            } catch (err) {
+                // Ignore invalid token, default to public view
+            }
+        }
+
+        const { Op } = require('sequelize');
+        const whereClause = userId 
+            ? { [Op.or]: [{ status: 'APPROVED' }, { userId: userId }] } 
+            : { status: 'APPROVED' };
+
         const merchants = await Merchant.findAll({
-            where: { status: 'APPROVED' },
+            where: whereClause,
             order: [
                 ['isFeatured', 'DESC'],
                 ['topPlacementBid', 'DESC'],

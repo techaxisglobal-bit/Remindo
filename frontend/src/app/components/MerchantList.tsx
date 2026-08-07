@@ -14,7 +14,12 @@ export function MerchantList() {
     useEffect(() => {
         const fetchMerchants = async () => {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/merchants`);
+                const token = localStorage.getItem('token');
+                const headers: HeadersInit = {};
+                if (token) {
+                    headers['x-auth-token'] = token;
+                }
+                const res = await fetch(`${API_BASE_URL}/api/merchants`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setMerchants(data);

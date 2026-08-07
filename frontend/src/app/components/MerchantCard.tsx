@@ -48,7 +48,7 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-lg">{merchant.businessName}</h3>
-                            {isAdminView && (
+                            {(isAdminView || merchant.status !== 'APPROVED') && (
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[merchant.status]}`}>
                                     {merchant.status}
                                 </span>
