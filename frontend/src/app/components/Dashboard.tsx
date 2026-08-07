@@ -835,10 +835,10 @@ export function Dashboard({
 
 
   return (
-    <div className={`flex ${activeView === 'calendar' ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-[#1f1f1f] text-gray-900 dark:text-gray-100 font-sans selection:bg-[#e0b596]/30`}>
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-[#1f1f1f] text-gray-900 dark:text-gray-100 font-sans selection:bg-[#e0b596]/30">
 
       {/* Sidebar - Teams Style (Updated) */}
-      <div className={`hidden lg:flex flex-col w-[68px] bg-white dark:bg-[#1b1b1b] border-r border-gray-200 dark:border-[#292929] items-center py-6 z-20 ${activeView === 'calendar' ? '' : 'sticky top-0 h-screen'}`}>
+      <div className="hidden lg:flex flex-col w-[68px] bg-white dark:bg-[#1b1b1b] border-r border-gray-200 dark:border-[#292929] items-center py-6 z-20">
         <nav className="flex-1 w-full flex flex-col items-center gap-6">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -1284,7 +1284,7 @@ export function Dashboard({
           )}
         </AnimatePresence>
 
-        <div className={`flex-1 relative flex bg-gray-50 dark:bg-[#1f1f1f] ${activeView === 'calendar' ? 'overflow-hidden' : ''}`}>
+        <div className="flex-1 relative flex bg-gray-50 dark:bg-[#1f1f1f] overflow-hidden">
           <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''} pb-[88px] lg:pb-0`}>
             
             {activeView === 'merchants' && (
@@ -1306,7 +1306,7 @@ export function Dashboard({
             )}
             
             {activeView === 'merchantAdmin' && (
-              <div className="flex-1">
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {isAdmin ? (
                   <MerchantAdmin />
                 ) : (
