@@ -251,7 +251,9 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     }
   };
 
-  const avatarUrl = user.profilePictureUrl ? `${API_BASE_URL}${user.profilePictureUrl}` : '';
+  const avatarUrl = user.profilePictureUrl 
+    ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE_URL}${user.profilePictureUrl}`) 
+    : '';
 
   return (
     <motion.div

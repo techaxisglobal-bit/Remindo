@@ -56,7 +56,7 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                     {/* Current User Info */}
                     <div className="flex flex-col items-center text-center">
                         <Avatar className="w-20 h-20 border-2 border-white/20 dark:border-white/10 shadow-xl bg-[#e0b596]/90 backdrop-blur-sm mb-3">
-                            <AvatarImage src={user.profilePictureUrl ? `${API_BASE_URL}${user.profilePictureUrl}` : ''} className="object-cover" />
+                            <AvatarImage src={user.profilePictureUrl ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE_URL}${user.profilePictureUrl}`) : ''} className="object-cover" />
                             <AvatarFallback className="text-[#1f1f1f] text-3xl font-bold bg-[#e0b596]/90 backdrop-blur-sm">
                                 {user.name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>

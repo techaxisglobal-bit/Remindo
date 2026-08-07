@@ -140,7 +140,9 @@ export function SettingsPanel({
     .toUpperCase()
     .slice(0, 2);
 
-  const avatarUrl = user.profilePictureUrl ? `${API_BASE_URL}${user.profilePictureUrl}` : '';
+  const avatarUrl = user.profilePictureUrl 
+    ? (user.profilePictureUrl.startsWith('http') ? user.profilePictureUrl : `${API_BASE_URL}${user.profilePictureUrl}`) 
+    : '';
 
   return (
     <motion.div

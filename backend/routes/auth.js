@@ -700,25 +700,10 @@ router.post('/verify-phone-otp', auth, async (req, res) => {
     }
 });
 
-// Multer setup for profile picture upload
+// Multer setup for profile picture upload using Cloudinary
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, `profile-${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+const { getStorage } = require('../config/cloudinary');
+const storage = getStorage('profiles');
 
 const upload = multer({ 
     storage: storage,
@@ -749,15 +734,7 @@ router.post('/upload-profile-picture', auth, upload.single('profilePicture'), as
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Delete old profile picture if exists
-        if (user.profilePictureUrl) {
-            const oldImagePath = path.join(__dirname, '..', user.profilePictureUrl);
-            if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-            }
-        }
-
-        const imageUrl = `/uploads/${req.file.filename}`;
+        const imageUrl = req.file.path;
         user.profilePictureUrl = imageUrl;
         await user.save();
 

@@ -14,14 +14,8 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 if (!fs.existsSync(merchantsDir)) fs.mkdirSync(merchantsDir);
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, merchantsDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
-    }
-});
+const { getStorage } = require('../config/cloudinary');
+const storage = getStorage('merchants');
 const upload = multer({ storage: storage });
 
 // @route   POST api/merchants
@@ -38,10 +32,10 @@ router.post('/', [auth, upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'p
 
         const files = req.files || {};
         
-        // Prepare URLs for saved files
-        const logoUrl = files.logo ? `/uploads/merchants/${files.logo[0].filename}` : null;
-        const proofDocumentUrl = files.proofDocument ? `/uploads/merchants/${files.proofDocument[0].filename}` : null;
-        const photoUrls = files.photos ? files.photos.map(f => `/uploads/merchants/${f.filename}`) : [];
+        // Prepare URLs for saved files (Cloudinary returns the absolute URL in file.path)
+        const logoUrl = files.logo ? files.logo[0].path : null;
+        const proofDocumentUrl = files.proofDocument ? files.proofDocument[0].path : null;
+        const photoUrls = files.photos ? files.photos.map(f => f.path) : [];
 
         // Parse JSON fields if they are sent as strings
         let parsedKeywords = [];
