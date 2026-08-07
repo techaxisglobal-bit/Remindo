@@ -5,7 +5,7 @@ import {
     Loader2, ShieldCheck, Store, Clock, XCircle, Star, 
     Search, Filter, Phone, Mail, Globe, MapPin, 
     Check, X, Trash2, Edit3, Eye, Calendar, ArrowRight,
-    Briefcase, Image as ImageIcon, Map, RotateCw
+    Briefcase, Image as ImageIcon, Map, RotateCw, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -517,6 +517,38 @@ export function MerchantAdmin() {
                                                     <p className="text-sm text-gray-900 dark:text-white">{selectedMerchant.address || ''} {selectedMerchant.city || ''}, {selectedMerchant.state || ''} {selectedMerchant.zipCode || ''}</p>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2"><FileText className="w-4 h-4" /> Proof Document</h4>
+                                        <div className="bg-gray-50 dark:bg-[#1f1f1f] rounded-xl border border-gray-100 dark:border-[#333] p-4 text-sm flex items-center justify-between">
+                                            {selectedMerchant.proofDocumentUrl ? (
+                                                <>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                                            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-gray-900 dark:text-white">Business License / Document</p>
+                                                            <p className="text-xs text-gray-500">Uploaded by merchant</p>
+                                                        </div>
+                                                    </div>
+                                                    <a 
+                                                        href={selectedMerchant.proofDocumentUrl.startsWith('http') ? selectedMerchant.proofDocumentUrl : `${API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL}${selectedMerchant.proofDocumentUrl.startsWith('/') ? selectedMerchant.proofDocumentUrl : '/' + selectedMerchant.proofDocumentUrl}`} 
+                                                        target="_blank" 
+                                                        rel="noreferrer" 
+                                                        className="px-4 py-2 bg-white dark:bg-[#252525] hover:bg-gray-50 dark:hover:bg-[#333] border border-gray-200 dark:border-[#444] rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                                                    >
+                                                        View
+                                                    </a>
+                                                </>
+                                            ) : (
+                                                <div className="flex items-center gap-3 text-gray-500">
+                                                    <FileText className="w-5 h-5 opacity-50" />
+                                                    <p>No document provided.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
 
