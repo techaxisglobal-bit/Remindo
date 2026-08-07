@@ -11,22 +11,36 @@
     scrollbar-width: none;
   }
 
+  /* Modern slim scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
+    height: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 8px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e0b59660;
-    border-radius: 10px;
+    background: rgba(156, 163, 175, 0.3); /* subtle gray */
+    border-radius: 8px;
+    background-clip: padding-box;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #e0b596;
+    background: rgba(156, 163, 175, 0.5); /* slightly darker on hover */
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(224, 181, 150, 0.2); /* theme primary color highly transparent */
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(224, 181, 150, 0.4);
   }
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #e0b59660 transparent;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+    overscroll-behavior: contain;
+  }
+  .dark .custom-scrollbar {
+    scrollbar-color: rgba(224, 181, 150, 0.2) transparent;
   }
 }
 

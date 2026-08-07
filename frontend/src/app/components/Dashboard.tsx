@@ -1306,7 +1306,7 @@ export function Dashboard({
             )}
             
             {activeView === 'merchantAdmin' && (
-              <div className="h-full overflow-y-auto custom-scrollbar">
+              <div className="h-full flex flex-col overflow-hidden">
                 {isAdmin ? (
                   <MerchantAdmin />
                 ) : (

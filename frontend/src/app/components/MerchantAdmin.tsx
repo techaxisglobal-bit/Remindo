@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { API_BASE_URL } from '@/app/api';
 import { Merchant } from '@/app/types';
 import { 
@@ -155,7 +156,6 @@ export function MerchantAdmin() {
     // Categories for filter
     const categories = useMemo(() => Array.from(new Set(merchants.map(m => m.category))).filter(Boolean), [merchants]);
 
-    // Filtered list
     const filteredMerchants = useMemo(() => {
         return merchants.filter(m => {
             const matchesSearch = (m.businessName.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -166,6 +166,15 @@ export function MerchantAdmin() {
             return matchesSearch && matchesStatus && matchesCategory;
         }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }, [merchants, searchTerm, statusFilter, categoryFilter]);
+
+    // Virtualization setup
+    const parentRef = useRef<HTMLDivElement>(null);
+    const rowVirtualizer = useVirtualizer({
+        count: filteredMerchants.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 100, // Approximate height of a row
+        overscan: 5,
+    });
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -283,7 +292,10 @@ export function MerchantAdmin() {
             </div>
 
             {/* List Container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div 
+                ref={parentRef}
+                className="flex-1 overflow-y-auto custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 relative will-change-transform scroll-smooth"
+            >
                 {isLoading ? (
                     <div className="space-y-3">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -309,91 +321,114 @@ export function MerchantAdmin() {
                         )}
                     </div>
                 ) : (
-                    <div className="space-y-3 pb-8">
-                        {filteredMerchants.map(merchant => (
-                            <div key={merchant.id} className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
-                                
-                                {/* Info Section */}
-                                <div className="flex items-center gap-4 w-full lg:w-[35%]">
-                                    <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden flex-shrink-0">
-                                        {merchant.logoUrl ? (
-                                            <img src={merchant.logoUrl} alt={merchant.businessName} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Store className="w-6 h-6 text-gray-400" />
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h4 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">{merchant.businessName}</h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-[#1f1f1f] text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate max-w-[150px]">
-                                                {merchant.category}
+                    <div 
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: 'relative',
+                        }}
+                    >
+                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                            const merchant = filteredMerchants[virtualRow.index];
+                            return (
+                                <div
+                                    key={merchant.id}
+                                    ref={rowVirtualizer.measureElement}
+                                    data-index={virtualRow.index}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                        paddingBottom: '12px' // Spacing between items
+                                    }}
+                                >
+                                    <div className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
+                                        
+                                        {/* Info Section */}
+                                        <div className="flex items-center gap-4 w-full lg:w-[35%]">
+                                            <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                {merchant.logoUrl ? (
+                                                    <img src={merchant.logoUrl} alt={merchant.businessName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Store className="w-6 h-6 text-gray-400" />
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">{merchant.businessName}</h4>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-[#1f1f1f] text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate max-w-[150px]">
+                                                        {merchant.category}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Contact & Location */}
+                                        <div className="flex flex-col gap-1.5 w-full lg:w-[25%] text-xs text-gray-500 dark:text-gray-400">
+                                            <div className="flex items-center gap-2 truncate">
+                                                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span className="truncate">{merchant.city || 'N/A'}, {merchant.state || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 truncate">
+                                                <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span className="truncate">{merchant.email || 'N/A'}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Status & Date */}
+                                        <div className="w-full lg:w-[20%] flex flex-row lg:flex-col items-center lg:items-start justify-between lg:justify-center gap-2">
+                                            <div className="flex gap-2 items-center">
+                                                {getStatusBadge(merchant.status)}
+                                                {merchant.isFeatured && (
+                                                    <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-200/50 dark:border-purple-800/50">
+                                                        Featured
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="text-[11px] font-medium text-gray-400">
+                                                Added {format(new Date(merchant.createdAt), 'MMM d, yyyy')}
                                             </span>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="w-full lg:w-auto lg:flex-1 flex items-center justify-end gap-1.5 border-t lg:border-t-0 border-gray-100 dark:border-[#333] pt-3 lg:pt-0">
+                                            {merchant.status !== 'APPROVED' && (
+                                                <Tooltip content="Approve">
+                                                    <button onClick={() => updateStatus(merchant.id, 'APPROVED')} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
+                                                        <Check className="w-4 h-4" />
+                                                    </button>
+                                                </Tooltip>
+                                            )}
+                                            {merchant.status !== 'REJECTED' && (
+                                                <Tooltip content="Reject">
+                                                    <button onClick={() => updateStatus(merchant.id, 'REJECTED')} className="p-2 rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors">
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </Tooltip>
+                                            )}
+                                            <Tooltip content={merchant.isFeatured ? "Unfeature" : "Feature"}>
+                                                <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}`}>
+                                                    <Star className={`w-4 h-4 ${merchant.isFeatured ? 'fill-current' : ''}`} />
+                                                </button>
+                                            </Tooltip>
+                                            <div className="w-px h-4 bg-gray-200 dark:bg-[#333] mx-1" />
+                                            <Tooltip content="View Details">
+                                                <button onClick={() => setSelectedMerchant(merchant)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                            </Tooltip>
+                                            <Tooltip content="Delete">
+                                                <button onClick={() => deleteMerchant(merchant.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </Tooltip>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Contact & Location */}
-                                <div className="flex flex-col gap-1.5 w-full lg:w-[25%] text-xs text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center gap-2 truncate">
-                                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                                        <span className="truncate">{merchant.city || 'N/A'}, {merchant.state || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 truncate">
-                                        <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-                                        <span className="truncate">{merchant.email || 'N/A'}</span>
-                                    </div>
-                                </div>
-
-                                {/* Status & Date */}
-                                <div className="w-full lg:w-[20%] flex flex-row lg:flex-col items-center lg:items-start justify-between lg:justify-center gap-2">
-                                    <div className="flex gap-2 items-center">
-                                        {getStatusBadge(merchant.status)}
-                                        {merchant.isFeatured && (
-                                            <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-200/50 dark:border-purple-800/50">
-                                                Featured
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className="text-[11px] font-medium text-gray-400">
-                                        Added {format(new Date(merchant.createdAt), 'MMM d, yyyy')}
-                                    </span>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="w-full lg:w-auto lg:flex-1 flex items-center justify-end gap-1.5 border-t lg:border-t-0 border-gray-100 dark:border-[#333] pt-3 lg:pt-0">
-                                    {merchant.status !== 'APPROVED' && (
-                                        <Tooltip content="Approve">
-                                            <button onClick={() => updateStatus(merchant.id, 'APPROVED')} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
-                                                <Check className="w-4 h-4" />
-                                            </button>
-                                        </Tooltip>
-                                    )}
-                                    {merchant.status !== 'REJECTED' && (
-                                        <Tooltip content="Reject">
-                                            <button onClick={() => updateStatus(merchant.id, 'REJECTED')} className="p-2 rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors">
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </Tooltip>
-                                    )}
-                                    <Tooltip content={merchant.isFeatured ? "Unfeature" : "Feature"}>
-                                        <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}`}>
-                                            <Star className={`w-4 h-4 ${merchant.isFeatured ? 'fill-current' : ''}`} />
-                                        </button>
-                                    </Tooltip>
-                                    <div className="w-px h-4 bg-gray-200 dark:bg-[#333] mx-1" />
-                                    <Tooltip content="View Details">
-                                        <button onClick={() => setSelectedMerchant(merchant)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                    </Tooltip>
-                                    <Tooltip content="Delete">
-                                        <button onClick={() => deleteMerchant(merchant.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </Tooltip>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
