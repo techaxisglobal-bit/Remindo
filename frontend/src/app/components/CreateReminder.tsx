@@ -390,7 +390,12 @@ export function CreateReminder({
 
       let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=3`;
       if (lat && lon) {
-         url += `&lat=${lat}&lon=${lon}`;
+         // Create a viewbox of roughly 20x20km around the user
+         const left = lon - 0.1;
+         const top = lat + 0.1;
+         const right = lon + 0.1;
+         const bottom = lat - 0.1;
+         url += `&viewbox=${left},${top},${right},${bottom}&bounded=1`;
       }
       
       const response = await fetch(url);
