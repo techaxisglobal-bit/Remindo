@@ -39,7 +39,7 @@ const Notification = sequelize.define('Notification', {
         allowNull: false
     },
     relatedTaskId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: true
     },
     actionUrl: {
