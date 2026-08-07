@@ -16,6 +16,7 @@ const getStorage = (folderName) => {
     params: {
       folder: folderName,
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+      resource_type: 'auto',
       public_id: (req, file) => Date.now() + '-' + Math.round(Math.random() * 1E9),
     },
   });
