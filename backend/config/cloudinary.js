@@ -13,11 +13,17 @@ cloudinary.config({
 const getStorage = (folderName) => {
   return new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-      folder: folderName,
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
-      resource_type: 'auto',
-      public_id: (req, file) => Date.now() + '-' + Math.round(Math.random() * 1E9),
+    params: async (req, file) => {
+      let isPdf = file.mimetype === 'application/pdf';
+      let pubId = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      if (isPdf) {
+        pubId += '.pdf';
+      }
+      return {
+        folder: folderName,
+        resource_type: isPdf ? 'raw' : 'auto',
+        public_id: pubId,
+      };
     },
   });
 };
