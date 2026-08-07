@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Bell, X, Check, Trash2 } from 'lucide-react';
-import { api } from '../api';
+import { API_BASE_URL } from '../api';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { notificationSocket } from '../services/NotificationSocket';
 import { toast } from 'sonner';
@@ -57,10 +57,24 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         return unsubscribe;
     }, []);
 
+    const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+        const token = localStorage.getItem('token');
+        const headers = new Headers(options.headers || {});
+        if (token) headers.set('x-auth-token', token);
+        if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+        
+        const response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw { response: { data: errorData } };
+        }
+        return response.json();
+    };
+
     const fetchNotifications = async (pageNumber: number) => {
         try {
             setIsLoading(true);
-            const { data } = await api.get(`/notifications?page=${pageNumber}&limit=20`);
+            const data = await fetchWithAuth(`/api/notifications?page=${pageNumber}&limit=20`);
             if (pageNumber === 1) {
                 setNotifications(data.notifications);
             } else {
@@ -77,7 +91,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const markAsRead = async (id: string) => {
         try {
-            await api.put(`/notifications/${id}/read`);
+            await fetchWithAuth(`/api/notifications/${id}/read`, { method: 'PUT' });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: 'Read' } : n));
         } catch (error) {
             console.error('Failed to mark read', error);
@@ -86,7 +100,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const markAllAsRead = async () => {
         try {
-            await api.put('/notifications/read-all');
+            await fetchWithAuth('/api/notifications/read-all', { method: 'PUT' });
             setNotifications(prev => prev.map(n => n.status === 'Unread' ? { ...n, status: 'Read' } : n));
         } catch (error) {
             console.error('Failed to mark all read', error);
@@ -95,7 +109,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const deleteNotification = async (id: string) => {
         try {
-            await api.delete(`/notifications/${id}`);
+            await fetchWithAuth(`/api/notifications/${id}`, { method: 'DELETE' });
             setNotifications(prev => prev.filter(n => n.id !== id));
         } catch (error) {
             console.error('Failed to delete notification', error);
@@ -109,7 +123,10 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         if (!token) return;
 
         try {
-            await api.post('/invitations/respond', { token, action: 'accept' });
+            await fetchWithAuth('/api/invitations/respond', { 
+                method: 'POST', 
+                body: JSON.stringify({ token, action: 'accept' }) 
+            });
             setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, status: 'Accepted' } : n));
             toast.success('Invitation accepted');
         } catch (error: any) {
@@ -124,7 +141,10 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         if (!token) return;
 
         try {
-            await api.post('/invitations/respond', { token, action: 'decline' });
+            await fetchWithAuth('/api/invitations/respond', { 
+                method: 'POST', 
+                body: JSON.stringify({ token, action: 'decline' }) 
+            });
             setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, status: 'Declined' } : n));
             toast.success('Invitation declined');
         } catch (error: any) {

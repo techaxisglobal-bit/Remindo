@@ -80,7 +80,7 @@ import { MerchantAdmin } from '@/app/components/MerchantAdmin';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
 import { notificationSocket } from '@/app/services/NotificationSocket';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { api } from '@/app/api';
+import { API_BASE_URL } from '@/app/api';
 
 import { Calendar } from '@/app/components/ui/calendar';
 import { Checkbox } from '@/app/components/ui/checkbox';
@@ -322,9 +322,14 @@ export function Dashboard({
           setUnreadCount(prev => prev + 1);
       });
 
-      api.get('/notifications?limit=1').then((res: any) => {
-          if (res.data && res.data.notifications) {
-              const unread = res.data.notifications.filter((n: any) => n.status === 'Unread').length;
+      fetch(`${API_BASE_URL}/api/notifications?limit=1`, {
+          headers: {
+              'x-auth-token': token,
+              'Content-Type': 'application/json'
+          }
+      }).then(res => res.json()).then((data: any) => {
+          if (data && data.notifications) {
+              const unread = data.notifications.filter((n: any) => n.status === 'Unread').length;
               setUnreadCount(unread);
           }
       }).catch(console.error);
@@ -346,7 +351,14 @@ export function Dashboard({
       setupPush();
 
       PushNotifications.addListener('registration', (token) => {
-          api.put('/auth/profile', { fcmToken: token.value }).catch(console.error);
+          fetch(`${API_BASE_URL}/api/auth/profile`, {
+              method: 'PUT',
+              headers: {
+                  'x-auth-token': token,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ fcmToken: token.value })
+          }).catch(console.error);
       });
 
       return () => {
