@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '@/app/api';
 import { Merchant } from '@/app/types';
 import { 
@@ -167,14 +166,6 @@ export function MerchantAdmin() {
         }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }, [merchants, searchTerm, statusFilter, categoryFilter]);
 
-    // Virtualization setup
-    const parentRef = useRef<HTMLDivElement>(null);
-    const rowVirtualizer = useVirtualizer({
-        count: filteredMerchants.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 100, // Approximate height of a row
-        overscan: 5,
-    });
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -186,7 +177,7 @@ export function MerchantAdmin() {
     };
 
     return (
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col overflow-hidden">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 flex-shrink-0">
                 <div>
@@ -292,10 +283,7 @@ export function MerchantAdmin() {
             </div>
 
             {/* List Container */}
-            <div 
-                ref={parentRef}
-                className="flex-1 overflow-y-auto custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 relative will-change-transform scroll-smooth"
-            >
+            <div className="flex-1 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {isLoading ? (
                     <div className="space-y-3">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -303,7 +291,7 @@ export function MerchantAdmin() {
                         ))}
                     </div>
                 ) : filteredMerchants.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center py-20 text-center bg-gray-50 dark:bg-[#1f1f1f]/50 rounded-2xl border border-dashed border-gray-200 dark:border-[#333]">
+                    <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 dark:bg-[#1f1f1f]/50 rounded-2xl border border-dashed border-gray-200 dark:border-[#333]">
                         <div className="w-16 h-16 bg-white dark:bg-[#252525] rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100 dark:border-[#333]">
                             <Store className="w-8 h-8 text-gray-400" />
                         </div>
@@ -321,30 +309,9 @@ export function MerchantAdmin() {
                         )}
                     </div>
                 ) : (
-                    <div 
-                        style={{
-                            height: `${rowVirtualizer.getTotalSize()}px`,
-                            width: '100%',
-                            position: 'relative',
-                        }}
-                    >
-                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                            const merchant = filteredMerchants[virtualRow.index];
-                            return (
-                                <div
-                                    key={merchant.id}
-                                    ref={rowVirtualizer.measureElement}
-                                    data-index={virtualRow.index}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        transform: `translateY(${virtualRow.start}px)`,
-                                        paddingBottom: '12px' // Spacing between items
-                                    }}
-                                >
-                                    <div className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
+                    <div className="space-y-3 pb-8">
+                        {filteredMerchants.map(merchant => (
+                            <div key={merchant.id} className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
                                         
                                         {/* Info Section */}
                                         <div className="flex items-center gap-4 w-full lg:w-[35%]">
@@ -426,9 +393,7 @@ export function MerchantAdmin() {
                                             </Tooltip>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                        ))}
                     </div>
                 )}
             </div>
