@@ -3,12 +3,12 @@ const sequelize = require('../config/db');
 
 const Group = sequelize.define('Group', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
     },
     userId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     name: {
