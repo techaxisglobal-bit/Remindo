@@ -105,6 +105,7 @@ app.use('/api/attendees', require('./routes/attendees'));
 app.use('/api/merchants', require('./routes/merchants'));
 app.use('/api/invitations', require('./routes/invitations'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/groups', require('./routes/groups'));
 
 app.get('/', (req, res) => {
     res.send('Backend running');

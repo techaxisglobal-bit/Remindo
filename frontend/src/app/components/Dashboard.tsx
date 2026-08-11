@@ -71,6 +71,7 @@ import {
 import { Task, User as UserType } from '@/app/types';
 import { TaskDetails } from '@/app/components/TaskDetails';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
+import { GroupsModal } from '@/app/components/GroupsModal';
 import { CreateReminder } from '@/app/components/CreateReminder';
 import { CustomerSupportChat } from '@/app/components/CustomerSupportChat';
 import { ProfileMenu } from '@/app/components/ProfileMenu';
@@ -133,6 +134,7 @@ export function Dashboard({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [isGroupsModalOpen, setIsGroupsModalOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -1756,7 +1758,7 @@ export function Dashboard({
                           } else if (dragMode === 'resize' && activeTaskId) {
                             startMin = dragStart.time;
                             endMin = Math.max(startMin + SNAP_MINUTES, dragCurrent.time);
-                            dayIdx = dragStart.dayIndex;
+                            dayIdx = dragCurrent.dayIndex;
                           }
 
                           const formatMins = (mins: number) => {
@@ -2195,15 +2197,20 @@ export function Dashboard({
             {[
               { id: 'calendar', icon: Home, label: 'Home' },
               { id: 'pending', icon: Hourglass, label: 'Pending' },
-              { id: 'merchants', icon: Store, label: 'Merchants' },
-              { id: 'completed', icon: Check, label: 'Done' },
+              { id: 'completed', icon: CheckCircle, label: 'Completed' },
+              { id: 'merchants', icon: Store, label: 'Explore Businesses' },
+              { id: 'groups', icon: Users, label: 'Groups', isAction: true },
               { id: 'settings', icon: Settings, label: 'Settings', isAction: true }
             ].map((item) => {
               const isActive = activeView === item.id;
               return (
                 <button
                   key={item.id}
-                  onClick={() => item.isAction ? setShowSettings(true) : setActiveView(item.id as View)}
+                  onClick={() => {
+                      if (item.id === 'settings') setShowSettings(true);
+                      else if (item.id === 'groups') setIsGroupsModalOpen(true);
+                      else setActiveView(item.id as View);
+                  }}
                   className={`flex flex-col items-center justify-center w-1/5 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
                 >
                   {isActive && !item.isAction && (
@@ -2271,6 +2278,8 @@ export function Dashboard({
             onClose={() => setShowNotifications(false)}
           />
         </AnimatePresence >
+
+        <GroupsModal isOpen={isGroupsModalOpen} onClose={() => setIsGroupsModalOpen(false)} />
 
         <CustomerSupportChat />
       </div >

@@ -3,6 +3,7 @@ const Task = require('./Task');
 const TaskAttendee = require('./TaskAttendee');
 const Merchant = require('./Merchant');
 const Notification = require('./Notification');
+const Group = require('./Group');
 
 
 // Associations
@@ -21,11 +22,15 @@ Notification.belongsTo(User, { foreignKey: 'userId', as: 'recipient' });
 User.hasMany(Notification, { foreignKey: 'senderId', as: 'sentNotifications' });
 Notification.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 
+User.hasMany(Group, { foreignKey: 'userId', as: 'groups' });
+Group.belongsTo(User, { foreignKey: 'userId', as: 'owner' });
+
 
 module.exports = {
     User,
     Task,
     TaskAttendee,
     Merchant,
-    Notification
+    Notification,
+    Group
 };

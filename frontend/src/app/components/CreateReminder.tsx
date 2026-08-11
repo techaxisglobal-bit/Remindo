@@ -20,9 +20,10 @@ import {
   Loader2
 } from 'lucide-react';
 import { Switch } from '@/app/components/ui/switch';
-import { Task } from '@/app/types';
+import { Task, Group } from '@/app/types';
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
+import { API_BASE_URL } from '@/app/api';
 
 interface CreateReminderProps {
   tasks: Task[];
@@ -304,6 +305,8 @@ export function CreateReminder({
   const [notifyBefore, setNotifyBefore] = useState<number[]>([15]); // Default 15 min
   const [attendees, setAttendees] = useState<string[]>([]);
   const [attendeeInput, setAttendeeInput] = useState('');
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [showGroupsDropdown, setShowGroupsDropdown] = useState(false);
 
   const getNotifyBeforeLabel = (values: number[]) => {
     if (values.includes(0) || values.length === 0) {
@@ -425,6 +428,24 @@ export function CreateReminder({
   const [isProcessing, setIsProcessing] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/api/groups`, {
+          headers: { 'x-auth-token': token || '' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setGroups(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch groups', err);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -616,7 +637,7 @@ export function CreateReminder({
     }
   };
 
-  const toggleVoice = () => {
+  const toggleVoice = async () => {
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
@@ -860,7 +881,7 @@ return (
         </div>
 
         {/* Attendees Row */}
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-col gap-2 mt-2 relative">
           <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#252525]/80 p-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px]">
             {attendees.map((email) => (
               <div key={email} className="flex items-center gap-1.5 bg-white dark:bg-[#333] border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full text-[12px] font-bold shadow-sm">
@@ -885,9 +906,7 @@ return (
                     setAttendees(prev => [...prev, email]);
                     setAttendeeInput('');
                   } else if (email && !emailRegex.test(email)) {
-                    // Just clear it if they press space on invalid, or ignore
                     if (e.key === 'Enter') {
-                       // Could show toast but let's just ignore for now to keep it simple
                        setAttendeeInput('');
                     }
                   }
@@ -904,7 +923,50 @@ return (
                 }
               }}
             />
+            {groups.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowGroupsDropdown(!showGroupsDropdown)}
+                className="text-xs font-semibold text-[#e0b596] hover:text-[#d4a37f] bg-[#e0b596]/10 px-2 py-1 rounded-lg ml-auto"
+              >
+                + Group
+              </button>
+            )}
           </div>
+          
+          <AnimatePresence>
+            {showGroupsDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-[#1b1b1b] border border-gray-200 dark:border-[#333] shadow-lg rounded-xl overflow-hidden"
+              >
+                <div className="max-h-40 overflow-y-auto custom-scrollbar">
+                  {groups.map(group => (
+                    <button
+                      key={group.id}
+                      type="button"
+                      className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#252525] border-b border-gray-100 dark:border-white/5 last:border-0"
+                      onClick={() => {
+                        const newEmails = (group.members || []).filter(email => !attendees.includes(email));
+                        if (newEmails.length > 0) {
+                          setAttendees(prev => [...prev, ...newEmails]);
+                          toast.success(`Added ${newEmails.length} member(s) from ${group.name}`);
+                        } else {
+                          toast.info(`All members of ${group.name} are already added`);
+                        }
+                        setShowGroupsDropdown(false);
+                      }}
+                    >
+                      {group.name}
+                      <span className="block text-[10px] text-gray-500 font-normal mt-0.5">{group.members?.length || 0} members</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <button

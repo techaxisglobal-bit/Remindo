@@ -66,3 +66,9 @@ export interface Merchant {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface Group {
+  id: string;
+  name: string;
+  members: string[];
+}
