@@ -170,7 +170,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
             <div ref={ref} className="w-full max-w-md bg-white dark:bg-[#1a1a1a] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#222]">
+                <div className="px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#222]">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Bell className="w-5 h-5" /> Notifications
                     </h2>
