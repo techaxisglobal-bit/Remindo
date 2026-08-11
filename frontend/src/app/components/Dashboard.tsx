@@ -893,6 +893,18 @@ export function Dashboard({
             <TooltipContent side="right" hideArrow>Merchants</TooltipContent>
           </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setIsGroupsModalOpen(true)}
+                className={`group relative p-3 rounded-xl transition-all text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]`}
+              >
+                <Users className="w-6 h-6" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" hideArrow>Groups</TooltipContent>
+          </Tooltip>
+
           {isAdmin && (
             <Tooltip>
               <TooltipTrigger asChild>
