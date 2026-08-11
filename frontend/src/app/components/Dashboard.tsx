@@ -65,7 +65,8 @@ import {
   Bell,
   BellOff,
   Store,
-  ShieldCheck
+  ShieldCheck,
+  Users
 } from 'lucide-react';
 
 import { Task, User as UserType } from '@/app/types';
