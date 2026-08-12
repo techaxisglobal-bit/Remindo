@@ -21,7 +21,8 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [micStatus, setMicStatus] = useState<'listening' | 'denied' | 'unsupported'>('unsupported');
+  const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported'>('idle');
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => localStorage.getItem('milli_voice') === 'true');
   const isGreeting = useRef(false);
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,9 +36,15 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   }, [messages, isOpen]);
 
   useEffect(() => {
+    if (!isVoiceEnabled) {
+      setMicStatus('idle');
+      return;
+    }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicStatus('unsupported');
+      setIsVoiceEnabled(false);
       return;
     }
 
@@ -59,8 +66,10 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript.toLowerCase();
+        // Normalize transcript to remove punctuation and extra spaces
+        const normalizedTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").trim();
         
-        if (transcript.includes('hey milli') || transcript.includes('hi milli') || transcript.includes('hello milli')) {
+        if (normalizedTranscript.includes('hey milli') || normalizedTranscript.includes('hi milli') || normalizedTranscript.includes('hello milli')) {
           isGreeting.current = true;
           setIsOpen(true);
           
@@ -86,9 +95,11 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     };
 
     recognition.onerror = (event: any) => {
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      if (event.error === 'not-allowed' || event.error === 'permission-denied' || event.error === 'service-not-allowed') {
         isDenied = true;
         setMicStatus('denied');
+        setIsVoiceEnabled(false);
+        localStorage.setItem('milli_voice', 'false');
       }
     };
 
@@ -114,7 +125,16 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         recognition.stop();
       } catch (e) {}
     };
-  }, [userName]);
+  }, [userName, isVoiceEnabled]);
+
+  const toggleVoice = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsVoiceEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('milli_voice', next ? 'true' : 'false');
+      return next;
+    });
+  };
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');
@@ -179,21 +199,31 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+80px)] lg:bottom-6 right-6 p-4 bg-[#8b5cf6] text-white rounded-full shadow-2xl hover:bg-[#7c3aed] hover:-translate-y-1 transition-all z-40 ${isOpen ? 'hidden' : 'block'}`}
-      >
-        <Sparkles className="w-6 h-6" />
-        {micStatus === 'listening' && (
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white dark:border-[#1f1f1f]"></span>
-          </span>
-        )}
-        {micStatus === 'denied' && (
-          <span className="absolute -top-1 -right-1 flex h-3 w-3 relative inline-flex rounded-full bg-red-500 border-2 border-white dark:border-[#1f1f1f]" title="Microphone permission denied"></span>
-        )}
-      </button>
+      <div className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+150px)] lg:bottom-[100px] right-6 z-40 ${isOpen ? 'hidden' : 'flex'} flex-col gap-3 items-center`}>
+        <button
+          onClick={toggleVoice}
+          title={isVoiceEnabled ? "Disable Voice Wake" : "Enable Voice Wake"}
+          className="p-3 bg-white dark:bg-[#252525] text-gray-700 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 border border-gray-200 dark:border-[#333] transition-all flex items-center justify-center"
+        >
+          {micStatus === 'listening' ? <Mic className="w-5 h-5 text-green-500" /> : <MicOff className="w-5 h-5 opacity-50" />}
+        </button>
+
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-4 bg-[#8b5cf6] text-white rounded-full shadow-2xl hover:bg-[#7c3aed] hover:-translate-y-1 transition-all relative"
+        >
+          <Sparkles className="w-6 h-6" />
+          {micStatus === 'listening' && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white dark:border-[#1f1f1f]"></span>
+            </span>
+          )}
+          {micStatus === 'denied' && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3 relative inline-flex rounded-full bg-red-500 border-2 border-white dark:border-[#1f1f1f]" title="Microphone permission denied"></span>
+          )}
+        </button>
+      </div>
 
       <AnimatePresence>
         {isOpen && (
