@@ -130,7 +130,10 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       }
     } catch (e: any) {
       console.error(e);
-      const errMsg = `Error: ${e.message}`;
+      let errMsg = `Error: ${e.message}`;
+      if (errMsg.includes('Token is not valid') || errMsg.includes('No token')) {
+        errMsg = "Your session expired. Please sign in again to let Milli create reminders.";
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       if (isVoice) {
         speakText(errMsg, () => setVoiceState('waiting-for-wake'));
@@ -181,7 +184,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
     recognition.onstart = () => {
       setMicStatus('listening');
-      setVoiceState('waiting-for-wake');
+      setVoiceState(prev => prev === 'inactive' ? 'waiting-for-wake' : prev);
     };
 
     recognition.onresult = (event: any) => {
@@ -215,7 +218,8 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         'hey milli', 'hi milli', 'hello milli',
         'hey millie', 'hi millie', 'hello millie',
         'hey milly', 'hi milly', 'hello milly',
-        'hey mili', 'hi mili', 'hello mili'
+        'hey mili', 'hi mili', 'hello mili',
+        'milli', 'millie', 'milly', 'mili'
       ];
 
       if (currentVoiceState === 'waiting-for-wake') {
@@ -268,11 +272,11 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         lastRestartTimeRef.current = now;
 
         if (restartCountRef.current < 3) {
-          try {
-            recognition.start();
-          } catch (e) {
-            // Ignore
-          }
+          setTimeout(() => {
+            try {
+              if (!isUnmounted && isListening) recognition.start();
+            } catch (e) {}
+          }, 300);
         } else {
           console.warn('Stopped speech recognition to prevent endless restart loops.');
           setIsListening(false);
