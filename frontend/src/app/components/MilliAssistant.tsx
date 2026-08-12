@@ -21,8 +21,10 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported'>('idle');
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => localStorage.getItem('milli_voice') === 'true');
+  const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported' | 'no-speech'>('idle');
+  const [isListening, setIsListening] = useState(false);
+  const restartCountRef = useRef(0);
+  const lastRestartTimeRef = useRef(0);
   const isGreeting = useRef(false);
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -36,7 +38,12 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   }, [messages, isOpen]);
 
   useEffect(() => {
-    if (!isVoiceEnabled) {
+    if (!isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
       setMicStatus('idle');
       return;
     }
@@ -44,7 +51,8 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicStatus('unsupported');
-      setIsVoiceEnabled(false);
+      setIsListening(false);
+      toast.error('Speech recognition is not supported in this browser.');
       return;
     }
 
@@ -59,15 +67,21 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
     recognition.onstart = () => {
       setMicStatus('listening');
+      toast.success('Milli is listening... Say "Hey Milli"');
     };
 
     recognition.onresult = (event: any) => {
       if (isGreeting.current) return;
+      
+      // Reset restart count when we get successful results
+      restartCountRef.current = 0;
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript.toLowerCase();
         // Normalize transcript to remove punctuation and extra spaces
         const normalizedTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").trim();
+        
+        console.log('Milli heard:', normalizedTranscript);
         
         if (normalizedTranscript.includes('hey milli') || normalizedTranscript.includes('hi milli') || normalizedTranscript.includes('hello milli')) {
           isGreeting.current = true;
@@ -95,20 +109,40 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     };
 
     recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
       if (event.error === 'not-allowed' || event.error === 'permission-denied' || event.error === 'service-not-allowed') {
         isDenied = true;
         setMicStatus('denied');
-        setIsVoiceEnabled(false);
-        localStorage.setItem('milli_voice', 'false');
+        setIsListening(false);
+        toast.error('Microphone permission denied.');
+      } else if (event.error === 'no-speech') {
+        setMicStatus('no-speech');
+        toast.error('No speech detected. Please try again.');
+        // Don't stop listening entirely, just let it naturally end and restart, or keep listening
       }
     };
 
     recognition.onend = () => {
-      if (!isDenied && !isUnmounted) {
-        try {
-          recognition.start();
-        } catch (e) {
-          // Ignore
+      if (!isDenied && !isUnmounted && isListening) {
+        const now = Date.now();
+        if (now - lastRestartTimeRef.current < 1000) {
+          restartCountRef.current += 1;
+        } else {
+          restartCountRef.current = 0;
+        }
+        lastRestartTimeRef.current = now;
+
+        if (restartCountRef.current < 3) {
+          try {
+            recognition.start();
+          } catch (e) {
+            // Ignore
+          }
+        } else {
+          console.warn('Stopped speech recognition to prevent endless restart loops.');
+          setIsListening(false);
+          setMicStatus('idle');
+          toast.error('Microphone stopped unexpectedly.');
         }
       }
     };
@@ -116,7 +150,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     try {
       recognition.start();
     } catch (e) {
-      // Ignore
+      console.error('Failed to start recognition:', e);
     }
 
     return () => {
@@ -125,15 +159,11 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         recognition.stop();
       } catch (e) {}
     };
-  }, [userName, isVoiceEnabled]);
+  }, [userName, isListening]);
 
   const toggleVoice = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsVoiceEnabled(prev => {
-      const next = !prev;
-      localStorage.setItem('milli_voice', next ? 'true' : 'false');
-      return next;
-    });
+    setIsListening(prev => !prev);
   };
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
@@ -202,7 +232,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       <div className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+150px)] lg:bottom-[100px] right-6 z-40 ${isOpen ? 'hidden' : 'flex'} flex-col gap-3 items-center`}>
         <button
           onClick={toggleVoice}
-          title={isVoiceEnabled ? "Disable Voice Wake" : "Enable Voice Wake"}
+          title={isListening ? "Disable Voice Wake" : "Enable Voice Wake"}
           className="p-3 bg-white dark:bg-[#252525] text-gray-700 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 border border-gray-200 dark:border-[#333] transition-all flex items-center justify-center"
         >
           {micStatus === 'listening' ? <Mic className="w-5 h-5 text-green-500" /> : <MicOff className="w-5 h-5 opacity-50" />}
