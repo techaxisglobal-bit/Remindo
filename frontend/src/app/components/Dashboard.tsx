@@ -74,7 +74,7 @@ import { TaskDetails } from '@/app/components/TaskDetails';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
 import { GroupsModal } from '@/app/components/GroupsModal';
 import { CreateReminder } from '@/app/components/CreateReminder';
-import { CustomerSupportChat } from '@/app/components/CustomerSupportChat';
+import { MilliAssistant } from '@/app/components/MilliAssistant';
 import { ProfileMenu } from '@/app/components/ProfileMenu';
 import { MerchantList } from '@/app/components/MerchantList';
 import { MerchantForm } from '@/app/components/MerchantForm';
@@ -2294,7 +2294,7 @@ export function Dashboard({
 
         <GroupsModal isOpen={isGroupsModalOpen} onClose={() => setIsGroupsModalOpen(false)} />
 
-        <CustomerSupportChat />
+        <MilliAssistant onAddTask={onAddTask} />
       </div >
     </div >
   );

@@ -100,7 +100,7 @@ app.set('io', io);
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/chat', require('./routes/chat'));
+app.use('/api/milli', require('./routes/milli'));
 app.use('/api/attendees', require('./routes/attendees'));
 app.use('/api/merchants', require('./routes/merchants'));
 app.use('/api/invitations', require('./routes/invitations'));
