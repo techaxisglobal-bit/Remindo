@@ -76,35 +76,47 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       // Reset restart count when we get successful results
       restartCountRef.current = 0;
 
+      let wakeDetected = false;
+
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript.toLowerCase();
         // Normalize transcript to remove punctuation and extra spaces
-        const normalizedTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").trim();
+        const normalizedTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g,"").replace(/\s{2,}/g," ").trim();
         
-        console.log('Milli heard:', normalizedTranscript);
+        console.log('Milli heard:', normalizedTranscript, '| Original:', transcript);
         
-        if (normalizedTranscript.includes('hey milli') || normalizedTranscript.includes('hi milli') || normalizedTranscript.includes('hello milli')) {
-          isGreeting.current = true;
-          setIsOpen(true);
-          
-          const greetingText = `Hey ${userName || 'there'}, I'm Milli, your personal assistant. How can I help you?`;
-          
-          setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: greetingText 
-          }]);
-
-          if ('speechSynthesis' in window) {
-             const utterance = new SpeechSynthesisUtterance(greetingText);
-             window.speechSynthesis.speak(utterance);
-          }
-
-          setTimeout(() => {
-            isGreeting.current = false;
-          }, 5000);
-          
+        const wakePhrases = [
+          'hey milli', 'hi milli', 'hello milli',
+          'hey millie', 'hi millie', 'hello millie',
+          'hey milly', 'hi milly', 'hello milly',
+          'hey mili', 'hi mili', 'hello mili'
+        ];
+        
+        if (wakePhrases.some(phrase => normalizedTranscript.includes(phrase))) {
+          wakeDetected = true;
           break;
         }
+      }
+
+      if (wakeDetected) {
+        isGreeting.current = true;
+        setIsOpen(true);
+        
+        const greetingText = `Hey ${userName || 'there'}, I'm Milli, your personal assistant. How can I help you?`;
+        
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: greetingText 
+        }]);
+
+        if ('speechSynthesis' in window) {
+           const utterance = new SpeechSynthesisUtterance(greetingText);
+           window.speechSynthesis.speak(utterance);
+        }
+
+        setTimeout(() => {
+          isGreeting.current = false;
+        }, 5000);
       }
     };
 

@@ -128,7 +128,7 @@ export function Dashboard({
   onToggleNotifications,
 }: DashboardProps) {
   const userEmail = user?.email || '';
-  const userName = user?.name || '';
+  const userName = user?.name || (user as any)?.displayName || (user as any)?.username || (user as any)?.firstName || userEmail.split('@')[0] || '';
   const isAdmin = userEmail === 'techaxisglobal@gmail.com';
   const [activeView, setActiveView] = useState<View>('calendar');
   const isMobile = useIsMobile();
