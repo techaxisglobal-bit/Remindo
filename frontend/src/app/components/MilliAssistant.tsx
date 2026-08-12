@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { API_BASE_URL } from '@/app/api';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, X, Send, User, Loader2 } from 'lucide-react';
+import { Sparkles, X, Send, User, Loader2, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Message {
@@ -11,15 +11,19 @@ interface Message {
 
 interface MilliAssistantProps {
   onAddTask: (task: any) => void;
+  userName?: string;
 }
 
-export function MilliAssistant({ onAddTask }: MilliAssistantProps) {
+export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: "Hi! I'm Milli, your AI reminder assistant. Tell me what to remind you about, like 'Remind me tomorrow at 9 AM to call Mom'." }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [micStatus, setMicStatus] = useState<'listening' | 'denied' | 'unsupported'>('unsupported');
+  const isGreeting = useRef(false);
+  const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -29,6 +33,88 @@ export function MilliAssistant({ onAddTask }: MilliAssistantProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setMicStatus('unsupported');
+      return;
+    }
+
+    let isDenied = false;
+    let isUnmounted = false;
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setMicStatus('listening');
+    };
+
+    recognition.onresult = (event: any) => {
+      if (isGreeting.current) return;
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript.toLowerCase();
+        
+        if (transcript.includes('hey milli') || transcript.includes('hi milli') || transcript.includes('hello milli')) {
+          isGreeting.current = true;
+          setIsOpen(true);
+          
+          const greetingText = `Hey ${userName || 'there'}, I'm Milli, your personal assistant. How can I help you?`;
+          
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: greetingText 
+          }]);
+
+          if ('speechSynthesis' in window) {
+             const utterance = new SpeechSynthesisUtterance(greetingText);
+             window.speechSynthesis.speak(utterance);
+          }
+
+          setTimeout(() => {
+            isGreeting.current = false;
+          }, 5000);
+          
+          break;
+        }
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        isDenied = true;
+        setMicStatus('denied');
+      }
+    };
+
+    recognition.onend = () => {
+      if (!isDenied && !isUnmounted) {
+        try {
+          recognition.start();
+        } catch (e) {
+          // Ignore
+        }
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      // Ignore
+    }
+
+    return () => {
+      isUnmounted = true;
+      try {
+        recognition.stop();
+      } catch (e) {}
+    };
+  }, [userName]);
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');
@@ -98,6 +184,15 @@ export function MilliAssistant({ onAddTask }: MilliAssistantProps) {
         className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+80px)] lg:bottom-6 right-6 p-4 bg-[#8b5cf6] text-white rounded-full shadow-2xl hover:bg-[#7c3aed] hover:-translate-y-1 transition-all z-40 ${isOpen ? 'hidden' : 'block'}`}
       >
         <Sparkles className="w-6 h-6" />
+        {micStatus === 'listening' && (
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white dark:border-[#1f1f1f]"></span>
+          </span>
+        )}
+        {micStatus === 'denied' && (
+          <span className="absolute -top-1 -right-1 flex h-3 w-3 relative inline-flex rounded-full bg-red-500 border-2 border-white dark:border-[#1f1f1f]" title="Microphone permission denied"></span>
+        )}
       </button>
 
       <AnimatePresence>

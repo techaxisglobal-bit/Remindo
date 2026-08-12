@@ -2294,7 +2294,7 @@ export function Dashboard({
 
         <GroupsModal isOpen={isGroupsModalOpen} onClose={() => setIsGroupsModalOpen(false)} />
 
-        <MilliAssistant onAddTask={onAddTask} />
+        <MilliAssistant onAddTask={onAddTask} userName={userName} />
       </div >
     </div >
   );
