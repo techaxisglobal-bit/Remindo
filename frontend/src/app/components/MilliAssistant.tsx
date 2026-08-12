@@ -23,7 +23,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported' | 'no-speech'>('idle');
+  const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported' | 'no-speech' | 'prompt'>('idle');
   const [isListening, setIsListening] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('inactive');
   
@@ -42,6 +42,35 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   useEffect(() => {
     voiceStateRef.current = voiceState;
   }, [voiceState]);
+
+  useEffect(() => {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'microphone' as PermissionName })
+        .then((result) => {
+          if (result.state === 'granted') {
+            setIsListening(true);
+          } else if (result.state === 'prompt') {
+            setMicStatus('prompt');
+          } else if (result.state === 'denied') {
+            setMicStatus('denied');
+          }
+          
+          result.onchange = () => {
+            if (result.state === 'granted') {
+              setIsListening(true);
+              setMicStatus('idle');
+            } else if (result.state === 'denied') {
+              setIsListening(false);
+              setMicStatus('denied');
+            }
+          };
+        })
+        .catch((e) => console.warn('Permissions API not supported', e));
+    } else {
+      // Fallback for browsers without permissions API
+      setIsListening(true); // Attempt to start to trigger prompt
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,12 +98,16 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       isSpeakingRef.current = true;
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.onend = () => {
-        isSpeakingRef.current = false;
-        if (onEnd) onEnd();
+        setTimeout(() => {
+          isSpeakingRef.current = false;
+          if (onEnd) onEnd();
+        }, 500);
       };
       utterance.onerror = () => {
-        isSpeakingRef.current = false;
-        if (onEnd) onEnd();
+        setTimeout(() => {
+          isSpeakingRef.current = false;
+          if (onEnd) onEnd();
+        }, 500);
       };
       window.speechSynthesis.speak(utterance);
     } else {
@@ -85,7 +118,10 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   const processCommand = async (text: string, isVoice: boolean) => {
     if (!text.trim() || isLoading) return;
     
-    if (isVoice) setVoiceState('processing');
+    if (isVoice) {
+      setVoiceState('processing');
+      voiceStateRef.current = 'processing';
+    }
     setMessages(prev => [...prev, { role: 'user', content: text }]);
     setIsLoading(true);
 
@@ -105,15 +141,12 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
           speakText(response.message, () => setVoiceState('waiting-for-command'));
         }
       } else if (response.status === 'success' && response.task) {
-        const newTask = await fetchWithAuth('/api/tasks', {
-          method: 'POST',
-          body: JSON.stringify({
-            title: response.task.title,
-            date: response.task.date,
-            time: response.task.time,
-            isAllDay: response.task.isAllDay || false
-          })
-        });
+        const newTask = {
+          title: response.task.title,
+          date: response.task.date,
+          time: response.task.time,
+          isAllDay: response.task.isAllDay || false
+        };
         
         onAddTask(newTask);
         const confirmMsg = response.message || `I've created a reminder for "${response.task.title}" on ${response.task.date} at ${response.task.time}.`;
@@ -131,8 +164,12 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     } catch (e: any) {
       console.error(e);
       let errMsg = `Error: ${e.message}`;
-      if (errMsg.includes('Token is not valid') || errMsg.includes('No token')) {
-        errMsg = "Your session expired. Please sign in again to let Milli create reminders.";
+      if (errMsg.includes('Token is not valid') || errMsg.includes('No token') || errMsg.includes('jwt expired') || errMsg.includes('unauthorized')) {
+        errMsg = "Please sign in again so Milli can create reminders for you.";
+      } else if (errMsg.includes('Missing GEMINI_API_KEY') || errMsg.includes('Milli AI is not configured') || errMsg.includes('Failed to process AI request')) {
+        errMsg = "I'm having trouble connecting to my brain right now. Please try again later.";
+      } else {
+        errMsg = "I couldn't process that right now. Please try again.";
       }
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       if (isVoice) {
@@ -145,10 +182,12 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
   const triggerGreeting = () => {
     setVoiceState('processing');
+    voiceStateRef.current = 'processing';
     const greetingText = `Hey ${userName || 'there'}, I'm Milli, your personal assistant. How can I help you?`;
     setMessages(prev => [...prev, { role: 'assistant', content: greetingText }]);
     speakText(greetingText, () => {
       setVoiceState('waiting-for-command');
+      voiceStateRef.current = 'waiting-for-command';
     });
   };
 
@@ -328,13 +367,6 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   return (
     <>
       <div className={`fixed bottom-[calc(env(safe-area-inset-bottom,16px)+150px)] lg:bottom-[100px] right-6 z-40 ${isOpen ? 'hidden' : 'flex'} flex-col gap-3 items-center`}>
-        <button
-          onClick={toggleVoice}
-          title={isListening ? "Disable Voice Wake" : "Enable Voice Wake"}
-          className="p-3 bg-white dark:bg-[#252525] text-gray-700 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 border border-gray-200 dark:border-[#333] transition-all flex items-center justify-center"
-        >
-          {isListening ? <Mic className="w-5 h-5 text-green-500" /> : <MicOff className="w-5 h-5 opacity-50" />}
-        </button>
 
         <button
           onClick={() => setIsOpen(true)}
@@ -372,13 +404,19 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={toggleVoice}
-                  title={isListening ? "Disable Voice Mode" : "Enable Voice Mode"}
-                  className={`p-1.5 rounded-full transition-colors ${isListening ? 'bg-white/20 text-white' : 'hover:bg-white/10 text-white/70'}`}
-                >
-                  {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-                </button>
+                {micStatus === 'prompt' && (
+                  <button
+                    onClick={toggleVoice}
+                    className="text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-full transition-colors flex items-center gap-1 font-medium"
+                  >
+                    <Mic className="w-3 h-3" /> Enable Voice
+                  </button>
+                )}
+                {isListening && (
+                  <div title="Milli is listening for 'Hey Milli'" className="p-1.5 rounded-full bg-white/20 text-white flex items-center justify-center">
+                    <Mic className="w-4 h-4" />
+                  </div>
+                )}
                 <button onClick={() => setIsOpen(false)} className="hover:bg-black/10 p-1.5 rounded-full transition-colors">
                   <X className="w-4 h-4" />
                 </button>

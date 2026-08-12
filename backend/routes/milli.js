@@ -3,7 +3,8 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { GoogleGenerativeAI, SchemaType } = require('@google/generative-ai');
 
-const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+const apiKey = process.env.MILLI_AI_API_KEY || process.env.GEMINI_API_KEY;
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 const schema = {
   type: SchemaType.OBJECT,
@@ -37,7 +38,31 @@ router.post('/', auth, async (req, res) => {
         const { message, currentDate, history } = req.body;
         
         if (!genAI) {
-            return res.status(503).json({ error: "Milli AI is not configured. Missing GEMINI_API_KEY in backend environment." });
+            console.warn("Milli AI is in offline mode (no API key configured). Using deterministic fallback parser.");
+            
+            const msgLower = message.toLowerCase().trim();
+            
+            if (msgLower.startsWith("remind me to") || msgLower.includes("remind me to ")) {
+                const titleMatch = msgLower.split("remind me to ")[1];
+                if (titleMatch && titleMatch.trim().length > 0) {
+                    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                    return res.json({
+                        status: "success",
+                        message: "I've set a reminder for that.",
+                        task: {
+                            title: titleMatch.trim(),
+                            date: tomorrow,
+                            time: "09:00",
+                            isAllDay: false
+                        }
+                    });
+                }
+            }
+
+            return res.json({
+                status: "clarify",
+                message: "I'm currently in offline mode. Please say 'Remind me to' followed by your task, and I'll remind you tomorrow morning."
+            });
         }
         
         const systemInstruction = `You are Milli AI, a highly efficient reminder assistant.
@@ -70,7 +95,11 @@ Rules:
         });
         
         const result = await chat.sendMessage([{ text: message }]);
-        const responseText = result.response.text();
+        let responseText = result.response.text();
+        
+        // Gemini often wraps JSON in markdown blocks (e.g. ```json ... ```)
+        responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
         const parsed = JSON.parse(responseText);
         
         res.json(parsed);
