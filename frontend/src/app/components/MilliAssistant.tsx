@@ -26,6 +26,9 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   const [micStatus, setMicStatus] = useState<'idle' | 'listening' | 'denied' | 'unsupported' | 'no-speech' | 'prompt'>('idle');
   const [isListening, setIsListening] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>('inactive');
+  const [isWakeWordMode, setIsWakeWordMode] = useState(() => {
+    return localStorage.getItem('milli_wake_word_mode') === 'true';
+  });
   
   const restartCountRef = useRef(0);
   const lastRestartTimeRef = useRef(0);
@@ -34,6 +37,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const voiceStateRef = useRef<VoiceState>('inactive');
   const messagesRef = useRef<Message[]>(messages);
+  const isWakeWordModeRef = useRef(isWakeWordMode);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -44,31 +48,79 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
   }, [voiceState]);
 
   useEffect(() => {
+    isWakeWordModeRef.current = isWakeWordMode;
+  }, [isWakeWordMode]);
+
+  useEffect(() => {
+    if (isWakeWordMode) {
+      setIsListening(true);
+    }
+  }, []);
+
+  const playActivationCue = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+      // Ignore if web audio API fails
+    }
+  };
+
+  const toggleWakeWordMode = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const newVal = !isWakeWordMode;
+    setIsWakeWordMode(newVal);
+    localStorage.setItem('milli_wake_word_mode', String(newVal));
+    if (newVal) {
+      setIsListening(true);
+      setVoiceState('waiting-for-wake');
+      toast.success('Wake Word Mode Enabled (Say "Hey Milli")');
+    } else {
+      setIsListening(false);
+      setVoiceState('inactive');
+      toast.info('Wake Word Mode Disabled');
+    }
+  };
+
+  const startTapToSpeak = () => {
+    setIsListening(true);
+    setVoiceState('waiting-for-command');
+    playActivationCue();
+  };
+
+  useEffect(() => {
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'microphone' as PermissionName })
         .then((result) => {
-          if (result.state === 'granted') {
-            setIsListening(true);
-          } else if (result.state === 'prompt') {
+          if (result.state === 'prompt') {
             setMicStatus('prompt');
           } else if (result.state === 'denied') {
             setMicStatus('denied');
+          } else {
+            setMicStatus('idle');
           }
           
           result.onchange = () => {
             if (result.state === 'granted') {
-              setIsListening(true);
               setMicStatus('idle');
             } else if (result.state === 'denied') {
               setIsListening(false);
               setMicStatus('denied');
+              setIsWakeWordMode(false);
+              localStorage.setItem('milli_wake_word_mode', 'false');
             }
           };
         })
         .catch((e) => console.warn('Permissions API not supported', e));
-    } else {
-      // Fallback for browsers without permissions API
-      setIsListening(true); // Attempt to start to trigger prompt
     }
   }, []);
 
@@ -155,7 +207,13 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         const confirmMsg = response.message || `I've created a reminder for "${response.task.title}" on ${response.task.date} at ${response.task.time}.`;
         setMessages(prev => [...prev, { role: 'assistant', content: confirmMsg }]);
         if (isVoice) {
-          speakText(confirmMsg, () => setVoiceState('waiting-for-wake'));
+          speakText(confirmMsg, () => {
+             if (isWakeWordModeRef.current) setVoiceState('waiting-for-wake');
+             else {
+                setIsListening(false);
+                setVoiceState('inactive');
+             }
+          });
         }
       } else {
         const errMsg = "I'm sorry, I couldn't understand that. Could you try rephrasing?";
@@ -176,7 +234,13 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       }
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       if (isVoice) {
-        speakText(errMsg, () => setVoiceState('waiting-for-wake'));
+        speakText(errMsg, () => {
+           if (isWakeWordModeRef.current) setVoiceState('waiting-for-wake');
+           else {
+              setIsListening(false);
+              setVoiceState('inactive');
+           }
+        });
       }
     } finally {
       setIsLoading(false);
@@ -257,11 +321,10 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       console.log('Milli heard (combined):', combinedNormalized, '| Final:', finalNormalized);
 
       const wakePhrases = [
-        'hey milli', 'hi milli', 'hello milli',
-        'hey millie', 'hi millie', 'hello millie',
-        'hey milly', 'hi milly', 'hello milly',
-        'hey mili', 'hi mili', 'hello mili',
-        'milli', 'millie', 'milly', 'mili'
+        'hey milli', 'hi milli', 'hello milli', 'okay milli', 'ok milli',
+        'hey millie', 'hi millie', 'hello millie', 'okay millie', 'ok millie',
+        'hey milly', 'hi milly', 'hello milly', 'okay milly', 'ok milly',
+        'hey mili', 'hi mili', 'hello mili', 'okay mili', 'ok mili'
       ];
 
       if (currentVoiceState === 'waiting-for-wake') {
@@ -269,19 +332,25 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
          let foundInCombined = wakePhrases.find(p => combinedNormalized.includes(p));
 
          if (foundInFinal) {
+            console.log('Wake word detected in final:', foundInFinal);
             setIsOpen(true);
             const remainder = finalNormalized.substring(finalNormalized.indexOf(foundInFinal) + foundInFinal.length).trim();
             if (remainder.length > 5) {
                processCommand(remainder, true);
             } else {
-               triggerGreeting();
+               playActivationCue();
+               setVoiceState('waiting-for-command');
+               voiceStateRef.current = 'waiting-for-command';
             }
          } else if (foundInCombined) {
+            console.log('Wake word detected in combined:', foundInCombined);
             const remainder = combinedNormalized.substring(combinedNormalized.indexOf(foundInCombined) + foundInCombined.length).trim();
             if (remainder.length <= 5) {
                setIsOpen(true);
-               triggerGreeting();
-               try { recognition.stop(); } catch(e){}
+               playActivationCue();
+               setVoiceState('waiting-for-command');
+               voiceStateRef.current = 'waiting-for-command';
+               try { recognition.stop(); } catch(e){} // Restart to clear buffer
             }
          }
       } else if (currentVoiceState === 'waiting-for-command') {
@@ -305,6 +374,13 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
 
     recognition.onend = () => {
       if (!isDenied && !isUnmounted && isListening) {
+        if (voiceStateRef.current === 'waiting-for-command' && !isWakeWordModeRef.current) {
+          setIsListening(false);
+          setMicStatus('idle');
+          setVoiceState('inactive');
+          return;
+        }
+
         const now = Date.now();
         if (now - lastRestartTimeRef.current < 1000) {
           restartCountRef.current += 1;
@@ -322,6 +398,8 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         } else {
           console.warn('Stopped speech recognition to prevent endless restart loops.');
           setIsListening(false);
+          setIsWakeWordMode(false);
+          localStorage.setItem('milli_wake_word_mode', 'false');
           setMicStatus('idle');
           setVoiceState('inactive');
           toast.error('Voice recognition paused due to inactivity/errors. Click mic to restart.');
@@ -343,11 +421,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
     };
   }, [userName, isListening]);
 
-  const toggleVoice = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsOpen(true);
-    setIsListening(prev => !prev);
-  };
+
 
   const handleSend = () => {
     const textToSend = input.trim();
@@ -408,19 +482,13 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {micStatus === 'prompt' && (
-                  <button
-                    onClick={toggleVoice}
-                    className="text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-full transition-colors flex items-center gap-1 font-medium"
-                  >
-                    <Mic className="w-3 h-3" /> Enable Voice
-                  </button>
-                )}
-                {isListening && (
-                  <div title="Milli is listening for 'Hey Milli'" className="p-1.5 rounded-full bg-white/20 text-white flex items-center justify-center">
-                    <Mic className="w-4 h-4" />
-                  </div>
-                )}
+                <button
+                  onClick={toggleWakeWordMode}
+                  className={`text-xs px-2 py-1 rounded-full transition-colors flex items-center gap-1 font-medium ${isWakeWordMode ? 'bg-green-400/20 text-green-100' : 'bg-white/20 hover:bg-white/30 text-white'}`}
+                >
+                  {isWakeWordMode ? <Mic className="w-3 h-3" /> : <MicOff className="w-3 h-3" />}
+                  {isWakeWordMode ? 'Wake Word ON' : 'Wake Word OFF'}
+                </button>
                 <button onClick={() => setIsOpen(false)} className="hover:bg-black/10 p-1.5 rounded-full transition-colors">
                   <X className="w-4 h-4" />
                 </button>
@@ -471,15 +539,25 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   disabled={isLoading}
-                  className="w-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-full py-2.5 pl-4 pr-12 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6]/50 text-sm disabled:opacity-50"
+                  className="w-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-full py-2.5 pl-4 pr-20 focus:outline-none focus:ring-1 focus:ring-[#8b5cf6]/50 text-sm disabled:opacity-50"
                 />
-                <button
-                  onClick={handleSend}
-                  disabled={isLoading || !input.trim()}
-                  className="absolute right-1 w-8 h-8 flex items-center justify-center bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </button>
+                <div className="absolute right-1 flex items-center gap-1">
+                  <button
+                    onClick={startTapToSpeak}
+                    disabled={isLoading}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${voiceState === 'waiting-for-command' && !isWakeWordMode ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-200 dark:bg-[#444] hover:bg-gray-300 dark:hover:bg-[#555] text-gray-600 dark:text-gray-300'} disabled:opacity-50`}
+                    title="Tap to speak"
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    disabled={isLoading || !input.trim()}
+                    className="w-8 h-8 flex items-center justify-center bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
