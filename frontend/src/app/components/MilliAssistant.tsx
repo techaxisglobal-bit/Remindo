@@ -131,6 +131,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
         body: JSON.stringify({
           message: text,
           currentDate: new Date().toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
           history: messagesRef.current
         })
       });
@@ -145,7 +146,9 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
           title: response.task.title,
           date: response.task.date,
           time: response.task.time,
-          isAllDay: response.task.isAllDay || false
+          isAllDay: response.task.isAllDay || false,
+          description: response.task.description || '',
+          category: response.task.category || 'other'
         };
         
         onAddTask(newTask);
@@ -321,6 +324,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
           setIsListening(false);
           setMicStatus('idle');
           setVoiceState('inactive');
+          toast.error('Voice recognition paused due to inactivity/errors. Click mic to restart.');
         }
       }
     };
