@@ -43,28 +43,110 @@ router.post('/', auth, async (req, res) => {
         if (!genAI) {
             console.warn("Milli AI is in offline mode (no API key configured). Using deterministic fallback parser.");
             
-            const msgLower = message.toLowerCase().trim();
+            let msgLower = message.toLowerCase().trim();
             
-            if (msgLower.startsWith("remind me to") || msgLower.includes("remind me to ")) {
-                const titleMatch = msgLower.split("remind me to ")[1];
-                if (titleMatch && titleMatch.trim().length > 0) {
-                    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-                    return res.json({
-                        status: "success",
-                        message: "I've set a reminder for that.",
-                        task: {
-                            title: titleMatch.trim(),
-                            date: tomorrow,
-                            time: "09:00",
-                            isAllDay: false
-                        }
-                    });
+            // Remove common prefixes
+            const prefixes = ["remind me to ", "remind me about ", "remind me ", "set a reminder for ", "set reminder for ", "set a reminder to ", "set reminder to "];
+            let taskText = msgLower;
+            for (const prefix of prefixes) {
+                if (msgLower.startsWith(prefix)) {
+                    taskText = msgLower.substring(prefix.length).trim();
+                    break;
                 }
             }
 
+            if (!taskText || taskText === 'remind' || taskText === 'reminder') {
+                return res.json({
+                    status: "clarify",
+                    message: "What would you like me to remind you about?"
+                });
+            }
+
+            // Basic Date/Time parsing
+            let date = new Date(currentDate || Date.now());
+            let timeStr = "09:00"; // default morning
+            let dateStr = "";
+            let timeFound = false;
+
+            if (taskText.includes("tomorrow")) {
+                date.setDate(date.getDate() + 1);
+                taskText = taskText.replace("tomorrow", "").trim();
+            } else if (taskText.includes("today")) {
+                // leave date as today
+                taskText = taskText.replace("today", "").trim();
+            } else if (taskText.includes("next week")) {
+                date.setDate(date.getDate() + 7);
+                taskText = taskText.replace("next week", "").trim();
+            } else {
+                // default to tomorrow if no date specified
+                date.setDate(date.getDate() + 1);
+            }
+
+            // Look for time like "at 9", "at 9pm", "at 9:30 pm"
+            const timeRegex = /at (\d{1,2})(?::(\d{2}))?\s*(am|pm)?/;
+            const timeMatch = taskText.match(timeRegex);
+            if (timeMatch) {
+                let hour = parseInt(timeMatch[1]);
+                let min = timeMatch[2] || "00";
+                let ampm = timeMatch[3];
+                
+                if (ampm === 'pm' && hour < 12) hour += 12;
+                if (ampm === 'am' && hour === 12) hour = 0;
+                // Basic assumption if no am/pm
+                if (!ampm && hour < 7) hour += 12; // 1 -> 1pm
+
+                timeStr = `${hour.toString().padStart(2, '0')}:${min}`;
+                taskText = taskText.replace(timeRegex, "").trim();
+                timeFound = true;
+            } else if (taskText.includes("in ") && taskText.includes("minutes")) {
+                const minMatch = taskText.match(/in (\d+)\s+minutes/);
+                if (minMatch) {
+                    const minsToAdd = parseInt(minMatch[1]);
+                    date.setMinutes(date.getMinutes() + minsToAdd);
+                    timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                    taskText = taskText.replace(minMatch[0], "").trim();
+                    timeFound = true;
+                }
+            } else if (taskText.includes("morning")) {
+                timeStr = "09:00";
+                taskText = taskText.replace("morning", "").trim();
+            } else if (taskText.includes("afternoon")) {
+                timeStr = "15:00";
+                taskText = taskText.replace("afternoon", "").trim();
+            } else if (taskText.includes("evening") || taskText.includes("night")) {
+                timeStr = "20:00";
+                taskText = taskText.replace(/evening|night/, "").trim();
+            }
+
+            // Clean up connecting words
+            taskText = taskText.replace(/^(on|at|about|that|for)\s+/, "").trim();
+            // Remove trailing words
+            taskText = taskText.replace(/\s+(on|at)$/, "").trim();
+            
+            if (taskText === "") {
+                return res.json({
+                    status: "clarify",
+                    message: "What was the reminder for?"
+                });
+            }
+
+            // Capitalize first letter
+            taskText = taskText.charAt(0).toUpperCase() + taskText.slice(1);
+            
+            // Format YYYY-MM-DD
+            dateStr = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
             return res.json({
-                status: "clarify",
-                message: "I'm currently in offline mode. Please say 'Remind me to' followed by your task, and I'll remind you tomorrow morning."
+                status: "success",
+                message: timeFound ? `I've set a reminder for ${taskText}.` : `I scheduled "${taskText}" for tomorrow morning. (Offline mode)`,
+                task: {
+                    title: taskText,
+                    date: dateStr,
+                    time: timeStr,
+                    isAllDay: false,
+                    description: "Created via offline parser",
+                    category: "other"
+                }
             });
         }
         
