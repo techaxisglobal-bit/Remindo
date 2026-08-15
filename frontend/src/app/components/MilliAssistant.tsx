@@ -227,7 +227,15 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       let errMsg = `Error: ${e.message}`;
       if (errMsg.includes('Token is not valid') || errMsg.includes('No token') || errMsg.includes('jwt expired') || errMsg.includes('unauthorized')) {
         errMsg = "Please sign in again so Milli can create reminders for you.";
-      } else if (errMsg.includes('Missing OPENAI_API_KEY') || errMsg.includes('Invalid OPENAI_API_KEY') || errMsg.includes('Rate limit exceeded') || errMsg.includes('Failed to process AI request')) {
+      } else if (errMsg.includes('quota is exhausted') || errMsg.includes('rate limited')) {
+        errMsg = "Milli AI quota is exhausted. Please update the Gemini billing/API key.";
+      } else if (errMsg.includes('Invalid GEMINI_API_KEY')) {
+        errMsg = "Milli AI is misconfigured (Invalid Gemini API Key).";
+      } else if (errMsg.includes('Missing GEMINI_API_KEY')) {
+        errMsg = "Milli AI is not configured. Please add a GEMINI_API_KEY.";
+      } else if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network failure')) {
+        errMsg = "Network failure. Please check your internet connection.";
+      } else if (errMsg.includes('Failed to process AI request')) {
         errMsg = "I'm having trouble connecting to my brain right now. Please try again later.";
       } else {
         errMsg = "I couldn't process that right now. Please try again.";
