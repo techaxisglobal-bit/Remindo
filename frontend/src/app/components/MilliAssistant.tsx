@@ -227,7 +227,7 @@ export function MilliAssistant({ onAddTask, userName }: MilliAssistantProps) {
       let errMsg = `Error: ${e.message}`;
       if (errMsg.includes('Token is not valid') || errMsg.includes('No token') || errMsg.includes('jwt expired') || errMsg.includes('unauthorized')) {
         errMsg = "Please sign in again so Milli can create reminders for you.";
-      } else if (errMsg.includes('Missing GEMINI_API_KEY') || errMsg.includes('Milli AI is not configured') || errMsg.includes('Failed to process AI request')) {
+      } else if (errMsg.includes('Missing OPENAI_API_KEY') || errMsg.includes('Invalid OPENAI_API_KEY') || errMsg.includes('Rate limit exceeded') || errMsg.includes('Failed to process AI request')) {
         errMsg = "I'm having trouble connecting to my brain right now. Please try again later.";
       } else {
         errMsg = "I couldn't process that right now. Please try again.";
