@@ -27,7 +27,7 @@ import {
 } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 
 import {
   Home,
@@ -1287,7 +1287,7 @@ export function Dashboard({
               onClose={() => setShowProfileMenu(false)}
               onLogout={async () => {
                 try {
-                  await GoogleAuth.signOut();
+                  await SocialLogin.logout({ provider: 'google' });
                 } catch (e) {
                   console.error('Google signOut error:', e);
                 }

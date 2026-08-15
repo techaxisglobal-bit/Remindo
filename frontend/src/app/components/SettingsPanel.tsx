@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
 import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import type { User as UserType } from '@/app/types';
 import { EditProfileModal } from './EditProfileModal';
 import { AvatarImage } from '@/app/components/ui/avatar';
@@ -122,7 +122,7 @@ export function SettingsPanel({
 
   const handleLogout = async () => {
     try {
-      await GoogleAuth.signOut();
+      await SocialLogin.logout({ provider: 'google' });
     } catch (e) {
       console.error('Google signOut error:', e);
     }

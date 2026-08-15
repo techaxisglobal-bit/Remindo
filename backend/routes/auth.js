@@ -282,6 +282,7 @@ router.post('/google', async (req, res) => {
                 audience: [
                     process.env.GOOGLE_CLIENT_ID,
                     process.env.GOOGLE_ANDROID_CLIENT_ID,
+                    process.env.GOOGLE_IOS_CLIENT_ID || '733914668823-6vilngcr5ta83g48aa45vs4kju7jvkl9.apps.googleusercontent.com',
                 ].filter(Boolean),
             });
 

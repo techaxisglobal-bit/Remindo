@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { API_BASE_URL } from '@/app/api';
 import { Capacitor } from '@capacitor/core';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
@@ -41,18 +41,13 @@ export function SignIn({ onSignIn }: SignInProps) {
     setTheme(saved);
     document.documentElement.classList.toggle('dark', saved === 'dark');
 
-    // Initialize GoogleAuth (native Android/iOS only)
-    if (Capacitor.isNativePlatform()) {
-      try {
-        GoogleAuth.initialize({
-          clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com',
-          scopes: ['profile', 'email'],
-          grantOfflineAccess: false,
-        });
-      } catch (err) {
-        console.error('Failed to initialize Google Auth', err);
+    // Initialize SocialLogin for Google
+    SocialLogin.initialize({
+      google: {
+        webClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '733914668823-u99m79v3ej4m4ispefs78k0tp749ef2j.apps.googleusercontent.com',
+        iOSClientId: '733914668823-6vilngcr5ta83g48aa45vs4kju7jvkl9.apps.googleusercontent.com',
       }
-    }
+    }).catch(err => console.error('SocialLogin initialize error:', err));
   }, []);
 
   // Auto-clear error after 5 seconds
@@ -407,6 +402,51 @@ export function SignIn({ onSignIn }: SignInProps) {
   }, []);
 
   const handleAppleClick = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await SocialLogin.login({
+          provider: 'apple',
+          options: {
+            scopes: ['email', 'name'],
+          }
+        });
+
+        if (result.result && result.result.idToken) {
+          setLoading(true);
+          const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/apple`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_token: result.result.idToken,
+              code: result.result.authorizationCode,
+              user: result.profile?.name ? {
+                name: {
+                  firstName: result.profile.givenName || result.profile.name,
+                  lastName: result.profile.familyName || ''
+                },
+                email: result.profile.email
+              } : null
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.msg || 'Apple authentication failed');
+
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          toast.success('Signed in with Apple!');
+          await processPendingInvitation(data.token);
+          onSignIn(data.user.email);
+        }
+      } catch (error: any) {
+        console.error('Native Apple sign-in error:', error);
+        toast.error(error.message || 'Apple sign-in failed');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Web fallback
     const clientId = import.meta.env.VITE_APPLE_CLIENT_ID;
     if (!clientId || clientId === 'YOUR_APPLE_CLIENT_ID_HERE') {
       toast.error('Apple Client ID not configured. Please add it to the .env file.');
@@ -429,13 +469,19 @@ export function SignIn({ onSignIn }: SignInProps) {
 
     if (!isWeb) {
       // Native Google Sign In
-      setLoading(true);
       try {
-        const googleUser = await GoogleAuth.signIn();
+        const result = await SocialLogin.login({
+          provider: 'google',
+          options: {
+            scopes: ['email', 'profile'],
+          }
+        });
+        const idToken = result.result.idToken;
+        
         const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: googleUser.authentication.idToken })
+          body: JSON.stringify({ credential: idToken })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.msg || 'Google authentication failed');
