@@ -81,10 +81,15 @@ Rules:
 7. Be friendly but concise in your message.`;
 
         // Map frontend history to Gemini history
-        const formattedHistory = (history || []).map(h => ({
+        let formattedHistory = (history || []).map(h => ({
             role: h.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: h.content }]
         }));
+
+        // Gemini requires the first message to be from the 'user'
+        while (formattedHistory.length > 0 && formattedHistory[0].role === 'model') {
+            formattedHistory.shift();
+        }
 
         console.log("[Milli AI - Gemini] Sending request to Gemini...");
 
