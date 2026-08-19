@@ -138,8 +138,8 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     };
 
     return (
-        <div className="bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-100 dark:border-[#292929] overflow-hidden max-w-4xl mx-auto my-8">
-            <div className="p-6 md:p-8 border-b border-gray-100 dark:border-[#292929] bg-gradient-to-r from-gray-50 to-white dark:from-[#202020] dark:to-[#1b1b1b]">
+        <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-sm border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] overflow-hidden max-w-4xl mx-auto my-8">
+            <div className="p-6 md:p-8 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] bg-gradient-to-r from-gray-50 to-white dark:from-[#202020] dark:to-[#1b1b1b]">
                 <div className="flex items-center gap-3">
                     <div className="p-3 bg-[#e0b596]/10 text-[#e0b596] rounded-xl">
                         <Store className="w-6 h-6" />
@@ -154,7 +154,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
             <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
                 {/* Basic Info */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-[#292929] pb-2">Basic Information</h3>
+                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] pb-2">Basic Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="businessName">Business Name *</Label>
@@ -167,7 +167,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                                 name="category" 
                                 value={formData.category} 
                                 onChange={handleChange} 
-                                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#292929] dark:bg-black dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300" 
+                                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] dark:bg-[#0a0a0a] dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300" 
                                 required
                             >
                                 <option value="" disabled>Select a category</option>
@@ -211,7 +211,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
                 {/* Contact & Location */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-[#292929] pb-2">Contact & Location</h3>
+                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] pb-2">Contact & Location</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="phone">Phone Number *</Label>
@@ -241,7 +241,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
                 {/* Digital Presence & Uploads */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-[#292929] pb-2">Digital Presence & Files</h3>
+                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] pb-2">Digital Presence & Files</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="website">Website</Label>
@@ -275,16 +275,16 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
                 {/* Additional Settings */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-[#292929] pb-2">Settings & Features</h3>
+                    <h3 className="text-lg font-semibold border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] pb-2">Settings & Features</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex items-center justify-between p-4 border border-gray-100 dark:border-[#292929] rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-xl">
                             <div>
                                 <Label className="text-base">Delivery Available</Label>
                                 <p className="text-xs text-gray-500">Do you deliver to customers?</p>
                             </div>
                             <Switch checked={formData.deliveryAvailable} onCheckedChange={(c) => handleSwitchChange('deliveryAvailable', c)} />
                         </div>
-                        <div className="flex items-center justify-between p-4 border border-gray-100 dark:border-[#292929] rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-xl">
                             <div>
                                 <Label className="text-base">Online Service</Label>
                                 <p className="text-xs text-gray-500">Do you offer virtual/online services?</p>
@@ -295,7 +295,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                 </div>
 
                 {/* Submit Actions */}
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-[#292929]">
+                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                     <Button type="button" variant="outline" onClick={handleReset} disabled={isLoading}>
                         <RefreshCw className="w-4 h-4 mr-2" /> Reset
                     </Button>

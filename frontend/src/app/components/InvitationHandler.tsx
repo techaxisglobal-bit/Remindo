@@ -75,8 +75,8 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4">
-                <div className="bg-white dark:bg-black p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-[#333] text-center space-y-4">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-black text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="bg-white dark:bg-[#0a0a0a] p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] text-center space-y-4">
+                    <div className="w-16 h-16 bg-red-100 dark:bg-[#0a0a0a] text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -97,7 +97,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
     if (inviteDetails) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4">
-                <div className="bg-white dark:bg-black p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-[#333] text-center space-y-6">
+                <div className="bg-white dark:bg-[#0a0a0a] p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] text-center space-y-6">
                     <div className="w-16 h-16 bg-[#e0b596]/10 text-[#e0b596] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
@@ -110,7 +110,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
                         </p>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-black border border-gray-100 dark:border-[#333] p-4 rounded-2xl text-left space-y-2">
+                    <div className="bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] p-4 rounded-2xl text-left space-y-2">
                         <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-2">{inviteDetails.task.title}</h3>
                         <p className="text-sm text-gray-500 flex items-center gap-2">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,7 +133,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
                             </button>
                             <button
                                 onClick={() => onNavigate('/signin')}
-                                className="w-full bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black text-gray-900 dark:text-white py-3 rounded-xl font-bold transition-all border border-gray-200 dark:border-[#444] active:scale-[0.98]"
+                                className="w-full bg-white dark:bg-[#0a0a0a] hover:bg-gray-50 dark:hover:bg-black text-gray-900 dark:text-white py-3 rounded-xl font-bold transition-all border border-gray-200 dark:border-[#444] active:scale-[0.98]"
                             >
                                 Sign In
                             </button>

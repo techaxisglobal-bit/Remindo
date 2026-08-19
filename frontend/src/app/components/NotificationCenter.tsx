@@ -169,8 +169,8 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
-            <div ref={ref} className="w-full max-w-md bg-white dark:bg-black h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                <div className="px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-black">
+            <div ref={ref} className="w-full max-w-md bg-white dark:bg-[#0a0a0a] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                <div className="px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#0a0a0a]">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Bell className="w-5 h-5" /> Notifications
                     </h2>
@@ -190,7 +190,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</h3>
                                 <div className="space-y-2">
                                     {items.map(n => (
-                                        <div key={n.id} className={`p-4 rounded-xl border transition-all ${n.status === 'Unread' ? 'bg-[#e0b596]/10 border-[#e0b596]/30 shadow-sm' : 'bg-white dark:bg-black border-gray-100 dark:border-[#333]'}`}>
+                                        <div key={n.id} className={`p-4 rounded-xl border transition-all ${n.status === 'Unread' ? 'bg-[#e0b596]/10 border-[#e0b596]/30 shadow-sm' : 'bg-white dark:bg-black border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]'}`}>
                                             <div className="flex justify-between items-start mb-1">
                                                 <h4 className={`font-semibold text-sm ${n.status === 'Unread' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</h4>
                                                 <div className="flex gap-2">

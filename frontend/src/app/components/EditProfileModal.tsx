@@ -268,9 +268,9 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-black rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-black/5 dark:ring-white/10"
+        className="bg-white dark:bg-[#0a0a0a] rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-black/5 dark:ring-white/10"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#333] sticky top-0 bg-white/80 dark:bg-black backdrop-blur-md z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] sticky top-0 bg-white/80 dark:bg-[#0a0a0a] backdrop-blur-md z-10">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
           <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors">
             <X className="w-5 h-5" />
@@ -409,7 +409,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
-                <SelectContent className="z-[70] bg-white dark:bg-black border-gray-200 dark:border-[#333]">
+                <SelectContent className="z-[70] bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                   <SelectItem value="Male" className="focus:bg-gray-100 dark:focus:bg-black cursor-pointer">Male</SelectItem>
                   <SelectItem value="Female" className="focus:bg-gray-100 dark:focus:bg-black cursor-pointer">Female</SelectItem>
                   <SelectItem value="Non-binary" className="focus:bg-gray-100 dark:focus:bg-black cursor-pointer">Non-binary</SelectItem>
@@ -420,7 +420,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#333] flex justify-end gap-3 bg-gray-50/50 dark:bg-black">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] flex justify-end gap-3 bg-gray-50/50 dark:bg-[#0a0a0a]">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSave} 

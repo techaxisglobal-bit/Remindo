@@ -560,11 +560,11 @@ export function SignIn({ onSignIn }: SignInProps) {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="bg-white/90 dark:bg-black backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-[#292929] relative overflow-hidden">
+        <div className="bg-white/90 dark:bg-[#0a0a0a] backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] relative overflow-hidden">
 
           {/* Verification / Loading Overlay */}
           {loading && (
-            <div className="absolute inset-0 bg-white/70 dark:bg-black backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
+            <div className="absolute inset-0 bg-white/70 dark:bg-[#0a0a0a] backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
               <div className="w-12 h-12 border-4 border-[#e0b596] border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200 animate-pulse tracking-wide">
                 Please wait...
@@ -579,7 +579,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="mb-6 p-4 bg-red-50 dark:bg-black border border-red-100 dark:border-red-900/30 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
+                className="mb-6 p-4 bg-red-50 dark:bg-[#0a0a0a] border border-red-100 dark:border-red-900/30 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
               >
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
@@ -701,7 +701,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                   {/* Google Sign In */}
                   <button
                     onClick={handleGoogleClick}
-                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#0a0a0a] hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
                   >
                     {/* Glossy shine */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent dark:from-white/5 pointer-events-none" />
@@ -718,7 +718,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                   {/* Apple Sign In */}
                   <button
                     onClick={handleAppleClick}
-                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#0a0a0a] hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
                   >
                     {/* Glossy shine */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent dark:from-white/5 pointer-events-none" />

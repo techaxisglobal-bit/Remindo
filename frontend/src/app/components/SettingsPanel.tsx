@@ -157,10 +157,10 @@ export function SettingsPanel({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white/60 dark:bg-black backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
+        className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
       >
         {/* Header - Minimal & Clean */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#333]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h2>
           <button
             onClick={onClose}
@@ -207,7 +207,7 @@ export function SettingsPanel({
             {/* Appearance */}
             <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-black transition-all duration-300 border border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
+                <div className="p-2.5 rounded-xl bg-white/50 dark:bg-[#0a0a0a] backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
                   {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </div>
                 <div>
@@ -225,7 +225,7 @@ export function SettingsPanel({
             {/* Notifications */}
             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-black transition-colors border border-transparent hover:border-gray-100 dark:hover:border-[#333]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-black text-gray-700 dark:text-[#e0b596]">
+                <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-[#0a0a0a] text-gray-700 dark:text-[#e0b596]">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div>
@@ -253,7 +253,7 @@ export function SettingsPanel({
                   className="flex items-center justify-between w-full group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
+                    <div className="p-2.5 rounded-xl bg-white/50 dark:bg-[#0a0a0a] backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
                       <Shield className="w-5 h-5" />
                     </div>
                     <div className="text-left">
@@ -282,7 +282,7 @@ export function SettingsPanel({
                               value={currentPassword}
                               onChange={(e) => setCurrentPassword(e.target.value)}
                               placeholder="••••••••"
-                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                             <button
                               type="button"
@@ -302,7 +302,7 @@ export function SettingsPanel({
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
                               placeholder="Min. 6 characters"
-                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                           </div>
                           <div className="relative">
@@ -312,7 +312,7 @@ export function SettingsPanel({
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               placeholder="Match new password"
-                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                           </div>
                         </div>
@@ -343,7 +343,7 @@ export function SettingsPanel({
           </section>
 
           {/* Footer / About */}
-          <section className="pt-6 border-t border-gray-100 dark:border-[#333]">
+          <section className="pt-6 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-6 px-1">
               <span>App Version</span>
               <span className="font-mono">v1.2.0</span>

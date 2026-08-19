@@ -37,10 +37,10 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.95, opacity: 0, y: -10 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white/60 dark:bg-black backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] w-80 overflow-hidden flex flex-col bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
+                className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] w-80 overflow-hidden flex flex-col bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#333]">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile</h2>
                     <button
                         onClick={onClose}
@@ -71,7 +71,7 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-1">Accounts</h4>
 
                         {accounts.map((acc, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-white/40 dark:bg-black border border-white/20 dark:border-white/5 shadow-sm">
+                            <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-white/40 dark:bg-[#0a0a0a] border border-white/20 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm">
                                 <div className="flex items-center gap-3">
                                     <Avatar className="w-8 h-8 bg-gray-200 dark:bg-black">
                                         <AvatarFallback className="text-xs">{acc.name.slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -89,7 +89,7 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                             onClick={handleAddAccount}
                             className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-black border border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#e0b596] hover:text-[#e0b596] transition-all group"
                         >
-                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-black flex items-center justify-center group-hover:bg-[#e0b596]/10">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#0a0a0a] flex items-center justify-center group-hover:bg-[#e0b596]/10">
                                 <Plus className="w-4 h-4" />
                             </div>
                             <span className="text-sm font-medium">Add another account</span>
@@ -99,7 +99,7 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-100 dark:border-[#333] bg-gray-50/50 dark:bg-black">
+                <div className="p-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] bg-gray-50/50 dark:bg-[#0a0a0a]">
                     <Button
                         onClick={onLogout}
                         variant="ghost"

@@ -35,7 +35,7 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
             <div className="p-5 flex-1">
                 <div className="flex gap-4 items-start">
                     {/* Logo */}
-                    <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-black border border-gray-200 dark:border-[#444] flex-shrink-0 overflow-hidden flex items-center justify-center text-gray-400">
+                    <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#444] flex-shrink-0 overflow-hidden flex items-center justify-center text-gray-400">
                         <MerchantLogo 
                             url={merchant.logoUrl} 
                             name={merchant.businessName} 
@@ -86,12 +86,12 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2 mt-4">
                     {merchant.deliveryAvailable && (
-                        <span className="text-[10px] bg-blue-50 dark:bg-black text-blue-600 dark:text-blue-400 px-2 py-1 rounded border border-blue-100 dark:border-blue-900/30">
+                        <span className="text-[10px] bg-blue-50 dark:bg-[#0a0a0a] text-blue-600 dark:text-blue-400 px-2 py-1 rounded border border-blue-100 dark:border-blue-900/30">
                             Delivery Available
                         </span>
                     )}
                     {merchant.onlineServiceAvailable && (
-                        <span className="text-[10px] bg-purple-50 dark:bg-black text-purple-600 dark:text-purple-400 px-2 py-1 rounded border border-purple-100 dark:border-purple-900/30">
+                        <span className="text-[10px] bg-purple-50 dark:bg-[#0a0a0a] text-purple-600 dark:text-purple-400 px-2 py-1 rounded border border-purple-100 dark:border-purple-900/30">
                             Online Service
                         </span>
                     )}
@@ -99,7 +99,7 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
             </div>
 
             {/* Actions */}
-            <div className="border-t border-gray-100 dark:border-gray-800/60 p-3 bg-gray-50/50 dark:bg-black flex gap-2 justify-end">
+            <div className="border-t border-gray-100 dark:border-gray-800/60 p-3 bg-gray-50/50 dark:bg-[#0a0a0a] flex gap-2 justify-end">
                 {isAdminView ? (
                     <>
                         {merchant.status === 'PENDING' && (
@@ -139,16 +139,16 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
             {/* Custom Contact Modal */}
             {showContactModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-black rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-black">
+                    <div className="bg-white dark:bg-[#0a0a0a] rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-[#0a0a0a]">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">Contact Options</h3>
-                            <button onClick={() => setShowContactModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors bg-white dark:bg-black rounded-full p-1 border border-gray-200 dark:border-gray-700">
+                            <button onClick={() => setShowContactModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors bg-white dark:bg-[#0a0a0a] rounded-full p-1 border border-gray-200 dark:border-transparent">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
                         <div className="p-5 space-y-3">
-                            <a href={`tel:${merchant.phone}`} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-black hover:border-blue-200 dark:hover:border-blue-900/30 transition-all group">
-                                <div className="p-2.5 bg-blue-100 dark:bg-black text-blue-600 dark:text-blue-400 rounded-full group-hover:scale-110 transition-transform">
+                            <a href={`tel:${merchant.phone}`} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-transparent hover:bg-blue-50 dark:hover:bg-black hover:border-blue-200 dark:hover:border-blue-900/30 transition-all group">
+                                <div className="p-2.5 bg-blue-100 dark:bg-[#0a0a0a] text-blue-600 dark:text-blue-400 rounded-full group-hover:scale-110 transition-transform">
                                     <Phone className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -158,8 +158,8 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                             </a>
                             
                             {merchant.whatsappNumber && (
-                                <a href={`https://wa.me/${merchant.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-green-50 dark:hover:bg-black hover:border-green-200 dark:hover:border-green-900/30 transition-all group">
-                                    <div className="p-2.5 bg-green-100 dark:bg-black text-green-600 dark:text-green-400 rounded-full group-hover:scale-110 transition-transform">
+                                <a href={`https://wa.me/${merchant.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-transparent hover:bg-green-50 dark:hover:bg-black hover:border-green-200 dark:hover:border-green-900/30 transition-all group">
+                                    <div className="p-2.5 bg-green-100 dark:bg-[#0a0a0a] text-green-600 dark:text-green-400 rounded-full group-hover:scale-110 transition-transform">
                                         <PhoneForwarded className="w-5 h-5" />
                                     </div>
                                     <div>
@@ -170,8 +170,8 @@ export function MerchantCard({ merchant, isAdminView, onApprove, onReject, onFea
                             )}
 
                             {merchant.website && (
-                                <a href={merchant.website.startsWith('http') ? merchant.website : `https://${merchant.website}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-purple-50 dark:hover:bg-black hover:border-purple-200 dark:hover:border-purple-900/30 transition-all group">
-                                    <div className="p-2.5 bg-purple-100 dark:bg-black text-purple-600 dark:text-purple-400 rounded-full group-hover:scale-110 transition-transform">
+                                <a href={merchant.website.startsWith('http') ? merchant.website : `https://${merchant.website}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 dark:border-transparent hover:bg-purple-50 dark:hover:bg-black hover:border-purple-200 dark:hover:border-purple-900/30 transition-all group">
+                                    <div className="p-2.5 bg-purple-100 dark:bg-[#0a0a0a] text-purple-600 dark:text-purple-400 rounded-full group-hover:scale-110 transition-transform">
                                         <Globe className="w-5 h-5" />
                                     </div>
                                     <div>
