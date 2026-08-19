@@ -62,6 +62,7 @@ import {
   Rows3,
   Columns3,
   PanelLeft,
+  Bell,
   BellOff,
   Store,
   ShieldCheck,
