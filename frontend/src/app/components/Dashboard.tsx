@@ -62,11 +62,14 @@ import {
   Rows3,
   Columns3,
   PanelLeft,
-  Bell,
   BellOff,
   Store,
   ShieldCheck,
-  Users
+  Users,
+  Timer,
+  CheckCircle2,
+  BriefcaseBusiness,
+  UsersRound
 } from 'lucide-react';
 
 import { Task, User as UserType } from '@/app/types';
@@ -2208,11 +2211,11 @@ export function Dashboard({
           >
             {[
               { id: 'calendar', icon: Home, label: 'Home' },
-              { id: 'pending', icon: Hourglass, label: 'Pending' },
-              { id: 'completed', icon: CheckCircle, label: 'Completed' },
-              { id: 'merchants', icon: Store, label: 'Explore Businesses' },
-              { id: 'groups', icon: Users, label: 'Groups', isAction: true },
-              { id: 'settings', icon: Settings, label: 'Settings', isAction: true }
+              { id: 'pending', icon: Timer, label: 'Pending' },
+              { id: 'completed', icon: CheckCircle2, label: 'Completed' },
+              { id: 'merchants', icon: BriefcaseBusiness, label: 'Explore Businesses' },
+              { id: 'groups', icon: UsersRound, label: 'Groups', isAction: true },
+              { id: 'settings', icon: SlidersHorizontal, label: 'Settings', isAction: true }
             ].map((item) => {
               const isActive = activeView === item.id;
               return (
@@ -2232,7 +2235,10 @@ export function Dashboard({
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
-                  <item.icon className={`w-[22px] h-[22px] mb-1 transition-all ${isActive && !item.isAction ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
+                  <item.icon 
+                    className={`w-[22px] h-[22px] mb-1 transition-all ${isActive && !item.isAction ? 'stroke-[2px]' : 'stroke-[1.5px]'}`} 
+                    fill={isActive && !item.isAction ? "currentColor" : "none"}
+                  />
                   <span className={`text-[10px] leading-none tracking-tight transition-all duration-300 ${isActive && !item.isAction ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                 </button>
               );
