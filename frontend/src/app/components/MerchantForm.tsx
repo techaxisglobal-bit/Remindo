@@ -138,7 +138,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     };
 
     return (
-        <div className="bg-white dark:bg-[#1b1b1b] rounded-2xl shadow-sm border border-gray-100 dark:border-[#292929] overflow-hidden max-w-4xl mx-auto my-8">
+        <div className="bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-100 dark:border-[#292929] overflow-hidden max-w-4xl mx-auto my-8">
             <div className="p-6 md:p-8 border-b border-gray-100 dark:border-[#292929] bg-gradient-to-r from-gray-50 to-white dark:from-[#202020] dark:to-[#1b1b1b]">
                 <div className="flex items-center gap-3">
                     <div className="p-3 bg-[#e0b596]/10 text-[#e0b596] rounded-xl">
@@ -167,7 +167,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                                 name="category" 
                                 value={formData.category} 
                                 onChange={handleChange} 
-                                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#292929] dark:bg-[#1b1b1b] dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300" 
+                                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#292929] dark:bg-black dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300" 
                                 required
                             >
                                 <option value="" disabled>Select a category</option>
@@ -256,7 +256,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                         </div>
                         <div className="space-y-2">
                             <Label>Logo Upload</Label>
-                            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-[#252525] transition-colors relative">
+                            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-black transition-colors relative">
                                 <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'logo')} />
                                 <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
                                 <span className="text-sm text-gray-500">{logoFile ? logoFile.name : 'Upload Business Logo'}</span>
@@ -264,7 +264,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                         </div>
                         <div className="space-y-2">
                             <Label>Proof Document (PDF/JPG)</Label>
-                            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-[#252525] transition-colors relative">
+                            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-black transition-colors relative">
                                 <input type="file" accept=".pdf,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'proof')} />
                                 <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
                                 <span className="text-sm text-gray-500">{proofFile ? proofFile.name : 'Upload Business License/Proof'}</span>

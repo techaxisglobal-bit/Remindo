@@ -59,44 +59,44 @@
   --foreground: #e5e7eb;
 
   /* Semi-transparent overlays as requested */
-  --card: #ffffff0d;
+  --card: #000000;
   --card-foreground: #e5e7eb;
 
-  --popover: #ffffff0d;
+  --popover: #000000;
   --popover-foreground: #e5e7eb;
 
-  --primary: #f8fafc;
-  --primary-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
 
-  --secondary: #ffffff0d;
+  --secondary: #000000;
   --secondary-foreground: #e5e7eb;
 
-  --muted: #ffffff0d;
+  --muted: #000000;
   --muted-foreground: #94a3b8;
 
-  --accent: #ffffff1a;
+  --accent: #000000;
   --accent-foreground: #e5e7eb;
 
-  --destructive: #7f1d1d;
-  --destructive-foreground: #e5e7eb;
+  --destructive: #000000;
+  --destructive-foreground: #dc2626;
 
   --border: #ffffff1a;
-  --input: #ffffff0d;
+  --input: #000000;
   --ring: #94a3b8;
 
   --sidebar: #000000;
   /* Pure Black */
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #334155;
+  --sidebar-primary: #000000;
   --sidebar-primary-foreground: #e5e7eb;
-  --sidebar-accent: #ffffff0d;
+  --sidebar-accent: #000000;
   --sidebar-accent-foreground: #e5e7eb;
   --sidebar-border: #ffffff1a;
   --sidebar-ring: #94a3b8;
 
   /* Specific variables requested */
-  --docusaurus-collapse-button-bg: #ffffff0d;
-  --docusaurus-collapse-button-bg-hover: #ffffff1a;
+  --docusaurus-collapse-button-bg: #000000;
+  --docusaurus-collapse-button-bg-hover: #000000;
 }
 
 /* Enforce the glassmorphism theme on hardcoded Tailwind classes */
@@ -109,13 +109,13 @@
 
 [data-theme='dark'] .dark\:bg-gray-700,
 .dark .dark\:bg-gray-700 {
-  background-color: #1a1a1a !important;
-  /* Slightly lighter for hover/accents */
+  background-color: #000000 !important;
+  /* Pure Black */
 }
 
 [data-theme='dark'] .dark\:hover\:bg-gray-700:hover,
 .dark .dark\:hover\:bg-gray-700:hover {
-  background-color: #262626 !important;
+  background-color: #000000 !important;
 }
 
 [data-theme='dark'] .dark\:border-gray-700,
@@ -127,7 +127,7 @@
 /* The class generated is potentially complex to guess perfectly, but focusing on standard usage */
 [data-theme='dark'] .hover\:bg-secondary\/80:hover,
 .dark .hover\:bg-secondary\/80:hover {
-  background-color: #ffffff1a !important;
+  background-color: #000000 !important;
 }
 
 /* Ensure global background matches the deep dark theme */

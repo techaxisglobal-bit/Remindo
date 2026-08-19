@@ -123,12 +123,12 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-[#1b1b1b] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-4 border-b border-gray-100 dark:border-[#292929] flex justify-between items-center bg-gray-50/50 dark:bg-[#222]">
+            <div className="bg-white dark:bg-black rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-4 border-b border-gray-100 dark:border-[#292929] flex justify-between items-center bg-gray-50/50 dark:bg-black">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Users className="w-5 h-5 text-[#e0b596]" /> My Groups
                     </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-[#333] rounded-full transition-colors text-gray-400">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-black rounded-full transition-colors text-gray-400">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -143,7 +143,7 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
                                     value={groupName}
                                     onChange={e => setGroupName(e.target.value)}
                                     placeholder="e.g. Family, Work Team"
-                                    className="w-full bg-gray-50 dark:bg-[#252525] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
+                                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
                                 />
                             </div>
 
@@ -156,13 +156,13 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
                                         onChange={e => setMemberInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMember())}
                                         placeholder="Add member email"
-                                        className="flex-1 bg-gray-50 dark:bg-[#252525] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
+                                        className="flex-1 bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
                                     />
                                     <Button type="button" onClick={handleAddMember} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white px-4 rounded-xl">Add</Button>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {members.map(member => (
-                                        <div key={member} className="bg-gray-100 dark:bg-[#333] px-3 py-1 rounded-full text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/5">
+                                        <div key={member} className="bg-gray-100 dark:bg-black px-3 py-1 rounded-full text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/5">
                                             {member}
                                             <button type="button" onClick={() => handleRemoveMember(member)} className="text-gray-400 hover:text-red-500">
                                                 <X className="w-3 h-3" />
@@ -196,16 +196,16 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
                             ) : (
                                 <div className="space-y-3">
                                     {groups.map(group => (
-                                        <div key={group.id} className="bg-gray-50 dark:bg-[#252525] p-4 rounded-xl border border-gray-100 dark:border-white/5 flex justify-between items-center group-hover:border-[#e0b596]/30 transition-all">
+                                        <div key={group.id} className="bg-gray-50 dark:bg-black p-4 rounded-xl border border-gray-100 dark:border-white/5 flex justify-between items-center group-hover:border-[#e0b596]/30 transition-all">
                                             <div>
                                                 <h3 className="font-bold text-gray-900 dark:text-white">{group.name}</h3>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">{group.members?.length || 0} members</p>
                                             </div>
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleEditGroup(group)} className="p-2 text-gray-400 hover:text-[#e0b596] bg-white dark:bg-[#333] rounded-lg shadow-sm border border-gray-100 dark:border-white/5 transition-colors">
+                                                <button onClick={() => handleEditGroup(group)} className="p-2 text-gray-400 hover:text-[#e0b596] bg-white dark:bg-black rounded-lg shadow-sm border border-gray-100 dark:border-white/5 transition-colors">
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
-                                                <button onClick={() => handleDeleteGroup(group.id)} className="p-2 text-gray-400 hover:text-red-500 bg-white dark:bg-[#333] rounded-lg shadow-sm border border-gray-100 dark:border-white/5 transition-colors">
+                                                <button onClick={() => handleDeleteGroup(group.id)} className="p-2 text-gray-400 hover:text-red-500 bg-white dark:bg-black rounded-lg shadow-sm border border-gray-100 dark:border-white/5 transition-colors">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>

@@ -425,7 +425,7 @@ export default function App() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 dark:bg-[#1f1f1f]"></div>;
+    return <div className="min-h-screen bg-gray-50 dark:bg-black"></div>;
   }
 
   // Handle invitation route

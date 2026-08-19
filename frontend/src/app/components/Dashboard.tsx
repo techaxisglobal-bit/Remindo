@@ -74,7 +74,6 @@ import { TaskDetails } from '@/app/components/TaskDetails';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
 import { GroupsModal } from '@/app/components/GroupsModal';
 import { CreateReminder } from '@/app/components/CreateReminder';
-import { MilliAssistant } from '@/app/components/MilliAssistant';
 import { ProfileMenu } from '@/app/components/ProfileMenu';
 import { MerchantList } from '@/app/components/MerchantList';
 import { MerchantForm } from '@/app/components/MerchantForm';
@@ -838,10 +837,10 @@ export function Dashboard({
 
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-[#1f1f1f] text-gray-900 dark:text-gray-100 font-sans selection:bg-[#e0b596]/30">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 font-sans selection:bg-[#e0b596]/30">
 
       {/* Sidebar - Teams Style (Updated) */}
-      <div className="hidden lg:flex flex-col w-[68px] bg-white dark:bg-[#1b1b1b] border-r border-gray-200 dark:border-[#292929] items-center py-6 z-20">
+      <div className="hidden lg:flex flex-col w-[68px] bg-white dark:bg-black border-r border-gray-200 dark:border-[#292929] items-center py-6 z-20">
         <nav className="flex-1 w-full flex flex-col items-center gap-6">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -850,7 +849,7 @@ export function Dashboard({
                   setActiveView('calendar');
                   document.getElementById('dashboard-main')?.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'calendar' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'calendar' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
               >
                 <Home className="w-6 h-6" />
               </button>
@@ -862,7 +861,7 @@ export function Dashboard({
             <TooltipTrigger asChild>
               <button
                 onClick={() => setActiveView('pending')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'pending' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'pending' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
               >
                 <Hourglass className="w-6 h-6" />
               </button>
@@ -874,7 +873,7 @@ export function Dashboard({
             <TooltipTrigger asChild>
               <button
                 onClick={() => setActiveView('completed')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'completed' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'completed' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
               >
                 <Check className="w-6 h-6" />
               </button>
@@ -886,7 +885,7 @@ export function Dashboard({
             <TooltipTrigger asChild>
               <button
                 onClick={() => setActiveView('merchants')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchants' || activeView === 'merchantForm' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchants' || activeView === 'merchantForm' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
               >
                 <Store className="w-6 h-6" />
               </button>
@@ -898,7 +897,7 @@ export function Dashboard({
             <TooltipTrigger asChild>
               <button
                 onClick={() => setIsGroupsModalOpen(true)}
-                className={`group relative p-3 rounded-xl transition-all text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]`}
+                className={`group relative p-3 rounded-xl transition-all text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black`}
               >
                 <Users className="w-6 h-6" />
               </button>
@@ -911,7 +910,7 @@ export function Dashboard({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setActiveView('merchantAdmin')}
-                  className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchantAdmin' ? 'bg-gray-100 dark:bg-[#333] text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e]'}`}
+                  className={`group relative p-3 rounded-xl transition-all ${activeView === 'merchantAdmin' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
                 >
                   <ShieldCheck className="w-6 h-6" />
                 </button>
@@ -925,7 +924,7 @@ export function Dashboard({
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleTheme}
-                  className="group relative p-3 rounded-xl text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2e2e2e] transition-all"
+                  className="group relative p-3 rounded-xl text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black transition-all"
                 >
                   {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                 </button>
@@ -948,7 +947,7 @@ export function Dashboard({
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-            className="hidden xl:flex flex-col bg-[#f9f9f9] dark:bg-[#1b1b1b] border-r border-gray-200 dark:border-[#292929] overflow-hidden z-10"
+            className="hidden xl:flex flex-col bg-[#f9f9f9] dark:bg-black border-r border-gray-200 dark:border-[#292929] overflow-hidden z-10"
           >
             <div className="w-[280px] h-full flex flex-col overflow-y-auto scrollbar-none">
               <div className="p-6">
@@ -976,11 +975,11 @@ export function Dashboard({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-[#1f1f1f]">
+      <div className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-black">
 
         {/* Header */}
         <header 
-          className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-[#292929]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-[#1f1f1f] sticky top-0 z-40`}
+          className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-[#292929]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-black sticky top-0 z-40`}
           style={isMobile ? { paddingTop: 'max(env(safe-area-inset-top), 16px)' } : {}}
         >
           {isMobile ? (
@@ -1029,7 +1028,7 @@ export function Dashboard({
                   <div className="relative">
                     <button
                       onClick={() => setShowMobileMiniCalendar(!showMobileMiniCalendar)}
-                      className="text-[13px] font-semibold tracking-tight text-gray-800 dark:text-gray-200 flex items-center gap-1.5 bg-gray-100/80 dark:bg-[#252525] px-3 py-2 rounded-[12px] transition-colors"
+                      className="text-[13px] font-semibold tracking-tight text-gray-800 dark:text-gray-200 flex items-center gap-1.5 bg-gray-100/80 dark:bg-black px-3 py-2 rounded-[12px] transition-colors"
                     >
                       {format(currentDate, 'MMMM yyyy')}
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMobileMiniCalendar ? 'rotate-180' : ''}`} />
@@ -1038,9 +1037,9 @@ export function Dashboard({
                     {showMobileMiniCalendar && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowMobileMiniCalendar(false)} />
-                        <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
+                        <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
                           <div className="flex justify-end mb-2">
-                            <button onClick={() => setShowMobileMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-[#2a2a2a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full text-gray-500 dark:text-gray-400 transition-colors">
+                            <button onClick={() => setShowMobileMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-black rounded-full text-gray-500 dark:text-gray-400 transition-colors">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -1069,7 +1068,7 @@ export function Dashboard({
                       onClick={() => setShowFilters(!showFilters)}
                       className={`flex items-center justify-center p-2 rounded-[12px] transition-all ${showFilters || showSpecialsOnly
                         ? 'bg-[#e0b596]/10 text-[#e0b596]'
-                        : 'bg-gray-100/80 dark:bg-[#252525] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2a2a2a]'
+                        : 'bg-gray-100/80 dark:bg-black text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-black'
                         }`}
                     >
                       <SlidersHorizontal className="w-4 h-4" />
@@ -1082,7 +1081,7 @@ export function Dashboard({
                             initial={{ opacity: 0, y: 8, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                            className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-xl shadow-2xl z-50 p-2 space-y-3"
+                            className="absolute right-0 mt-2 w-56 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-xl shadow-2xl z-50 p-2 space-y-3"
                           >
                             {/* View Mode */}
                             <div className="px-2 py-1">
@@ -1104,11 +1103,11 @@ export function Dashboard({
                                 ))}
                               </div>
                             </div>
-                            <div className="h-px bg-gray-100 dark:bg-[#333] mx-1" />
+                            <div className="h-px bg-gray-100 dark:bg-black mx-1" />
                             {/* Filters */}
                             <div className="px-2 py-1">
                               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Filters</p>
-                              <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-[#232323] rounded-lg border border-gray-100 dark:border-[#333]">
+                              <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-black rounded-lg border border-gray-100 dark:border-[#333]">
                                 <div className="flex items-center gap-2">
                                   <Sparkles className="w-4 h-4 text-purple-500" />
                                   <span className="text-sm font-medium">Specials</span>
@@ -1131,7 +1130,7 @@ export function Dashboard({
 
                   {/* Add Button */}
                   <button
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e0b596]/20 dark:bg-[#e0b596]/10 text-[#8c5a3c] dark:text-[#e0b596] rounded-[12px] text-[13px] font-bold active:scale-95 transition-transform"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e0b596]/20 dark:bg-black text-[#8c5a3c] dark:text-[#e0b596] rounded-[12px] text-[13px] font-bold active:scale-95 transition-transform"
                     onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
                   >
                     <Plus className="w-4 h-4" />
@@ -1153,7 +1152,7 @@ export function Dashboard({
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => setShowSecondarySidebar(!showSecondarySidebar)}
-                          className={`hidden xl:flex items-center justify-center p-2 rounded-lg transition-all ${!showSecondarySidebar ? 'bg-[#e0b596]/10 text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'}`}
+                          className={`hidden xl:flex items-center justify-center p-2 rounded-lg transition-all ${!showSecondarySidebar ? 'bg-[#e0b596]/10 text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
                         >
                           <PanelLeft className="w-5 h-5" />
                         </button>
@@ -1164,7 +1163,7 @@ export function Dashboard({
                     <div className="relative">
                       <button
                         onClick={() => setShowMiniCalendar(!showMiniCalendar)}
-                        className="text-xs md:text-sm font-semibold tracking-tight text-gray-500 dark:text-gray-300 flex items-center gap-1.5 md:gap-2 hover:bg-gray-100 dark:hover:bg-[#292929] px-2 py-1 rounded transition-colors"
+                        className="text-xs md:text-sm font-semibold tracking-tight text-gray-500 dark:text-gray-300 flex items-center gap-1.5 md:gap-2 hover:bg-gray-100 dark:hover:bg-black px-2 py-1 rounded transition-colors"
                       >
                         {format(currentDate, 'MMM yyyy')}
                         <ChevronDown className={`w-3 h-3 transition-transform ${showMiniCalendar ? 'rotate-180' : ''}`} />
@@ -1173,9 +1172,9 @@ export function Dashboard({
                       {showMiniCalendar && (
                         <>
                           <div className="fixed inset-0 z-40" onClick={() => setShowMiniCalendar(false)} />
-                          <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
+                          <div className="absolute top-full left-0 mt-2 p-3 pt-2 bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 w-[270px]">
                             <div className="flex justify-end mb-2">
-                              <button onClick={() => setShowMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-[#2a2a2a] hover:bg-gray-200 dark:hover:bg-[#333] rounded-full text-gray-500 dark:text-gray-400 transition-colors">
+                              <button onClick={() => setShowMiniCalendar(false)} className="p-1.5 bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-black rounded-full text-gray-500 dark:text-gray-400 transition-colors">
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -1205,7 +1204,7 @@ export function Dashboard({
                     onClick={() => setShowFilters(!showFilters)}
                     className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-sm font-semibold transition-all group ${showFilters || showSpecialsOnly
                       ? 'bg-[#e0b596]/10 border-[#e0b596] text-[#e0b596]'
-                      : 'bg-white dark:bg-[#292929] border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#333]'
+                      : 'bg-white dark:bg-black border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-black'
                       }`}
                   >
                     <SlidersHorizontal className="w-4 h-4" />
@@ -1220,7 +1219,7 @@ export function Dashboard({
                           initial={{ opacity: 0, y: 8, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-xl shadow-2xl z-50 p-2 space-y-3"
+                          className="absolute right-0 mt-2 w-56 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-xl shadow-2xl z-50 p-2 space-y-3"
                         >
                           <div className="px-2 py-1">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">View Mode</p>
@@ -1258,7 +1257,7 @@ export function Dashboard({
 
                   <button
                     onClick={() => { setShowNotifications(true); setUnreadCount(0); }}
-                    className="relative p-2.5 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-[14px] hover:bg-gray-100 dark:hover:bg-[#252525] transition-all ml-2"
+                    className="relative p-2.5 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-[14px] hover:bg-gray-100 dark:hover:bg-black transition-all ml-2"
                   >
                     <Bell className="w-[20px] h-[20px]" />
                     {unreadCount > 0 && (
@@ -1299,7 +1298,7 @@ export function Dashboard({
           )}
         </AnimatePresence>
 
-        <div className="flex-1 relative flex bg-gray-50 dark:bg-[#1f1f1f] overflow-hidden">
+        <div className="flex-1 relative flex bg-gray-50 dark:bg-black overflow-hidden">
           <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''} pb-[88px] lg:pb-0`}>
             
             {activeView === 'merchants' && (
@@ -1335,16 +1334,16 @@ export function Dashboard({
             )}
 
             {activeView === 'calendar' && (
-              <div className="flex flex-col h-full bg-white dark:bg-[#1f1f1f]">
+              <div className="flex flex-col h-full bg-white dark:bg-black">
                 {!isMobile ? (
                   // --- Desktop Calendar ---
                   <>
                     {calendarView !== 'month' ? (
-                      <div className="flex bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
-                        <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-[#252525]" />
+                      <div className="flex bg-white dark:bg-black border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
+                        <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-black" />
                         <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
                           {weekDays.map((day, i) => (
-                            <div key={i} className={`py-3 text-center border-r border-gray-200 dark:border-[#333] last:border-r-0 ${isSameDay(day, new Date()) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                            <div key={i} className={`py-3 text-center border-r border-gray-200 dark:border-[#333] last:border-r-0 ${isSameDay(day, new Date()) ? 'bg-blue-50/50 dark:bg-black' : ''}`}>
                               <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{format(day, 'EEE')}</div>
                               <div className={`text-2xl mt-1 ${isSameDay(day, new Date()) ? 'text-[#e0b596] font-bold' : 'text-gray-500 dark:text-gray-400 font-light'}`}>{format(day, 'd')}</div>
                             </div>
@@ -1352,7 +1351,7 @@ export function Dashboard({
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-7 bg-white dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
+                      <div className="grid grid-cols-7 bg-white dark:bg-black border-b border-gray-200 dark:border-[#333] sticky top-0 z-30">
                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
                           <div key={day} className="py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-[#333] last:border-r-0">{day}</div>
                         ))}
@@ -1361,10 +1360,10 @@ export function Dashboard({
                   </>
                 ) : (
                   // --- Mobile Calendar Header ---
-                  <div className="flex flex-col bg-white dark:bg-[#1f1f1f] shrink-0 relative">
+                  <div className="flex flex-col bg-white dark:bg-black shrink-0 relative">
                     {/* Mobile View Mode Toggle */}
-                    <div className="px-4 py-2.5 flex items-center justify-center bg-white/95 dark:bg-[#1f1f1f]/95 backdrop-blur-md z-10">
-                      <div className="flex w-full max-w-[240px] bg-gray-100/80 dark:bg-[#141414] p-1 rounded-[14px] shadow-inner border border-gray-200/60 dark:border-[#222]">
+                    <div className="px-4 py-2.5 flex items-center justify-center bg-white/95 dark:bg-black backdrop-blur-md z-10">
+                      <div className="flex w-full max-w-[240px] bg-gray-100/80 dark:bg-black p-1 rounded-[14px] shadow-inner border border-gray-200/60 dark:border-[#222]">
                         {['schedule', 'day'].map((mode) => {
                           const isActive = mobileViewMode === mode;
                           return (
@@ -1376,7 +1375,7 @@ export function Dashboard({
                               {isActive && (
                                 <motion.div
                                   layoutId="mobileViewSlider"
-                                  className="absolute inset-0 bg-white dark:bg-[#2d2d2d] rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-gray-200/50 dark:border-[#3d3d3d]"
+                                  className="absolute inset-0 bg-white dark:bg-black rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-gray-200/50 dark:border-[#3d3d3d]"
                                   initial={false}
                                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
                                 />
@@ -1402,7 +1401,7 @@ export function Dashboard({
                                     {format(day, 'd')}
                                   </span>
                                   {sanitizedTasks.some(t => isSameDay(parseTaskDate(t.date), day)) && (
-                                    <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e0b596]' : 'bg-gray-300 dark:bg-gray-600'}`} />
+                                    <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#e0b596]' : 'bg-gray-300 dark:bg-black'}`} />
                                   )}
                                 </button>
                               );
@@ -1426,10 +1425,10 @@ export function Dashboard({
                               return (
                                 <button key={i} data-date={format(day, 'yyyy-MM-dd')} onClick={() => handleDateSelect(day)} className="relative flex flex-col items-center justify-center py-1 group">
                                   {isFirstOfMonth && <span className="absolute -top-3 text-[9px] font-black text-gray-400 uppercase tracking-tighter">{format(day, 'MMM')}</span>}
-                                  <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg scale-110' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596] text-[#e0b596]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#292929]'}`}>
+                                  <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold transition-all ${isSelected ? 'bg-[#e0b596] text-white shadow-lg scale-110' : isSameDay(day, new Date()) ? 'border-2 border-[#e0b596] text-[#e0b596]' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}>
                                     {format(day, 'd')}
                                   </span>
-                                  {hasTasks && !isSelected && <div className="absolute bottom-0 w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />}
+                                  {hasTasks && !isSelected && <div className="absolute bottom-0 w-1 h-1 rounded-full bg-gray-300 dark:bg-black" />}
                                 </button>
                               );
                             })}
@@ -1439,14 +1438,14 @@ export function Dashboard({
                     )}
                     {/* Drag Handle */}
                     <motion.div onPanEnd={(_, info) => { if (info.offset.y > 20) setIsMobileCalendarExpanded(true); if (info.offset.y < -20) setIsMobileCalendarExpanded(false); }} className="flex justify-center pb-2 cursor-grab active:cursor-grabbing group select-none touch-none">
-                      <div className="w-12 h-1.5 rounded-full bg-gray-200 dark:bg-[#333] group-hover:bg-gray-300 dark:group-hover:bg-[#444] transition-colors" />
+                      <div className="w-12 h-1.5 rounded-full bg-gray-200 dark:bg-black group-hover:bg-gray-300 dark:group-hover:bg-black transition-colors" />
                     </motion.div>
                   </div>
                 )}
 
                 {/* Calendar Content Selection */}
                 {isMobile && mobileViewMode === 'schedule' ? (
-                  <div ref={scheduleListRef} className="flex-1 overflow-y-auto p-4 pb-32 space-y-8 bg-gray-50/30 dark:bg-transparent custom-scrollbar scroll-smooth">
+                  <div ref={scheduleListRef} className="flex-1 overflow-y-auto p-4 pb-32 space-y-8 bg-gray-50/30 dark:bg-black custom-scrollbar scroll-smooth">
                     {(() => {
                       let listDays = [];
                       if (calendarView === 'day') {
@@ -1493,7 +1492,7 @@ export function Dashboard({
                                               key={task.id}
                                               onMouseDown={(e) => e.stopPropagation()}
                                               onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                              className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-[#252525]/50 border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-[#252525] border-gray-100 dark:border-[#333] shadow-sm'}`}
+                                              className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-black border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-black border-gray-100 dark:border-[#333] shadow-sm'}`}
                                             >
                                               {/* Time & Duration (Left) */}
                                               <div className="flex flex-col items-center min-w-[64px] text-center">
@@ -1541,7 +1540,7 @@ export function Dashboard({
                                             e.stopPropagation();
                                             setExpandedScheduleDays(prev => ({ ...prev, [dateKey]: !isExpanded }));
                                           }}
-                                          className="w-full flex items-center justify-center gap-1.5 py-3 mt-1 bg-gray-50 dark:bg-[#252525] border border-dashed border-gray-200 dark:border-[#333] rounded-xl text-xs font-bold text-[#e0b596] hover:bg-white dark:hover:bg-[#2a2a2a] transition-all"
+                                          className="w-full flex items-center justify-center gap-1.5 py-3 mt-1 bg-gray-50 dark:bg-black border border-dashed border-gray-200 dark:border-[#333] rounded-xl text-xs font-bold text-[#e0b596] hover:bg-white dark:hover:bg-black transition-all"
                                         >
                                           {isExpanded ? 'Show less' : `+ ${dayTasks.length - 2} more tasks`}
                                           <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
@@ -1567,7 +1566,7 @@ export function Dashboard({
                       >
                         <button
                           onClick={() => handleDateSelect(new Date())}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-[#1b1b1b] border border-gray-100 dark:border-[#333] hover:border-[#e0b596] shadow-[0_8px_25px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-[#e0b596] active:scale-95 transition-all group"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-black border border-gray-100 dark:border-[#333] hover:border-[#e0b596] shadow-[0_8px_25px_rgba(0,0,0,0.1)] rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-[#e0b596] active:scale-95 transition-all group"
                         >
                           Today
                           <ChevronUp className="w-3.5 h-3.5 transition-transform group-hover:-translate-y-0.5" />
@@ -1583,7 +1582,7 @@ export function Dashboard({
                   >
                     <div className="flex min-h-[1440px] relative">
                       {/* Time Column */}
-                      <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-white dark:bg-[#1f1f1f] select-none text-right pr-2 pt-2">
+                      <div className="w-[60px] flex-shrink-0 border-r border-gray-200 dark:border-[#333] bg-white dark:bg-black select-none text-right pr-2 pt-2">
                         {Array.from({ length: 24 }).map((_, i) => (
                           <div key={i} className="h-[60px] text-xs text-gray-400 font-medium relative -top-2.5">
                             {format(setHours(new Date(), i), 'h a')}
@@ -1592,7 +1591,7 @@ export function Dashboard({
                       </div>
 
                       {/* Grid Columns */}
-                      <div className="flex-1 grid relative bg-white dark:bg-[#1f1f1f]" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
+                      <div className="flex-1 grid relative bg-white dark:bg-black" style={{ gridTemplateColumns: `repeat(${weekDays.length}, 1fr)` }}>
                         {/* Current Time Indicator */}
                         {isToday(currentDate) && (
                           <div
@@ -1601,7 +1600,7 @@ export function Dashboard({
                               top: (new Date().getHours() * 60 + new Date().getMinutes()) + 'px'
                             }}
                           >
-                            <div className="w-[60px] text-right pr-2 text-red-500 text-[10px] font-black leading-none bg-white/60 dark:bg-black/40 py-0.5 rounded-sm backdrop-blur-[2px]">
+                            <div className="w-[60px] text-right pr-2 text-red-500 text-[10px] font-black leading-none bg-white/60 dark:bg-black py-0.5 rounded-sm backdrop-blur-[2px]">
                               {format(new Date(), 'h:mm a')}
                             </div>
                             <div className="flex-1 h-[1px] bg-red-500 relative">
@@ -1702,11 +1701,11 @@ export function Dashboard({
                             >
                               <div
                                 className={`h-full w-full rounded-md border-l-4 p-1.5 text-xs cursor-pointer shadow-sm hover:shadow-md transition-shadow relative flex flex-col justify-center
-                                  ${event.completed ? 'bg-gray-100 border-gray-400 text-gray-500 dark:bg-[#333] dark:border-gray-500 dark:text-gray-400' :
-                                    event.isPast ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-900/20 dark:border-amber-500 dark:text-amber-300' :
-                                      event.category?.toLowerCase() === 'work' ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/20 dark:border-blue-500 dark:text-blue-300' :
-                                        event.category?.toLowerCase() === 'personal' ? 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:border-green-500 dark:text-green-300' :
-                                          'bg-purple-50 border-purple-500 text-purple-700 dark:bg-purple-900/20 dark:border-purple-500 dark:text-purple-300'}
+                                  ${event.completed ? 'bg-gray-100 border-gray-400 text-gray-500 dark:bg-black dark:border-gray-500 dark:text-gray-400' :
+                                    event.isPast ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-black dark:border-amber-500 dark:text-amber-300' :
+                                      event.category?.toLowerCase() === 'work' ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-black dark:border-blue-500 dark:text-blue-300' :
+                                        event.category?.toLowerCase() === 'personal' ? 'bg-green-50 border-green-500 text-green-700 dark:bg-black dark:border-green-500 dark:text-green-300' :
+                                          'bg-purple-50 border-purple-500 text-purple-700 dark:bg-black dark:border-purple-500 dark:text-purple-300'}
                                 `}
                               >
                                 {!event.completed && !event.isPast && (
@@ -1803,7 +1802,7 @@ export function Dashboard({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 overflow-y-auto grid grid-cols-7 auto-rows-fr bg-gray-50 dark:bg-[#1f1f1f] custom-scrollbar">
+                  <div className="flex-1 overflow-y-auto grid grid-cols-7 auto-rows-fr bg-gray-50 dark:bg-black custom-scrollbar">
                     {calendarDays.map((day, i) => {
                       const dayTasks = sanitizedTasks.filter(t => isSameDay(parseTaskDate(t.date), day));
                       const isCurrentMonth = day.getMonth() === currentDate.getMonth();
@@ -1811,7 +1810,7 @@ export function Dashboard({
                       return (
                         <div
                           key={i}
-                          className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-[#333] flex flex-col gap-1 transition-colors ${!isCurrentMonth ? 'bg-gray-100/30 dark:bg-black/10 opacity-50' : 'bg-white dark:bg-[#1f1f1f]'} ${isSameDay(day, new Date()) ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+                          className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-[#333] flex flex-col gap-1 transition-colors ${!isCurrentMonth ? 'bg-gray-100/30 dark:bg-black opacity-50' : 'bg-white dark:bg-black'} ${isSameDay(day, new Date()) ? 'bg-blue-50/30 dark:bg-black' : ''}`}
                         >
                           <div className="flex justify-between items-start mb-1">
                             <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isSameDay(day, new Date()) ? 'bg-[#e0b596] text-white' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -1825,12 +1824,12 @@ export function Dashboard({
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
                                 className={`px-1.5 py-0.5 rounded text-[10px] font-medium truncate cursor-pointer transition-all hover:brightness-95 active:scale-95
-                                    ${task.completed ? 'bg-gray-100 text-gray-400 dark:bg-[#333] line-through' :
+                                    ${task.completed ? 'bg-gray-100 text-gray-400 dark:bg-black line-through' :
                                     isBefore(setMinutes(setHours(startOfDay(parseTaskDate(task.date)), parseInt(task.time?.split(':')[0] || '0')), parseInt(task.time?.split(':')[1] || '0')), subMinutes(new Date(), 1)) ?
-                                      'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' :
-                                      task.category?.toLowerCase() === 'work' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
-                                        task.category?.toLowerCase() === 'personal' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
-                                          'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'}
+                                      'bg-amber-100 text-amber-700 dark:bg-black dark:text-amber-300' :
+                                      task.category?.toLowerCase() === 'work' ? 'bg-blue-100 text-blue-700 dark:bg-black dark:text-blue-300' :
+                                        task.category?.toLowerCase() === 'personal' ? 'bg-green-100 text-green-700 dark:bg-black dark:text-green-300' :
+                                          'bg-purple-100 text-purple-700 dark:bg-black dark:text-purple-300'}
                                   `}
                                 title={`${task.time} - ${task.title}`}
                               >
@@ -1876,14 +1875,14 @@ export function Dashboard({
                         <div className="relative">
                           <button
                             onClick={() => setShowCompletedCalendar(!showCompletedCalendar)}
-                            className={`p-2 rounded-lg transition-all ${completedSearchDate ? 'bg-[#e0b596] text-white shadow-lg shadow-[#e0b596]/30' : 'bg-white dark:bg-[#292929] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#333] hover:border-[#e0b596]'}`}
+                            className={`p-2 rounded-lg transition-all ${completedSearchDate ? 'bg-[#e0b596] text-white shadow-lg shadow-[#e0b596]/30' : 'bg-white dark:bg-black text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#333] hover:border-[#e0b596]'}`}
                             title="Search by date"
                           >
                             <Search className="w-5 h-5" />
                           </button>
 
                           {showCompletedCalendar && (
-                            <div className="absolute top-full right-0 mt-2 p-2 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50">
+                            <div className="absolute top-full right-0 mt-2 p-2 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50">
                               <DayPicker
                                 mode="single"
                                 selected={completedSearchDate}
@@ -1924,14 +1923,14 @@ export function Dashboard({
                         <div className="relative">
                           <button
                             onClick={() => setShowPendingCalendar(!showPendingCalendar)}
-                            className={`p-2 rounded-lg transition-all ${pendingSearchDate ? 'bg-[#e0b596] text-white shadow-lg shadow-[#e0b596]/30' : 'bg-white dark:bg-[#292929] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#333] hover:border-[#e0b596]'}`}
+                            className={`p-2 rounded-lg transition-all ${pendingSearchDate ? 'bg-[#e0b596] text-white shadow-lg shadow-[#e0b596]/30' : 'bg-white dark:bg-black text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#333] hover:border-[#e0b596]'}`}
                             title="Search by date"
                           >
                             <Search className="w-5 h-5" />
                           </button>
 
                           {showPendingCalendar && (
-                            <div className="absolute top-full right-0 mt-2 p-2 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50">
+                            <div className="absolute top-full right-0 mt-2 p-2 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-lg shadow-2xl z-50">
                               <DayPicker
                                 mode="single"
                                 selected={pendingSearchDate}
@@ -1985,7 +1984,7 @@ export function Dashboard({
                               key={task.id}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="bg-white dark:bg-[#292929] px-3 py-2 rounded-xl border border-gray-200 dark:border-[#333] shadow-sm flex items-center justify-between group"
+                              className="bg-white dark:bg-black px-3 py-2 rounded-xl border border-gray-200 dark:border-[#333] shadow-sm flex items-center justify-between group"
                             >
                               <div className="flex items-start gap-4">
                                 <button
@@ -1998,16 +1997,16 @@ export function Dashboard({
                                   <h3 className={`font-semibold text-lg ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}>{task.title}</h3>
                                   <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
                                     <CalendarIcon className="w-3.5 h-3.5" /> {task.date} at {task.time}
-                                    {task.duration && <span className="text-xs bg-gray-100 dark:bg-black/30 px-2 py-0.5 rounded ml-2">{task.duration}m</span>}
+                                    {task.duration && <span className="text-xs bg-gray-100 dark:bg-black px-2 py-0.5 rounded ml-2">{task.duration}m</span>}
                                   </p>
                                   {task.description && <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{task.description.replace(/<!-- metadata: .*? -->/g, '').trim()}</p>}
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => setSelectedTask(task)} className="p-2 text-gray-400 hover:text-[#e0b596] hover:bg-gray-100 dark:hover:bg-[#333] rounded-lg">
+                                <button onClick={() => setSelectedTask(task)} className="p-2 text-gray-400 hover:text-[#e0b596] hover:bg-gray-100 dark:hover:bg-black rounded-lg">
                                   <Settings className="w-4 h-4" /> {/* Edit Icon placeholder really */}
                                 </button>
-                                <button onClick={() => onDeleteTask(task.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                                <button onClick={() => onDeleteTask(task.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black rounded-lg">
                                   <X className="w-4 h-4" />
                                 </button>
                               </div>
@@ -2053,9 +2052,9 @@ export function Dashboard({
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: '100%', opacity: 0 }}
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-[#1b1b1b] border-l border-gray-200 dark:border-[#292929] shadow-2xl z-30 flex flex-col"
+                  className="absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-black border-l border-gray-200 dark:border-[#292929] shadow-2xl z-30 flex flex-col"
                 >
-                  <div className="p-6 border-b border-gray-100 dark:border-[#292929] flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
+                  <div className="p-6 border-b border-gray-100 dark:border-[#292929] flex items-center justify-between bg-purple-50/30 dark:bg-black">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-purple-500 flex items-center justify-center text-white shadow-lg shadow-purple-500/20">
                         <Sparkles className="w-4 h-4" />
@@ -2079,14 +2078,14 @@ export function Dashboard({
                       <div className="relative">
                         <button
                           onClick={() => setShowSpecialCalendar(!showSpecialCalendar)}
-                          className={`p-2 rounded-lg transition-all ${specialDateFilter ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20' : 'hover:bg-gray-100 dark:hover:bg-[#333] text-gray-400'}`}
+                          className={`p-2 rounded-lg transition-all ${specialDateFilter ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20' : 'hover:bg-gray-100 dark:hover:bg-black text-gray-400'}`}
                           title="Search specials by date"
                         >
                           <Search className="w-4 h-4" />
                         </button>
 
                         {showSpecialCalendar && (
-                          <div className="absolute top-full right-0 mt-2 bg-white dark:bg-[#292929] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-50 origin-top-right scale-[0.85]">
+                          <div className="absolute top-full right-0 mt-2 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-50 origin-top-right scale-[0.85]">
                             <DayPicker
                               mode="single"
                               selected={specialDateFilter}
@@ -2120,7 +2119,7 @@ export function Dashboard({
                       </div>
                       <button
                         onClick={() => setShowSpecialsOnly(false)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-[#333] rounded-full transition-colors text-gray-400"
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors text-gray-400"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -2137,7 +2136,7 @@ export function Dashboard({
                       if (filtered.length === 0) {
                         return (
                           <div className="h-full flex flex-col items-center justify-center p-8 text-center opacity-40">
-                            <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/10 rounded-3xl flex items-center justify-center mb-4">
+                            <div className="w-16 h-16 bg-purple-50 dark:bg-black rounded-3xl flex items-center justify-center mb-4">
                               <Sparkles className="w-8 h-8 text-purple-400 shadow-xl shadow-purple-500/10" />
                             </div>
                             <p className="text-sm font-bold text-gray-600 dark:text-gray-400">No special tasks {specialDateFilter ? 'for this day' : 'found'}.</p>
@@ -2160,11 +2159,11 @@ export function Dashboard({
                       return sortedDates.map(dateKey => (
                         <div key={dateKey} className="space-y-3">
                           <div className="flex items-center gap-2 px-1">
-                            <div className="h-px flex-1 bg-gray-100 dark:bg-[#292929]" />
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-black" />
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">
                               {format(parse(dateKey, 'yyyy-MM-dd', new Date()), 'EEE, d MMM')}
                             </span>
-                            <div className="h-px flex-1 bg-gray-100 dark:bg-[#292929]" />
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-black" />
                           </div>
                           <div className="space-y-3">
                             {groups[dateKey]
@@ -2173,7 +2172,7 @@ export function Dashboard({
                                 <div
                                   key={task.id}
                                   onClick={() => setSelectedTask(task)}
-                                  className="px-3 py-1.5 rounded-2xl bg-white dark:bg-[#252525] border border-gray-100 dark:border-[#333] shadow-sm hover:shadow-md hover:border-purple-200 dark:hover:border-purple-900/50 transition-all cursor-pointer group relative overflow-hidden"
+                                  className="px-3 py-1.5 rounded-2xl bg-white dark:bg-black border border-gray-100 dark:border-[#333] shadow-sm hover:shadow-md hover:border-purple-200 dark:hover:border-purple-900/50 transition-all cursor-pointer group relative overflow-hidden"
                                 >
                                   <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
                                   <div className="flex items-center justify-between mb-2">
@@ -2204,7 +2203,7 @@ export function Dashboard({
         <AnimatePresence>
           {/* Mobile Bottom Navigation */}
           <div 
-            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-xl border-t border-gray-100 dark:border-[#2a2a2a] flex justify-between items-center rounded-t-[28px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors"
+            className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-black backdrop-blur-xl border-t border-gray-100 dark:border-[#2a2a2a] flex justify-between items-center rounded-t-[28px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 8px)', paddingTop: '8px', paddingLeft: '8px', paddingRight: '8px' }}
           >
             {[
@@ -2229,7 +2228,7 @@ export function Dashboard({
                   {isActive && !item.isAction && (
                     <motion.div 
                       layoutId="activeBottomNavPill"
-                      className="absolute inset-x-2 inset-y-1 bg-[#e0b596]/10 dark:bg-[#e0b596]/15 rounded-[16px] -z-10"
+                      className="absolute inset-x-2 inset-y-1 bg-[#e0b596]/10 dark:bg-black rounded-[16px] -z-10"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
@@ -2293,8 +2292,6 @@ export function Dashboard({
         </AnimatePresence >
 
         <GroupsModal isOpen={isGroupsModalOpen} onClose={() => setIsGroupsModalOpen(false)} />
-
-        <MilliAssistant onAddTask={onAddTask} userName={userName} />
       </div >
     </div >
   );

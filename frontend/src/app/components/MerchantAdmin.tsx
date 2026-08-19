@@ -170,10 +170,10 @@ export function MerchantAdmin() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'APPROVED': return <span className="px-2.5 py-1 rounded-md bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider border border-green-200/50 dark:border-green-800/50">Approved</span>;
-            case 'PENDING': return <span className="px-2.5 py-1 rounded-md bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider border border-orange-200/50 dark:border-orange-800/50">Pending</span>;
-            case 'REJECTED': return <span className="px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider border border-red-200/50 dark:border-red-800/50">Rejected</span>;
-            default: return <span className="px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-bold uppercase tracking-wider border border-gray-200 dark:border-gray-700">{status}</span>;
+            case 'APPROVED': return <span className="px-2.5 py-1 rounded-md bg-green-50 dark:bg-black text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider border border-green-200/50 dark:border-green-800/50">Approved</span>;
+            case 'PENDING': return <span className="px-2.5 py-1 rounded-md bg-orange-50 dark:bg-black text-orange-700 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider border border-orange-200/50 dark:border-orange-800/50">Pending</span>;
+            case 'REJECTED': return <span className="px-2.5 py-1 rounded-md bg-red-50 dark:bg-black text-red-700 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider border border-red-200/50 dark:border-red-800/50">Rejected</span>;
+            default: return <span className="px-2.5 py-1 rounded-md bg-gray-50 dark:bg-black text-gray-700 dark:text-gray-300 text-[10px] font-bold uppercase tracking-wider border border-gray-200 dark:border-gray-700">{status}</span>;
         }
     };
 
@@ -190,7 +190,7 @@ export function MerchantAdmin() {
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={fetchMerchants}
-                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#2a2a2a] text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-all shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-black border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-all shadow-sm"
                     >
                         <RotateCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
                     </button>
@@ -199,46 +199,46 @@ export function MerchantAdmin() {
 
             {/* Stats Dashboard */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8 flex-shrink-0">
-                <div className="bg-white dark:bg-[#252525] p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-black p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total</span>
-                        <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-black flex items-center justify-center">
                             <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
                     <div className="text-3xl font-black text-gray-900 dark:text-white">{stats.total}</div>
                 </div>
-                <div className="bg-white dark:bg-[#252525] p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-black p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Pending</span>
-                        <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-black flex items-center justify-center">
                             <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         </div>
                     </div>
                     <div className="text-3xl font-black text-gray-900 dark:text-white">{stats.pending}</div>
                 </div>
-                <div className="bg-white dark:bg-[#252525] p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-black p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Approved</span>
-                        <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-black flex items-center justify-center">
                             <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
                     <div className="text-3xl font-black text-gray-900 dark:text-white">{stats.approved}</div>
                 </div>
-                <div className="bg-white dark:bg-[#252525] p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-black p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Rejected</span>
-                        <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-black flex items-center justify-center">
                             <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                         </div>
                     </div>
                     <div className="text-3xl font-black text-gray-900 dark:text-white">{stats.rejected}</div>
                 </div>
-                <div className="bg-white dark:bg-[#252525] p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-black p-5 rounded-2xl border border-gray-200 dark:border-[#333] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Featured</span>
-                        <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-black flex items-center justify-center">
                             <Star className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         </div>
                     </div>
@@ -247,7 +247,7 @@ export function MerchantAdmin() {
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-[#252525] p-2 rounded-xl border border-gray-200 dark:border-[#333] shadow-sm mb-6 flex flex-col md:flex-row items-center gap-2 flex-shrink-0">
+            <div className="bg-white dark:bg-black p-2 rounded-xl border border-gray-200 dark:border-[#333] shadow-sm mb-6 flex flex-col md:flex-row items-center gap-2 flex-shrink-0">
                 <div className="relative w-full md:flex-1 h-10 flex items-center">
                     <Search className="absolute left-3 w-4 h-4 text-gray-400" />
                     <input 
@@ -258,10 +258,10 @@ export function MerchantAdmin() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-[#333]" />
+                <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-black" />
                 <div className="flex w-full md:w-auto gap-2">
                     <select 
-                        className="flex-1 md:w-40 h-10 px-3 bg-gray-50 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#e0b596] cursor-pointer"
+                        className="flex-1 md:w-40 h-10 px-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-[#333] rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#e0b596] cursor-pointer"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -271,7 +271,7 @@ export function MerchantAdmin() {
                         <option value="REJECTED">Rejected</option>
                     </select>
                     <select 
-                        className="flex-1 md:w-48 h-10 px-3 bg-gray-50 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#e0b596] cursor-pointer"
+                        className="flex-1 md:w-48 h-10 px-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-[#333] rounded-lg text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#e0b596] cursor-pointer"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
                     >
@@ -288,12 +288,12 @@ export function MerchantAdmin() {
                 {isLoading ? (
                     <div className="space-y-3">
                         {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="h-20 bg-white dark:bg-[#252525] border border-gray-100 dark:border-[#333] rounded-2xl animate-pulse" />
+                            <div key={i} className="h-20 bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-2xl animate-pulse" />
                         ))}
                     </div>
                 ) : filteredMerchants.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 dark:bg-[#1f1f1f]/50 rounded-2xl border border-dashed border-gray-200 dark:border-[#333]">
-                        <div className="w-16 h-16 bg-white dark:bg-[#252525] rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100 dark:border-[#333]">
+                    <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 dark:bg-black rounded-2xl border border-dashed border-gray-200 dark:border-[#333]">
+                        <div className="w-16 h-16 bg-white dark:bg-black rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100 dark:border-[#333]">
                             <Store className="w-8 h-8 text-gray-400" />
                         </div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No merchants found</h3>
@@ -303,7 +303,7 @@ export function MerchantAdmin() {
                         {(searchTerm || statusFilter !== 'ALL' || categoryFilter !== 'ALL') && (
                             <button 
                                 onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); setCategoryFilter('ALL'); }}
-                                className="mt-4 px-4 py-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors shadow-sm"
+                                className="mt-4 px-4 py-2 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-black transition-colors shadow-sm"
                             >
                                 Clear all filters
                             </button>
@@ -312,11 +312,11 @@ export function MerchantAdmin() {
                 ) : (
                     <div className="space-y-3 pb-8">
                         {filteredMerchants.map(merchant => (
-                            <div key={merchant.id} className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-[#252525] border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
+                            <div key={merchant.id} className="flex flex-col lg:flex-row items-start lg:items-center p-4 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl hover:border-gray-300 dark:hover:border-[#444] transition-colors shadow-sm group gap-4">
                                         
                                         {/* Info Section */}
                                         <div className="flex items-center gap-4 w-full lg:w-[35%]">
-                                            <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                            <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-black border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 <MerchantLogo 
                                                     url={merchant.logoUrl} 
                                                     name={merchant.businessName} 
@@ -327,7 +327,7 @@ export function MerchantAdmin() {
                                             <div className="min-w-0">
                                                 <h4 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">{merchant.businessName}</h4>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-[#1f1f1f] text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate max-w-[150px]">
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-black text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate max-w-[150px]">
                                                         {merchant.category}
                                                     </span>
                                                 </div>
@@ -351,7 +351,7 @@ export function MerchantAdmin() {
                                             <div className="flex gap-2 items-center">
                                                 {getStatusBadge(merchant.status)}
                                                 {merchant.isFeatured && (
-                                                    <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-200/50 dark:border-purple-800/50">
+                                                    <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-black text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-200/50 dark:border-purple-800/50">
                                                         Featured
                                                     </span>
                                                 )}
@@ -365,31 +365,31 @@ export function MerchantAdmin() {
                                         <div className="w-full lg:w-auto lg:flex-1 flex items-center justify-end gap-1.5 border-t lg:border-t-0 border-gray-100 dark:border-[#333] pt-3 lg:pt-0">
                                             {merchant.status !== 'APPROVED' && (
                                                 <Tooltip content="Approve">
-                                                    <button onClick={() => updateStatus(merchant.id, 'APPROVED')} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
+                                                    <button onClick={() => updateStatus(merchant.id, 'APPROVED')} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-black transition-colors">
                                                         <Check className="w-4 h-4" />
                                                     </button>
                                                 </Tooltip>
                                             )}
                                             {merchant.status !== 'REJECTED' && (
                                                 <Tooltip content="Reject">
-                                                    <button onClick={() => updateStatus(merchant.id, 'REJECTED')} className="p-2 rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors">
+                                                    <button onClick={() => updateStatus(merchant.id, 'REJECTED')} className="p-2 rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-black transition-colors">
                                                         <X className="w-4 h-4" />
                                                     </button>
                                                 </Tooltip>
                                             )}
                                             <Tooltip content={merchant.isFeatured ? "Unfeature" : "Feature"}>
-                                                <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}`}>
+                                                <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-black' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-black'}`}>
                                                     <Star className={`w-4 h-4 ${merchant.isFeatured ? 'fill-current' : ''}`} />
                                                 </button>
                                             </Tooltip>
-                                            <div className="w-px h-4 bg-gray-200 dark:bg-[#333] mx-1" />
+                                            <div className="w-px h-4 bg-gray-200 dark:bg-black mx-1" />
                                             <Tooltip content="View Details">
-                                                <button onClick={() => setSelectedMerchant(merchant)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                                                <button onClick={() => setSelectedMerchant(merchant)} className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-black transition-colors">
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                             </Tooltip>
                                             <Tooltip content="Delete">
-                                                <button onClick={() => deleteMerchant(merchant.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                <button onClick={() => deleteMerchant(merchant.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-black transition-colors">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </Tooltip>
@@ -416,15 +416,15 @@ export function MerchantAdmin() {
                             animate={{ x: 0, opacity: 1 }}
                             exit={{ x: '100%', opacity: 0 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-[#1b1b1b] shadow-2xl z-50 flex flex-col border-l border-gray-200 dark:border-[#333]"
+                            className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-black shadow-2xl z-50 flex flex-col border-l border-gray-200 dark:border-[#333]"
                         >
                             {/* Drawer Header */}
-                            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-[#1f1f1f]/50">
+                            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-[#333] bg-gray-50/50 dark:bg-black">
                                 <div>
                                     <h3 className="font-bold text-lg text-gray-900 dark:text-white">Merchant Details</h3>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">ID: #{selectedMerchant.id}</p>
                                 </div>
-                                <button onClick={() => setSelectedMerchant(null)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#333] transition-colors">
+                                <button onClick={() => setSelectedMerchant(null)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-black transition-colors">
                                     <X className="w-5 h-5 text-gray-500" />
                                 </button>
                             </div>
@@ -433,7 +433,7 @@ export function MerchantAdmin() {
                             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                                 {/* Profile Header */}
                                 <div className="flex items-center gap-5 mb-8">
-                                    <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-[#252525] border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+                                    <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-black border border-gray-200 dark:border-[#333] flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
                                         <MerchantLogo 
                                             url={selectedMerchant.logoUrl} 
                                             name={selectedMerchant.businessName} 
@@ -445,30 +445,30 @@ export function MerchantAdmin() {
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedMerchant.businessName}</h2>
                                         <div className="flex items-center gap-2 mt-2">
                                             {getStatusBadge(selectedMerchant.status)}
-                                            {selectedMerchant.isFeatured && <span className="px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider">Featured</span>}
+                                            {selectedMerchant.isFeatured && <span className="px-2 py-0.5 rounded bg-purple-50 dark:bg-black text-purple-700 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider">Featured</span>}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Actions row */}
-                                <div className="flex gap-2 mb-8 bg-gray-50 dark:bg-[#1f1f1f] p-2 rounded-xl border border-gray-100 dark:border-[#333]">
+                                <div className="flex gap-2 mb-8 bg-gray-50 dark:bg-black p-2 rounded-xl border border-gray-100 dark:border-[#333]">
                                     <button 
                                         onClick={() => updateStatus(selectedMerchant.id, 'APPROVED')}
                                         disabled={selectedMerchant.status === 'APPROVED'}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-[#252525] hover:shadow-sm"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-black hover:shadow-sm"
                                     >
                                         <Check className="w-4 h-4 text-green-600" /> <span className={selectedMerchant.status === 'APPROVED' ? 'text-green-600' : 'text-gray-700 dark:text-gray-300'}>Approve</span>
                                     </button>
                                     <button 
                                         onClick={() => updateStatus(selectedMerchant.id, 'REJECTED')}
                                         disabled={selectedMerchant.status === 'REJECTED'}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-[#252525] hover:shadow-sm"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-black hover:shadow-sm"
                                     >
                                         <X className="w-4 h-4 text-orange-600" /> <span className={selectedMerchant.status === 'REJECTED' ? 'text-orange-600' : 'text-gray-700 dark:text-gray-300'}>Reject</span>
                                     </button>
                                     <button 
                                         onClick={() => toggleFeature(selectedMerchant.id, selectedMerchant.isFeatured)}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-white dark:hover:bg-[#252525] hover:shadow-sm"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-white dark:hover:bg-black hover:shadow-sm"
                                     >
                                         <Star className={`w-4 h-4 ${selectedMerchant.isFeatured ? 'text-purple-600 fill-current' : 'text-gray-400'}`} /> 
                                         <span className={selectedMerchant.isFeatured ? 'text-purple-600' : 'text-gray-700 dark:text-gray-300'}>Feature</span>
@@ -479,30 +479,30 @@ export function MerchantAdmin() {
                                 <div className="space-y-6">
                                     <section>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2"><Briefcase className="w-4 h-4" /> About</h4>
-                                        <div className="bg-gray-50 dark:bg-[#1f1f1f] rounded-xl p-4 border border-gray-100 dark:border-[#333]">
+                                        <div className="bg-gray-50 dark:bg-black rounded-xl p-4 border border-gray-100 dark:border-[#333]">
                                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedMerchant.description || 'No description provided.'}</p>
                                         </div>
                                     </section>
 
                                     <section>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2"><MapPin className="w-4 h-4" /> Contact & Location</h4>
-                                        <div className="bg-white dark:bg-[#252525] rounded-xl border border-gray-200 dark:border-[#333] divide-y divide-gray-100 dark:divide-[#333]">
+                                        <div className="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-[#333] divide-y divide-gray-100 dark:divide-[#333]">
                                             <div className="p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#1f1f1f] flex items-center justify-center"><Phone className="w-4 h-4 text-gray-500" /></div>
+                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-black flex items-center justify-center"><Phone className="w-4 h-4 text-gray-500" /></div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[10px] text-gray-500 uppercase font-bold">Phone</p>
                                                     <p className="text-sm text-gray-900 dark:text-white truncate">{selectedMerchant.phone || 'N/A'}</p>
                                                 </div>
                                             </div>
                                             <div className="p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#1f1f1f] flex items-center justify-center"><Mail className="w-4 h-4 text-gray-500" /></div>
+                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-black flex items-center justify-center"><Mail className="w-4 h-4 text-gray-500" /></div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[10px] text-gray-500 uppercase font-bold">Email</p>
                                                     <p className="text-sm text-gray-900 dark:text-white truncate">{selectedMerchant.email || 'N/A'}</p>
                                                 </div>
                                             </div>
                                             <div className="p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#1f1f1f] flex items-center justify-center"><Globe className="w-4 h-4 text-gray-500" /></div>
+                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-black flex items-center justify-center"><Globe className="w-4 h-4 text-gray-500" /></div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[10px] text-gray-500 uppercase font-bold">Website</p>
                                                     {selectedMerchant.website ? (
@@ -511,7 +511,7 @@ export function MerchantAdmin() {
                                                 </div>
                                             </div>
                                             <div className="p-3 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#1f1f1f] flex items-center justify-center"><Map className="w-4 h-4 text-gray-500" /></div>
+                                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-black flex items-center justify-center"><Map className="w-4 h-4 text-gray-500" /></div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[10px] text-gray-500 uppercase font-bold">Address</p>
                                                     <p className="text-sm text-gray-900 dark:text-white">{selectedMerchant.address || ''} {selectedMerchant.city || ''}, {selectedMerchant.state || ''} {selectedMerchant.zipCode || ''}</p>
@@ -522,11 +522,11 @@ export function MerchantAdmin() {
 
                                     <section>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2"><FileText className="w-4 h-4" /> Proof Document</h4>
-                                        <div className="bg-gray-50 dark:bg-[#1f1f1f] rounded-xl border border-gray-100 dark:border-[#333] p-4 text-sm flex items-center justify-between">
+                                        <div className="bg-gray-50 dark:bg-black rounded-xl border border-gray-100 dark:border-[#333] p-4 text-sm flex items-center justify-between">
                                             {selectedMerchant.proofDocumentUrl ? (
                                                 <>
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-black flex items-center justify-center">
                                                             <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                         </div>
                                                         <div>
@@ -538,7 +538,7 @@ export function MerchantAdmin() {
                                                         href={selectedMerchant.proofDocumentUrl.startsWith('http') ? selectedMerchant.proofDocumentUrl : `${API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL}${selectedMerchant.proofDocumentUrl.startsWith('/') ? selectedMerchant.proofDocumentUrl : '/' + selectedMerchant.proofDocumentUrl}`} 
                                                         target="_blank" 
                                                         rel="noreferrer" 
-                                                        className="px-4 py-2 bg-white dark:bg-[#252525] hover:bg-gray-50 dark:hover:bg-[#333] border border-gray-200 dark:border-[#444] rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                                                        className="px-4 py-2 bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black border border-gray-200 dark:border-[#444] rounded-lg text-sm font-semibold transition-colors shadow-sm"
                                                     >
                                                         View
                                                     </a>
@@ -554,7 +554,7 @@ export function MerchantAdmin() {
 
                                     <section>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2"><Calendar className="w-4 h-4" /> System Info</h4>
-                                        <div className="bg-white dark:bg-[#252525] rounded-xl border border-gray-200 dark:border-[#333] p-4 flex flex-col gap-3 text-sm">
+                                        <div className="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-[#333] p-4 flex flex-col gap-3 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Created On</span>
                                                 <span className="font-semibold text-gray-900 dark:text-white">{format(new Date(selectedMerchant.createdAt), 'PPpp')}</span>
@@ -565,7 +565,7 @@ export function MerchantAdmin() {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Owner ID</span>
-                                                <span className="font-semibold text-gray-900 dark:text-white text-xs font-mono bg-gray-100 dark:bg-[#1f1f1f] px-2 py-0.5 rounded">{selectedMerchant.userId}</span>
+                                                <span className="font-semibold text-gray-900 dark:text-white text-xs font-mono bg-gray-100 dark:bg-black px-2 py-0.5 rounded">{selectedMerchant.userId}</span>
                                             </div>
                                         </div>
                                     </section>

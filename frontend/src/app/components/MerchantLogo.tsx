@@ -36,7 +36,7 @@ export const MerchantLogo: React.FC<MerchantLogoProps> = ({
 
     if (!finalUrl || imgError) {
         return (
-            <div className={`flex flex-col items-center justify-center bg-gray-100 dark:bg-[#1f1f1f] text-gray-500 dark:text-gray-400 w-full h-full p-1 ${className}`}>
+            <div className={`flex flex-col items-center justify-center bg-gray-100 dark:bg-black text-gray-500 dark:text-gray-400 w-full h-full p-1 ${className}`}>
                 <Store className={iconClassName} />
                 <span className={initialsClassName}>{initials}</span>
             </div>

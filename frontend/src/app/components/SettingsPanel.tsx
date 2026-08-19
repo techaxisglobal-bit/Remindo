@@ -157,14 +157,14 @@ export function SettingsPanel({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white/60 dark:bg-black/60 backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
+        className="bg-white/60 dark:bg-black backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
       >
         {/* Header - Minimal & Clean */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#333]">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#292929] rounded-full transition-colors"
+            className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-black rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -205,9 +205,9 @@ export function SettingsPanel({
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Preferences</h3>
 
             {/* Appearance */}
-            <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group">
+            <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-black transition-all duration-300 border border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-white/50 dark:bg-white/10 backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
+                <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
                   {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </div>
                 <div>
@@ -223,9 +223,9 @@ export function SettingsPanel({
             </div>
 
             {/* Notifications */}
-            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-[#25252b] transition-colors border border-transparent hover:border-gray-100 dark:hover:border-[#333]">
+            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-black transition-colors border border-transparent hover:border-gray-100 dark:hover:border-[#333]">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-[#333] text-gray-700 dark:text-[#e0b596]">
+                <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-black text-gray-700 dark:text-[#e0b596]">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div>
@@ -246,14 +246,14 @@ export function SettingsPanel({
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4 mb-2 px-1">Security</h3>
             <div className="space-y-3">
               <div
-                className={`p-3 rounded-2xl transition-all duration-300 border ${showChangePassword ? 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10' : 'hover:bg-white/40 dark:hover:bg-white/10 border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group'}`}
+                className={`p-3 rounded-2xl transition-all duration-300 border ${showChangePassword ? 'bg-gray-50 dark:bg-black border-gray-100 dark:border-white/10' : 'hover:bg-white/40 dark:hover:bg-black border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group'}`}
               >
                 <button
                   onClick={() => setShowChangePassword(!showChangePassword)}
                   className="flex items-center justify-between w-full group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-white/50 dark:bg-white/10 backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
+                    <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black backdrop-blur-md text-gray-700 dark:text-[#e0b596] shadow-inner ring-1 ring-white/20 dark:ring-white/5">
                       <Shield className="w-5 h-5" />
                     </div>
                     <div className="text-left">
@@ -282,7 +282,7 @@ export function SettingsPanel({
                               value={currentPassword}
                               onChange={(e) => setCurrentPassword(e.target.value)}
                               placeholder="••••••••"
-                              className="w-full bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-[#333] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                             <button
                               type="button"
@@ -302,7 +302,7 @@ export function SettingsPanel({
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
                               placeholder="Min. 6 characters"
-                              className="w-full bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                           </div>
                           <div className="relative">
@@ -312,7 +312,7 @@ export function SettingsPanel({
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               placeholder="Match new password"
-                              className="w-full bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
+                              className="w-full bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl mt-1 px-4 py-2.5 text-sm focus:outline-none focus:border-[#e0b596] transition-colors"
                             />
                           </div>
                         </div>
@@ -352,7 +352,7 @@ export function SettingsPanel({
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="w-full h-12 border border-white/40 dark:border-white/10 bg-gradient-to-b from-white/30 to-white/10 dark:from-white/10 dark:to-transparent hover:bg-white/50 dark:hover:bg-white/20 backdrop-blur-md text-gray-700 dark:text-red-400 justify-center gap-2 group transition-all duration-300 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] ring-1 ring-white/40 dark:ring-transparent"
+              className="w-full h-12 border border-white/40 dark:border-white/10 bg-gradient-to-b from-white/30 to-white/10 dark:from-white/10 dark:to-transparent hover:bg-white/50 dark:hover:bg-black backdrop-blur-md text-gray-700 dark:text-red-400 justify-center gap-2 group transition-all duration-300 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] ring-1 ring-white/40 dark:ring-transparent"
             >
               <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
               Sign out

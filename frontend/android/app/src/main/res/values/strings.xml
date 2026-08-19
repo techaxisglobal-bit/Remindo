@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Remindo</string>
-    <string name="title_activity_main">Remindo</string>
+    <string name="app_name">Milli</string>
+    <string name="title_activity_main">Milli</string>
     <string name="package_name">com.techaxisglobal.remindo</string>
     <string name="custom_url_scheme">com.techaxisglobal.remindo</string>
     <string name="server_client_id">733914668823-fl25s7gs82c51qu9vgq4prrp2h32qmd0.apps.googleusercontent.com</string>

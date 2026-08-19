@@ -526,8 +526,8 @@ export function SignIn({ onSignIn }: SignInProps) {
   };
 
   // ── Shared Input Styles ──
-  const inputClass = "pl-10 bg-white dark:bg-[#292929] border-gray-200 dark:border-[#3a3a3a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-[#e0b596] focus:border-[#e0b596] transition-colors";
-  const inputClassWithEye = "pl-10 pr-10 bg-white dark:bg-[#292929] border-gray-200 dark:border-[#3a3a3a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-[#e0b596] focus:border-[#e0b596] transition-colors";
+  const inputClass = "pl-10 bg-white dark:bg-black border-gray-200 dark:border-[#3a3a3a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-[#e0b596] focus:border-[#e0b596] transition-colors";
+  const inputClassWithEye = "pl-10 pr-10 bg-white dark:bg-black border-gray-200 dark:border-[#3a3a3a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-[#e0b596] focus:border-[#e0b596] transition-colors";
 
   // ── Determine current view title ──
   const getTitle = () => {
@@ -547,7 +547,7 @@ export function SignIn({ onSignIn }: SignInProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#1f1f1f] p-4 transition-colors duration-300">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4 transition-colors duration-300">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#e0b596]/5 rounded-full blur-3xl" />
@@ -560,11 +560,11 @@ export function SignIn({ onSignIn }: SignInProps) {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="bg-white/90 dark:bg-[#1b1b1b]/95 backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-[#292929] relative overflow-hidden">
+        <div className="bg-white/90 dark:bg-black backdrop-blur-xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 p-8 border border-gray-200/80 dark:border-[#292929] relative overflow-hidden">
 
           {/* Verification / Loading Overlay */}
           {loading && (
-            <div className="absolute inset-0 bg-white/70 dark:bg-[#1b1b1b]/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
+            <div className="absolute inset-0 bg-white/70 dark:bg-black backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 transition-all duration-300">
               <div className="w-12 h-12 border-4 border-[#e0b596] border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200 animate-pulse tracking-wide">
                 Please wait...
@@ -579,7 +579,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
+                className="mb-6 p-4 bg-red-50 dark:bg-black border border-red-100 dark:border-red-900/30 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
               >
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
@@ -701,7 +701,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                   {/* Google Sign In */}
                   <button
                     onClick={handleGoogleClick}
-                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#292929] hover:bg-gray-50 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
                   >
                     {/* Glossy shine */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent dark:from-white/5 pointer-events-none" />
@@ -718,7 +718,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                   {/* Apple Sign In */}
                   <button
                     onClick={handleAppleClick}
-                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#292929] hover:bg-gray-50 dark:hover:bg-[#333] text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-black text-gray-700 dark:text-gray-200 font-medium text-sm transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden shadow-sm"
                   >
                     {/* Glossy shine */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent dark:from-white/5 pointer-events-none" />
@@ -732,9 +732,9 @@ export function SignIn({ onSignIn }: SignInProps) {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-gray-200 dark:bg-[#3a3a3a]" />
+                  <div className="flex-1 h-px bg-gray-200 dark:bg-black" />
                   <span className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase">or</span>
-                  <div className="flex-1 h-px bg-gray-200 dark:bg-[#3a3a3a]" />
+                  <div className="flex-1 h-px bg-gray-200 dark:bg-black" />
                 </div>
 
                 {/* Form */}
@@ -821,7 +821,7 @@ export function SignIn({ onSignIn }: SignInProps) {
                       setIsSignUp(!isSignUp);
                       setError(null);
                     }}
-                    className="group text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+                    className="group text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-black"
                   >
                     {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
                     <span className="text-[#e0b596] font-bold group-hover:text-[#c69472] underline decoration-2 underline-offset-4 decoration-[#e0b596]/30 group-hover:decoration-[#c69472]">

@@ -169,14 +169,14 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
-            <div ref={ref} className="w-full max-w-md bg-white dark:bg-[#1a1a1a] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                <div className="px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#222]">
+            <div ref={ref} className="w-full max-w-md bg-white dark:bg-black h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                <div className="px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-black">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Bell className="w-5 h-5" /> Notifications
                     </h2>
                     <div className="flex gap-3 items-center">
                         <button onClick={markAllAsRead} className="text-sm font-medium text-[#e0b596] hover:underline">Mark all read</button>
-                        <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-black">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -190,7 +190,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</h3>
                                 <div className="space-y-2">
                                     {items.map(n => (
-                                        <div key={n.id} className={`p-4 rounded-xl border transition-all ${n.status === 'Unread' ? 'bg-[#e0b596]/10 border-[#e0b596]/30 shadow-sm' : 'bg-white dark:bg-[#222] border-gray-100 dark:border-[#333]'}`}>
+                                        <div key={n.id} className={`p-4 rounded-xl border transition-all ${n.status === 'Unread' ? 'bg-[#e0b596]/10 border-[#e0b596]/30 shadow-sm' : 'bg-white dark:bg-black border-gray-100 dark:border-[#333]'}`}>
                                             <div className="flex justify-between items-start mb-1">
                                                 <h4 className={`font-semibold text-sm ${n.status === 'Unread' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</h4>
                                                 <div className="flex gap-2">
@@ -210,7 +210,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                                 <span className="text-xs text-gray-400">{format(parseISO(n.createdAt), 'h:mm a')}</span>
                                                 {n.type === 'Invitation' && n.status === 'Unread' && (
                                                     <div className="flex gap-2">
-                                                        <button onClick={() => handleDecline(n)} className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">Decline</button>
+                                                        <button onClick={() => handleDecline(n)} className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black rounded-lg transition-colors">Decline</button>
                                                         <button onClick={() => handleAccept(n)} className="px-3 py-1.5 text-xs font-bold text-white bg-[#e0b596] hover:bg-[#c49a7c] rounded-lg shadow-sm transition-colors">Accept</button>
                                                     </div>
                                                 )}

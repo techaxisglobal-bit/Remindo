@@ -59,7 +59,7 @@ function DatePicker({ value, onChange, disabled }: DatePickerProps) {
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setShow(!show)}
-        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap transition-colors bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
+        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap transition-colors bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
           ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-[#e0b596]/30 hover:text-[#e0b596]'}`}
       >
         <span>{format(parsedDate, 'dd-MM-yyyy')}</span>
@@ -72,7 +72,7 @@ function DatePicker({ value, onChange, disabled }: DatePickerProps) {
             initial={{ opacity: 0, y: 5, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.98 }}
-            className="absolute top-full left-0 mt-1.5 p-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 min-w-max"
+            className="absolute top-full left-0 mt-1.5 p-1 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 min-w-max"
           >
             <DayPicker
               mode="single"
@@ -191,7 +191,7 @@ function TimePicker({ value, onChange, disabled }: TimePickerProps) {
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setShow(!show)}
-        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
+        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
           ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-[#e0b596]/30 hover:text-[#e0b596]'}`}
       >
         <span>{format(currentTime, 'hh:mm a')}</span>
@@ -204,9 +204,9 @@ function TimePicker({ value, onChange, disabled }: TimePickerProps) {
             initial={{ opacity: 0, y: 5, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.98 }}
-            className="absolute top-full left-0 mt-1.5 p-1.5 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 flex flex-col gap-1.5 w-[120px]"
+            className="absolute top-full left-0 mt-1.5 p-1.5 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 flex flex-col gap-1.5 w-[120px]"
           >
-            <div className="flex items-center justify-center h-28 relative bg-gray-50 dark:bg-black/20 rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
+            <div className="flex items-center justify-center h-28 relative bg-gray-50 dark:bg-black rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
               {/* Highlight Overlay */}
               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[28px] bg-[#e0b596]/10 border-y border-[#e0b596]/20 pointer-events-none rounded-sm" />
 
@@ -778,7 +778,7 @@ export function CreateReminder({
   };
 
 return (
-  <div className="flex flex-col md:flex-row bg-white dark:bg-[#1b1b1b] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-[#292929] max-w-2xl w-full mx-auto h-full relative">
+  <div className="flex flex-col md:flex-row bg-white dark:bg-black text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-[#292929] max-w-2xl w-full mx-auto h-full relative">
 
     <AnimatePresence>
       {(isListening || isProcessing) && (
@@ -786,7 +786,7 @@ return (
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 dark:bg-[#1b1b1b]/95 backdrop-blur-sm rounded-[2rem]"
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 dark:bg-black backdrop-blur-sm rounded-[2rem]"
         >
           <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(224,181,150,0.4)] transition-all ${isListening ? 'bg-[#e0b596] animate-pulse' : 'bg-[#e0b596]/50'}`}>
             {isProcessing ? <Loader2 className="w-10 h-10 text-white animate-spin" /> : <Mic className="w-10 h-10 text-white" />}
@@ -803,7 +803,7 @@ return (
           <Button
             onClick={toggleVoice}
             variant="ghost"
-            className="mt-8 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-[#333] hover:bg-gray-200 dark:hover:bg-[#444] rounded-full px-8 py-2 font-bold transition-colors"
+            className="mt-8 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-black rounded-full px-8 py-2 font-bold transition-colors"
           >
             {isProcessing ? 'Cancel' : 'Stop Listening'}
           </Button>
@@ -814,7 +814,7 @@ return (
     <div className="flex-[1.5] flex flex-col p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Reminder</h2>
-        <button onClick={handleCloseAttempt} className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-[#292929] rounded-full transition-colors">
+        <button onClick={handleCloseAttempt} className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors">
           <X className="w-6 h-6 text-gray-400" />
         </button>
       </div>
@@ -839,7 +839,7 @@ return (
           </button>
         </div>
 
-        <div className="relative group bg-gray-50/80 dark:bg-[#252525]/80 p-3.5 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all">
+        <div className="relative group bg-gray-50/80 dark:bg-black p-3.5 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all">
           <textarea
             placeholder="Add detailed description, steps, or notes..."
             className="w-full bg-transparent text-[14px] font-medium leading-relaxed placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-0 border-none p-0 min-h-[70px] resize-none pr-10"
@@ -882,9 +882,9 @@ return (
 
         {/* Attendees Row */}
         <div className="flex flex-col gap-2 mt-2 relative">
-          <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#252525]/80 p-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px]">
+          <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-black p-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px]">
             {attendees.map((email) => (
-              <div key={email} className="flex items-center gap-1.5 bg-white dark:bg-[#333] border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full text-[12px] font-bold shadow-sm">
+              <div key={email} className="flex items-center gap-1.5 bg-white dark:bg-black border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full text-[12px] font-bold shadow-sm">
                 <span>{email}</span>
                 <button type="button" onClick={() => setAttendees(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
                   <X className="w-3.5 h-3.5" />
@@ -940,14 +940,14 @@ return (
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-[#1b1b1b] border border-gray-200 dark:border-[#333] shadow-lg rounded-xl overflow-hidden"
+                className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-black border border-gray-200 dark:border-[#333] shadow-lg rounded-xl overflow-hidden"
               >
                 <div className="max-h-40 overflow-y-auto custom-scrollbar">
                   {groups.map(group => (
                     <button
                       key={group.id}
                       type="button"
-                      className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#252525] border-b border-gray-100 dark:border-white/5 last:border-0"
+                      className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-black border-b border-gray-100 dark:border-white/5 last:border-0"
                       onClick={() => {
                         const newEmails = (group.members || []).filter(email => !attendees.includes(email));
                         if (newEmails.length > 0) {
@@ -990,7 +990,7 @@ return (
                 <button
                   type="button"
                   onClick={() => setShowRepeatDropdown(!showRepeatDropdown)}
-                  className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
+                  className="flex items-center justify-between w-full bg-gray-50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
                 >
                   <div className="flex items-center gap-2">
                     <Repeat className="w-3.5 h-3.5 text-[#e0b596]" />
@@ -1013,12 +1013,12 @@ return (
                         initial={{ opacity: 0, y: 5, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.98 }}
-                        className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                        className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                       >
                         <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                           {/* Does not repeat option */}
                           <div
-                            className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                            className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                             onClick={() => {
                               setSelectedDays([]);
                               setShowRepeatDropdown(false);
@@ -1034,7 +1034,7 @@ return (
 
                           {/* Every day option */}
                           <div
-                            className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                            className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                             onClick={() => {
                               if (selectedDays.length === 7) setSelectedDays([]);
                               else setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
@@ -1049,14 +1049,14 @@ return (
                             </div>
                           </div>
 
-                          <div className="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2" />
+                          <div className="h-px bg-gray-100 dark:bg-black my-1 mx-2" />
 
                           {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => {
                             const isSelected = selectedDays.includes(index);
                             return (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                                 onClick={() => {
                                   if (isSelected) {
                                     setSelectedDays(selectedDays.filter(d => d !== index));
@@ -1084,7 +1084,7 @@ return (
                 <button
                   type="button"
                   onClick={() => setShowNotifyDropdown(!showNotifyDropdown)}
-                  className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
+                  className="flex items-center justify-between w-full bg-gray-50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
                 >
                   <div className="flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
@@ -1103,7 +1103,7 @@ return (
                         initial={{ opacity: 0, y: 5, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.98 }}
-                        className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                        className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                       >
                         <div className="p-2 space-y-1">
                           {NOTIFICATION_OPTIONS.map((option) => {
@@ -1111,7 +1111,7 @@ return (
                             return (
                               <div
                                 key={option.value}
-                                className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
+                                className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-black ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
                                 onClick={() => handleToggleNotifyBefore(option.value)}
                               >
                                 <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -1130,7 +1130,7 @@ return (
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-center justify-between gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-[#e0b596]/30 transition-all cursor-pointer" onClick={() => setIsSpecial(!isSpecial)}>
+              <div className="flex items-center justify-between gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-[#e0b596]/30 transition-all cursor-pointer" onClick={() => setIsSpecial(!isSpecial)}>
                 <div className="flex items-center gap-2">
                   <Sparkles className={`w-3.5 h-3.5 transition-colors ${isSpecial ? 'text-purple-500' : 'text-gray-400'}`} />
                   <span className="text-[13px] font-bold">Mark as special</span>
@@ -1150,7 +1150,7 @@ return (
 
       {/* Location Suggestions */}
       {(locationSuggestions.length > 0 || isSearchingLocation || location) && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-[#252525] rounded-2xl border border-gray-100 dark:border-white/5">
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-black rounded-2xl border border-gray-100 dark:border-white/5">
           <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <MapPin className="w-3.5 h-3.5" />
             {location ? 'Selected Location' : 'Suggested Locations Nearby'}
@@ -1158,11 +1158,11 @@ return (
           </div>
           
           {location ? (
-            <div className="flex items-center justify-between p-2.5 bg-white dark:bg-[#1f1f1f] border border-[#e0b596] rounded-xl">
+            <div className="flex items-center justify-between p-2.5 bg-white dark:bg-black border border-[#e0b596] rounded-xl">
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate pr-2">
                 {location}
               </span>
-              <button type="button" onClick={() => setLocation('')} className="p-1 hover:bg-gray-100 dark:hover:bg-[#333] rounded-full text-gray-400">
+              <button type="button" onClick={() => setLocation('')} className="p-1 hover:bg-gray-100 dark:hover:bg-black rounded-full text-gray-400">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1172,7 +1172,7 @@ return (
                 <div 
                   key={idx} 
                   onClick={() => setLocation(place.display_name)}
-                  className="p-2 bg-white dark:bg-[#1f1f1f] border border-gray-100 dark:border-[#333] rounded-xl cursor-pointer hover:border-[#e0b596]/50 hover:shadow-sm transition-all"
+                  className="p-2 bg-white dark:bg-black border border-gray-100 dark:border-[#333] rounded-xl cursor-pointer hover:border-[#e0b596]/50 hover:shadow-sm transition-all"
                 >
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{place.name || place.display_name.split(',')[0]}</p>
                   <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{place.display_name}</p>
@@ -1196,7 +1196,7 @@ return (
       </div>
     </div>
 
-    <div className="hidden md:flex flex-1 max-w-[240px] bg-gray-50 dark:bg-[#232323] border-l border-gray-200 dark:border-[#292929] flex-col">
+    <div className="hidden md:flex flex-1 max-w-[240px] bg-gray-50 dark:bg-black border-l border-gray-200 dark:border-[#292929] flex-col">
       <div className="p-5 border-b border-gray-200 dark:border-[#292929] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest">Schedule</h3>
@@ -1204,7 +1204,7 @@ return (
             {format(parse(startDate, 'yyyy-MM-dd', new Date()), 'MMM d')}
           </span>
         </div>
-        <button onClick={handleCloseAttempt} className="p-1.5 hover:bg-white dark:hover:bg-[#333] rounded-md transition-colors text-gray-400">
+        <button onClick={handleCloseAttempt} className="p-1.5 hover:bg-white dark:hover:bg-black rounded-md transition-colors text-gray-400">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -1220,7 +1220,7 @@ return (
                 </div>
               ) : (
                 <div key={item.id} className="relative">
-                  <div className="absolute -left-[25px] top-1 w-3.5 h-3.5 rounded-full bg-white dark:bg-[#1b1b1b] border-2 border-[#e0b596]" />
+                  <div className="absolute -left-[25px] top-1 w-3.5 h-3.5 rounded-full bg-white dark:bg-black border-2 border-[#e0b596]" />
                   <div className="space-y-1">
                     <span className="text-xs font-bold text-[#e0b596] uppercase tracking-tighter">
                       {item.time ? format(parse(item.time, 'HH:mm', new Date()), 'h:mm a') : '--'}
@@ -1246,7 +1246,7 @@ return (
           </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
-            <div className="w-14 h-14 bg-gray-200 dark:bg-[#333] rounded-2xl flex items-center justify-center">
+            <div className="w-14 h-14 bg-gray-200 dark:bg-black rounded-2xl flex items-center justify-center">
               <Info className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-base font-medium text-gray-400">No events scheduled<br />for this day.</p>
@@ -1275,9 +1275,9 @@ return (
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-xs bg-white dark:bg-[#1f1f1f] rounded-[1.5rem] shadow-2xl p-6 border border-gray-100 dark:border-[#333] text-center"
+            className="relative w-full max-w-xs bg-white dark:bg-black rounded-[1.5rem] shadow-2xl p-6 border border-gray-100 dark:border-[#333] text-center"
           >
-            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-black rounded-2xl flex items-center justify-center mx-auto mb-4">
               <CircleAlert className="w-6 h-6 text-amber-500" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Discard changes?</h3>

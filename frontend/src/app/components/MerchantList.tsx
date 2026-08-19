@@ -73,7 +73,7 @@ export function MerchantList() {
                     <div className="relative w-full sm:w-48">
                         <Filter className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         <select 
-                            className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-9 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus:ring-gray-300 appearance-none"
+                            className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-9 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:bg-black dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus:ring-gray-300 appearance-none"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
                         >
@@ -87,7 +87,7 @@ export function MerchantList() {
             </div>
 
             {filteredMerchants.length === 0 ? (
-                <div className="text-center py-20 bg-gray-50 dark:bg-[#1f1f1f] rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                <div className="text-center py-20 bg-gray-50 dark:bg-black rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
                     <p className="text-gray-500 dark:text-gray-400">No listings found matching your criteria.</p>
                 </div>
             ) : (

@@ -61,7 +61,7 @@ function DatePicker({ value, onChange, disabled }: DatePickerProps) {
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setShow(!show)}
-        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap transition-colors bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
+        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap transition-colors bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
           ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-[#e0b596]/30 hover:text-[#e0b596]'}`}
       >
         <span>{format(parsedDate, 'dd-MM-yyyy')}</span>
@@ -74,7 +74,7 @@ function DatePicker({ value, onChange, disabled }: DatePickerProps) {
             initial={{ opacity: 0, y: 5, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.98 }}
-            className="absolute top-full left-0 mt-1.5 p-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 min-w-max"
+            className="absolute top-full left-0 mt-1.5 p-1 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 min-w-max"
           >
             <DayPicker
               mode="single"
@@ -192,7 +192,7 @@ function TimePicker({ value, onChange, disabled }: TimePickerProps) {
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setShow(!show)}
-        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
+        className={`w-full text-left text-[13px] font-bold focus:outline-none whitespace-nowrap bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl flex items-center justify-between group border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all
           ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-[#e0b596]/30 hover:text-[#e0b596]'}`}
       >
         <span>{format(currentTime, 'hh:mm a')}</span>
@@ -205,9 +205,9 @@ function TimePicker({ value, onChange, disabled }: TimePickerProps) {
             initial={{ opacity: 0, y: 5, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.98 }}
-            className="absolute top-full left-0 mt-1.5 p-1.5 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 flex flex-col gap-1.5 w-[120px]"
+            className="absolute top-full left-0 mt-1.5 p-1.5 bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-[1rem] shadow-2xl z-50 flex flex-col gap-1.5 w-[120px]"
           >
-            <div className="flex items-center justify-center h-28 relative bg-gray-50 dark:bg-black/20 rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
+            <div className="flex items-center justify-center h-28 relative bg-gray-50 dark:bg-black rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
               {/* Highlight Overlay */}
               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[28px] bg-[#e0b596]/10 border-y border-[#e0b596]/20 pointer-events-none rounded-sm" />
 
@@ -454,14 +454,14 @@ export function TaskDetails({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="flex flex-col md:flex-row bg-white dark:bg-[#1b1b1b] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-[#292929] max-w-2xl w-full mx-auto h-[85vh]"
+        className="flex flex-col md:flex-row bg-white dark:bg-black text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-[#292929] max-w-2xl w-full mx-auto h-[85vh]"
       >
         <div className="flex-[1.5] flex flex-col p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
               {isEditing ? 'Edit Reminder' : 'Reminder Details'}
             </h2>
-            <button onClick={onClose} className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-[#292929] rounded-full transition-colors">
+            <button onClick={onClose} className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors">
               <X className="w-6 h-6 text-gray-400" />
             </button>
           </div>
@@ -524,7 +524,7 @@ export function TaskDetails({
                       <button
                         type="button"
                         onClick={() => setShowRepeatDropdown(!showRepeatDropdown)}
-                        className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
+                        className="flex items-center justify-between w-full bg-gray-50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
                       >
                         <div className="flex items-center gap-2">
                           <Repeat className="w-3.5 h-3.5 text-[#e0b596]" />
@@ -546,12 +546,12 @@ export function TaskDetails({
                               initial={{ opacity: 0, y: 5, scale: 0.98 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: 5, scale: 0.98 }}
-                              className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                              className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                             >
                               <div className="p-2 space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                                 {/* Does not repeat option */}
                                 <div
-                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                                   onClick={() => {
                                     setSelectedDays([]);
                                     setShowRepeatDropdown(false);
@@ -567,7 +567,7 @@ export function TaskDetails({
 
                                 {/* Every day option */}
                                 <div
-                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                                   onClick={() => {
                                     if (selectedDays.length === 7) setSelectedDays([]);
                                     else setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
@@ -582,14 +582,14 @@ export function TaskDetails({
                                   </div>
                                 </div>
 
-                                <div className="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2" />
+                                <div className="h-px bg-gray-100 dark:bg-black my-1 mx-2" />
 
                                 {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => {
                                   const isSelected = selectedDays.includes(index);
                                   return (
                                     <div
                                       key={index}
-                                      className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] transition-colors cursor-pointer group"
+                                      className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-black transition-colors cursor-pointer group"
                                       onClick={() => {
                                         if (isSelected) {
                                           setSelectedDays(prev => prev.filter(d => d !== index));
@@ -623,7 +623,7 @@ export function TaskDetails({
                       <button
                         type="button"
                         onClick={() => setShowNotifyDropdown(!showNotifyDropdown)}
-                        className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
+                        className="flex items-center justify-between w-full bg-gray-50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-[#e0b596]/30 transition-all group"
                       >
                         <div className="flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
@@ -641,7 +641,7 @@ export function TaskDetails({
                               initial={{ opacity: 0, y: 5, scale: 0.98 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: 5, scale: 0.98 }}
-                              className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                              className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-black border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl z-[100] overflow-hidden"
                             >
                               <div className="p-2 space-y-1">
                                 {NOTIFICATION_OPTIONS.map((option) => {
@@ -649,7 +649,7 @@ export function TaskDetails({
                                   return (
                                     <div
                                       key={option.value}
-                                      className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-[#333] ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
+                                      className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-black ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
                                       onClick={() => handleToggleNotifyBefore(option.value)}
                                     >
                                       <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -667,7 +667,7 @@ export function TaskDetails({
                         )}
                       </AnimatePresence>
                     </div>
-                    <div className="flex items-start gap-2 bg-gray-50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
+                    <div className="flex items-start gap-2 bg-gray-50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
                       <AlignLeft className="w-3.5 h-3.5 text-[#e0b596] mt-1" />
                       <textarea
                         placeholder="Add notes..."
@@ -676,7 +676,7 @@ export function TaskDetails({
                         className="bg-transparent text-[13px] font-bold focus:outline-none w-full min-h-[80px] resize-none placeholder:text-gray-400 dark:placeholder:text-gray-500 border-none p-0"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-[#e0b596]/30 transition-all cursor-pointer" onClick={() => setIsSpecial(!isSpecial)}>
+                    <div className="flex items-center justify-between gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-[#e0b596]/30 transition-all cursor-pointer" onClick={() => setIsSpecial(!isSpecial)}>
                       <div className="flex items-center gap-2">
                         <Sparkles className={`w-3.5 h-3.5 transition-colors ${isSpecial ? 'text-purple-500' : 'text-gray-400'}`} />
                         <span className="text-[13px] font-bold">Mark as special</span>
@@ -700,7 +700,7 @@ export function TaskDetails({
                 <div className="flex items-center gap-2">
 
                   {isSpecial && (
-                    <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-none px-2 py-0.5 flex items-center gap-1">
+                    <Badge className="bg-orange-100 text-orange-700 dark:bg-black dark:text-orange-400 border-none px-2 py-0.5 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" />
                       Special
                     </Badge>
@@ -711,11 +711,11 @@ export function TaskDetails({
               <div className="space-y-2">
                 {/* Start Row */}
                 <div className="flex items-center gap-2">
-                  <div className="flex-[1.8] flex items-center gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                  <div className="flex-[1.8] flex items-center gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
                     <CalendarIcon className="w-3.5 h-3.5 text-[#e0b596]" />
                     <span className="text-[13px] font-bold">{format(parse(startDate, 'yyyy-MM-dd', new Date()), 'dd-MM-yyyy')}</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                  <div className="flex-1 flex items-center gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
                     <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
                     <span className="text-[13px] font-bold">{format(parse(startTime, 'HH:mm', new Date()), 'hh:mm a')}</span>
                   </div>
@@ -723,11 +723,11 @@ export function TaskDetails({
 
                 {/* End Row */}
                 <div className="flex items-center gap-2">
-                  <div className="flex-[1.8] flex items-center gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                  <div className="flex-[1.8] flex items-center gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
                     <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
                     <span className="text-[13px] font-bold">{format(parse(endDate, 'yyyy-MM-dd', new Date()), 'dd-MM-yyyy')}</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                  <div className="flex-1 flex items-center gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
                     <Clock className="w-3.5 h-3.5 text-gray-400" />
                     <span className="text-[13px] font-bold">{format(parse(endTime, 'HH:mm', new Date()), 'hh:mm a')}</span>
                   </div>
@@ -742,7 +742,7 @@ export function TaskDetails({
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden space-y-2"
                   >
-                    <div className="flex items-start gap-2 bg-gray-50/50 dark:bg-[#252525] px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
+                    <div className="flex items-start gap-2 bg-gray-50/50 dark:bg-black px-3 py-2 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm">
                       <AlignLeft className="w-4 h-4 text-[#e0b596] mt-0.5" />
                       <p className="text-[13px] font-bold whitespace-pre-wrap">{description || 'No notes'}</p>
                     </div>
@@ -755,7 +755,7 @@ export function TaskDetails({
                 <div className="space-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-[#333]">
                   <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
                     Invited Attendees
-                    <Badge className="bg-gray-100 text-gray-500 dark:bg-[#333] dark:text-gray-400 border-none">{localTask.attendees.length}</Badge>
+                    <Badge className="bg-gray-100 text-gray-500 dark:bg-black dark:text-gray-400 border-none">{localTask.attendees.length}</Badge>
                   </h3>
                   <div className="flex flex-col gap-3">
                     {(localTask.attendees as any[]).map((attendee, idx) => {
@@ -765,14 +765,14 @@ export function TaskDetails({
                       
                       let statusBadge = null;
                       switch(status) {
-                        case 'Accepted': statusBadge = <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-none px-2 py-0.5 text-[10px]">🟢 Accepted</Badge>; break;
-                        case 'Declined': statusBadge = <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-none px-2 py-0.5 text-[10px]">🔴 Declined</Badge>; break;
-                        case 'Expired': statusBadge = <Badge className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-none px-2 py-0.5 text-[10px]">⚪ Expired</Badge>; break;
-                        default: statusBadge = <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-none px-2 py-0.5 text-[10px]">🟠 Pending</Badge>;
+                        case 'Accepted': statusBadge = <Badge className="bg-green-100 text-green-700 dark:bg-black dark:text-green-400 border-none px-2 py-0.5 text-[10px]">🟢 Accepted</Badge>; break;
+                        case 'Declined': statusBadge = <Badge className="bg-red-100 text-red-700 dark:bg-black dark:text-red-400 border-none px-2 py-0.5 text-[10px]">🔴 Declined</Badge>; break;
+                        case 'Expired': statusBadge = <Badge className="bg-gray-100 text-gray-700 dark:bg-black dark:text-gray-400 border-none px-2 py-0.5 text-[10px]">⚪ Expired</Badge>; break;
+                        default: statusBadge = <Badge className="bg-orange-100 text-orange-700 dark:bg-black dark:text-orange-400 border-none px-2 py-0.5 text-[10px]">🟠 Pending</Badge>;
                       }
 
                       return (
-                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#252525] p-3 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-black p-3 rounded-2xl border border-gray-100 dark:border-[#333] shadow-sm hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e0b596] to-[#c29675] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                               {email[0].toUpperCase()}
@@ -826,7 +826,7 @@ export function TaskDetails({
                             {(status === 'Pending' || status === 'Expired') && attendeeId && (
                               <Button
                                 variant="ghost"
-                                className="h-8 px-3 text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                                className="h-8 px-3 text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-black rounded-xl transition-colors"
                                 onClick={async () => {
                                   if (!window.confirm('Are you sure you want to cancel this invitation?')) return;
                                   try {
@@ -853,7 +853,7 @@ export function TaskDetails({
                               </Button>
                             )}
                             {status === 'Accepted' && (
-                               <Button variant="ghost" className="h-8 px-3 text-[11px] font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-[#333] rounded-xl transition-colors" disabled>
+                               <Button variant="ghost" className="h-8 px-3 text-[11px] font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-black rounded-xl transition-colors" disabled>
                                    View Recipient
                                </Button>
                             )}
@@ -877,7 +877,7 @@ export function TaskDetails({
                   <Button
                     variant="ghost"
                     onClick={() => { onDeleteTask(task.id); onClose(); }}
-                    className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 text-sm font-bold h-auto py-4 px-4 rounded-xl"
+                    className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black text-sm font-bold h-auto py-4 px-4 rounded-xl"
                   >
                     Delete
                   </Button>
@@ -956,7 +956,7 @@ export function TaskDetails({
                 <Button
                   variant="ghost"
                   onClick={() => { onDeleteTask(task.id); onClose(); }}
-                  className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 text-sm font-bold h-auto py-4 px-4 rounded-xl"
+                  className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black text-sm font-bold h-auto py-4 px-4 rounded-xl"
                 >
                   Delete
                 </Button>
@@ -980,7 +980,7 @@ export function TaskDetails({
           </div>
         </div>
 
-        <div className="hidden md:flex flex-1 max-w-[240px] bg-gray-50 dark:bg-[#232323] border-l border-gray-200 dark:border-[#292929] flex-col">
+        <div className="hidden md:flex flex-1 max-w-[240px] bg-gray-50 dark:bg-black border-l border-gray-200 dark:border-[#292929] flex-col">
           <div className="p-5 border-b border-gray-200 dark:border-[#292929] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest">Schedule</h3>
@@ -988,7 +988,7 @@ export function TaskDetails({
                 {format(parse(startDate, 'yyyy-MM-dd', new Date()), 'MMM d')}
               </span>
             </div>
-            <button onClick={onClose} className="p-1.5 hover:bg-white dark:hover:bg-[#333] rounded-md transition-colors text-gray-400">
+            <button onClick={onClose} className="p-1.5 hover:bg-white dark:hover:bg-black rounded-md transition-colors text-gray-400">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -998,7 +998,7 @@ export function TaskDetails({
               <div className="relative pl-5 border-l-2 border-gray-200 dark:border-[#333] space-y-8">
                 {allScheduleItems.map((t) => (
                   <div key={t.id} className="relative">
-                    <div className={`absolute -left-[25px] top-1 w-3.5 h-3.5 rounded-full bg-white dark:bg-[#1b1b1b] border-2 ${t.id === task.id ? 'border-[#e0b596] scale-125 ring-4 ring-[#e0b596]/10' : 'border-gray-300'}`} />
+                    <div className={`absolute -left-[25px] top-1 w-3.5 h-3.5 rounded-full bg-white dark:bg-black border-2 ${t.id === task.id ? 'border-[#e0b596] scale-125 ring-4 ring-[#e0b596]/10' : 'border-gray-300'}`} />
                     <div className="space-y-1">
                       <span className={`text-xs font-bold uppercase tracking-tighter ${t.id === task.id ? 'text-[#e0b596]' : 'text-gray-400'}`}>
                         {t.time ? format(parse(t.time, 'HH:mm', new Date()), 'h:mm a') : '--'}
@@ -1018,7 +1018,7 @@ export function TaskDetails({
               </div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
-                <div className="w-14 h-14 bg-gray-200 dark:bg-[#333] rounded-2xl flex items-center justify-center">
+                <div className="w-14 h-14 bg-gray-200 dark:bg-black rounded-2xl flex items-center justify-center">
                   <Info className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-base font-medium text-gray-400">No events scheduled<br />for this day.</p>
