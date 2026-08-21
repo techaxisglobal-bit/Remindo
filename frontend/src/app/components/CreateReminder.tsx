@@ -32,6 +32,7 @@ import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
 import { API_BASE_URL } from '@/app/api';
 import { fetchWithAuth } from '../../utils/apiClient';
+import { Geolocation } from '@capacitor/geolocation';
 
 interface CreateReminderProps {
   tasks: Task[];
@@ -349,6 +350,7 @@ export function CreateReminder({
 
   const [location, setLocation] = useState('');
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -383,22 +385,23 @@ export function CreateReminder({
 
   const searchLocations = async (query: string) => {
     setIsSearchingLocation(true);
+    setLocationError(null);
     try {
       let lat = userCoords?.lat;
       let lon = userCoords?.lon;
       
       if (!lat || !lon) {
-        if ('geolocation' in navigator) {
-          try {
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
-            });
-            lat = position.coords.latitude;
-            lon = position.coords.longitude;
-            setUserCoords({ lat, lon });
-          } catch (e) {
-            console.warn("Could not get location for suggestions", e);
-          }
+        try {
+          const position = await Geolocation.getCurrentPosition({ timeout: 10000 });
+          lat = position.coords.latitude;
+          lon = position.coords.longitude;
+          setUserCoords({ lat, lon });
+        } catch (e) {
+          console.warn("Could not get location for suggestions", e);
+          setLocationError("Enable location access to see nearby suggestions.");
+          setLocationSuggestions([]);
+          setIsSearchingLocation(false);
+          return;
         }
       }
 
@@ -1263,7 +1266,7 @@ return (
       </div>
 
       {/* Location Suggestions */}
-      {(locationSuggestions.length > 0 || isSearchingLocation || location) && (
+      {(locationSuggestions.length > 0 || isSearchingLocation || location || locationError) && (
         <div className="mt-4 p-3 bg-gray-50 dark:bg-[#0a0a0a] rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <MapPin className="w-3.5 h-3.5" />
@@ -1279,6 +1282,10 @@ return (
               <button type="button" onClick={() => setLocation('')} className="p-1 hover:bg-gray-100 dark:hover:bg-black rounded-full text-gray-400">
                 <X className="w-4 h-4" />
               </button>
+            </div>
+          ) : locationError ? (
+            <div className="p-3 text-sm text-center text-red-500 bg-red-50 dark:bg-red-500/10 rounded-xl border border-red-100 dark:border-red-500/20">
+              {locationError}
             </div>
           ) : (
             <div className="space-y-1.5">
