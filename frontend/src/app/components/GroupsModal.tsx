@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../../utils/apiClient';
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Edit2, Users } from 'lucide-react';
 import { Button } from './ui/button';
@@ -18,6 +19,7 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
     const [members, setMembers] = useState<string[]>([]);
     const [memberInput, setMemberInput] = useState('');
     const [isFormVisible, setIsFormVisible] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen) fetchGroups();
@@ -27,17 +29,25 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
         const headers = new Headers(options.headers || {});
         if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
         const response = await fetchWithAuth(url.startsWith('http') ? url : `${API_BASE_URL}${url}`, { ...options, headers });
-        if (!response.ok) throw new Error('API Request Failed');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw { status: response.status, data: errData };
+        }
         return response.json();
     };
 
     const fetchGroups = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const data = await fetchJson('/api/groups');
             setGroups(data);
-        } catch (error) {
-            toast.error('Failed to load groups');
+        } catch (error: any) {
+            let msg = 'Server error. Please try again later.';
+            if (error?.status === 401) msg = 'Session expired. Please log in again.';
+            else if (error?.message === 'Failed to fetch') msg = 'Network error. Please check your connection.';
+            setError(msg);
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }
@@ -186,6 +196,14 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
 
                             {isLoading ? (
                                 <div className="text-center text-gray-500 py-8">Loading groups...</div>
+                            ) : error ? (
+                                <div className="text-center text-gray-500 py-8">
+                                    <div className="w-12 h-12 mx-auto text-red-400 mb-3 flex items-center justify-center">
+                                        <X className="w-8 h-8" />
+                                    </div>
+                                    <p className="text-red-500 mb-4">{error}</p>
+                                    <Button onClick={fetchGroups} className="mx-auto bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-[#0a0a0a] dark:text-gray-200 border border-gray-300 dark:border-white/10 rounded-xl px-6">Try Again</Button>
+                                </div>
                             ) : groups.length === 0 ? (
                                 <div className="text-center text-gray-500 py-8">
                                     <Users className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />

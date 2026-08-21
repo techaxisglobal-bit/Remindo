@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../../utils/apiClient';
 import React, { useEffect, useState, useRef } from 'react';
 import { Bell, X, Check, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from '../api';
