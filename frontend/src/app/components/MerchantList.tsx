@@ -4,6 +4,7 @@ import { Merchant } from '@/app/types';
 import { MerchantCard } from './MerchantCard';
 import { Input } from '@/app/components/ui/input';
 import { Search, Filter, Loader2 } from 'lucide-react';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 export function MerchantList() {
     const [merchants, setMerchants] = useState<Merchant[]>([]);
@@ -19,7 +20,7 @@ export function MerchantList() {
                 if (token) {
                     headers['x-auth-token'] = token;
                 }
-                const res = await fetch(`${API_BASE_URL}/api/merchants`, { headers });
+                const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setMerchants(data);

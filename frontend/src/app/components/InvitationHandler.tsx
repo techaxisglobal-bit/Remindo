@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 export default function InvitationHandler({ onNavigate }: { onNavigate: (path: string) => void }) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -26,7 +27,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
             if (authToken) {
                 // User is logged in, try to accept/decline directly
                 try {
-                    const res = await fetch(`${API_BASE_URL}/api/invitations/respond`, {
+                    const res = await fetchWithAuth(`${API_BASE_URL}/api/invitations/respond`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
             } else {
                 // Not logged in, fetch preview details
                 try {
-                    const res = await fetch(`${API_BASE_URL}/api/invitations/${token}`);
+                    const res = await fetchWithAuth(`${API_BASE_URL}/api/invitations/${token}`);
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.msg || 'Failed to fetch invitation details.');
                     setInviteDetails(data);

@@ -93,6 +93,14 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    refreshToken: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+    },
+    refreshTokenExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
 }, {
     tableName: 'users',
     timestamps: true,

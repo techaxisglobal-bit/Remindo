@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MerchantLogo } from './MerchantLogo';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 // Simple tooltip component inline to avoid extra dependencies if not available
 const Tooltip = ({ children, content }: { children: React.ReactNode, content: string }) => {
@@ -41,7 +42,7 @@ export function MerchantAdmin() {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/merchants/admin`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants/admin`, {
                 headers: { 'x-auth-token': token || '' }
             });
             if (res.ok) {
@@ -66,7 +67,7 @@ export function MerchantAdmin() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/merchants/${id}/status`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export function MerchantAdmin() {
         const isFeatured = !currentFeatured;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/merchants/${id}/status`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ export function MerchantAdmin() {
         
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/merchants/${id}`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants/${id}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token || '' }
             });

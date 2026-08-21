@@ -8,6 +8,7 @@ import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { Bell, Mail, Lock, User, Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { tokenManager } from '../../utils/tokenManager';
 
 interface SignInProps {
   onSignIn: (email: string) => void;
@@ -183,7 +184,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         toast.success('Account created! Check your email for the verification code.');
         setSignupOtpStep(true);
       } else {
-        localStorage.setItem('token', data.token);
+        await tokenManager.setTokens(data.token, data.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Welcome back!');
         await processPendingInvitation(data.token);
@@ -216,7 +217,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         throw new Error(data.msg || 'Verification failed');
       }
 
-      localStorage.setItem('token', data.token);
+      await tokenManager.setTokens(data.token, data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Email verified! Welcome!');
       await processPendingInvitation(data.token);
@@ -306,7 +307,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || 'Apple authentication failed');
 
-      localStorage.setItem('token', data.token);
+      await tokenManager.setTokens(data.token, data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Signed in with Apple!');
       await processPendingInvitation(data.token);
@@ -360,7 +361,7 @@ export function SignIn({ onSignIn }: SignInProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || 'Google authentication failed');
 
-      localStorage.setItem('token', data.token);
+      await tokenManager.setTokens(data.token, data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Signed in with Google!');
       await processPendingInvitation(data.token);
@@ -431,7 +432,7 @@ export function SignIn({ onSignIn }: SignInProps) {
           const data = await res.json();
           if (!res.ok) throw new Error(data.msg || 'Apple authentication failed');
 
-          localStorage.setItem('token', data.token);
+          await tokenManager.setTokens(data.token, data.refreshToken);
           localStorage.setItem('user', JSON.stringify(data.user));
           toast.success('Signed in with Apple!');
           await processPendingInvitation(data.token);
@@ -486,7 +487,7 @@ export function SignIn({ onSignIn }: SignInProps) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.msg || 'Google authentication failed');
 
-        localStorage.setItem('token', data.token);
+        await tokenManager.setTokens(data.token, data.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Signed in with Google!');
         await processPendingInvitation(data.token);

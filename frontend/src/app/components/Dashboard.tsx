@@ -97,6 +97,7 @@ import {
   TooltipTrigger,
 } from '@/app/components/ui/tooltip';
 import { toast } from 'sonner';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface DashboardProps {
   user: UserType;
@@ -328,7 +329,7 @@ export function Dashboard({
           setUnreadCount(prev => prev + 1);
       });
 
-      fetch(`${API_BASE_URL}/api/notifications?limit=1`, {
+      fetchWithAuth(`${API_BASE_URL}/api/notifications?limit=1`, {
           headers: {
               'x-auth-token': token,
               'Content-Type': 'application/json'
@@ -357,7 +358,7 @@ export function Dashboard({
       setupPush();
 
       PushNotifications.addListener('registration', (token) => {
-          fetch(`${API_BASE_URL}/api/auth/profile`, {
+          fetchWithAuth(`${API_BASE_URL}/api/auth/profile`, {
               method: 'PUT',
               headers: {
                   'x-auth-token': token,

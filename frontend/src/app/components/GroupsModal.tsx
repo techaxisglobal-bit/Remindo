@@ -23,12 +23,10 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
         if (isOpen) fetchGroups();
     }, [isOpen]);
 
-    const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-        const token = localStorage.getItem('token');
+    const fetchJson = async (url: string, options: RequestInit = {}) => {
         const headers = new Headers(options.headers || {});
-        if (token) headers.set('x-auth-token', token);
         if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-        const response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
+        const response = await fetchWithAuth(url.startsWith('http') ? url : `${API_BASE_URL}${url}`, { ...options, headers });
         if (!response.ok) throw new Error('API Request Failed');
         return response.json();
     };
@@ -36,7 +34,7 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
     const fetchGroups = async () => {
         setIsLoading(true);
         try {
-            const data = await fetchWithAuth('/api/groups');
+            const data = await fetchJson('/api/groups');
             setGroups(data);
         } catch (error) {
             toast.error('Failed to load groups');
@@ -54,14 +52,14 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
 
         try {
             if (editingGroup) {
-                const updated = await fetchWithAuth(`/api/groups/${editingGroup.id}`, {
+                const updated = await fetchJson(`/api/groups/${editingGroup.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({ name: groupName, members })
                 });
                 setGroups(prev => prev.map(g => g.id === updated.id ? updated : g));
                 toast.success('Group updated');
             } else {
-                const newGroup = await fetchWithAuth('/api/groups', {
+                const newGroup = await fetchJson('/api/groups', {
                     method: 'POST',
                     body: JSON.stringify({ name: groupName, members })
                 });
@@ -77,7 +75,7 @@ export function GroupsModal({ isOpen, onClose }: GroupsModalProps) {
     const handleDeleteGroup = async (id: string) => {
         if (!confirm('Are you sure you want to delete this group?')) return;
         try {
-            await fetchWithAuth(`/api/groups/${id}`, { method: 'DELETE' });
+            await fetchJson(`/api/groups/${id}`, { method: 'DELETE' });
             setGroups(prev => prev.filter(g => g.id !== id));
             toast.success('Group deleted');
         } catch (error) {

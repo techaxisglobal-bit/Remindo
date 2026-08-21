@@ -2,12 +2,88 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const emailService = require('../services/emailService');
 const { Op } = require('sequelize');
+
+// Helper to generate access & refresh tokens
+const generateTokensAndRespond = async (user, res) => {
+    const payload = { user: { id: user.id } };
+    // Access token lives for 15 minutes
+    const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '15m' });
+    
+    // Refresh token lives for 30 days
+    const plainRefreshToken = crypto.randomBytes(40).toString('hex');
+    const salt = await bcrypt.genSalt(10);
+    const hashedRefreshToken = await bcrypt.hash(plainRefreshToken, salt);
+    
+    user.refreshToken = hashedRefreshToken;
+    user.refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    const clientRefreshToken = `${user.id}.${plainRefreshToken}`;
+
+    res.json({
+        token,
+        refreshToken: clientRefreshToken,
+        user: { 
+            id: user.id, 
+            name: user.name, 
+            email: user.email,
+            username: user.username,
+            phoneNumber: user.phoneNumber,
+            phoneVerified: user.phoneVerified,
+            dateOfBirth: user.dateOfBirth,
+            anniversary: user.anniversary,
+            gender: user.gender,
+            profilePictureUrl: user.profilePictureUrl
+        }
+    });
+};
+
+// @route   POST api/auth/refresh
+// @desc    Refresh access token using refresh token
+// @access  Public
+router.post('/refresh', async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken || typeof refreshToken !== 'string') {
+        return res.status(401).json({ msg: 'No refresh token provided' });
+    }
+
+    const parts = refreshToken.split('.');
+    if (parts.length !== 2) {
+        return res.status(403).json({ msg: 'Invalid refresh token format' });
+    }
+    const [userId, plainToken] = parts;
+
+    try {
+        let user = await User.findByPk(userId);
+
+        if (!user || !user.refreshToken) {
+            return res.status(403).json({ msg: 'Invalid refresh token' });
+        }
+
+        const isMatch = await bcrypt.compare(plainToken, user.refreshToken);
+        if (!isMatch) {
+            return res.status(403).json({ msg: 'Invalid refresh token' });
+        }
+
+        if (user.refreshTokenExpires < new Date()) {
+            return res.status(403).json({ msg: 'Refresh token expired. Please login again.' });
+        }
+
+        // Token is valid, generate new tokens and respond
+        await generateTokensAndRespond(user, res);
+    } catch (err) {
+        console.error('Refresh token error:', err.message);
+        res.status(500).json({ msg: 'Server error during token refresh' });
+    }
+});
 
 // @route   POST api/auth/signup
 // @desc    Register new user (sends OTP for email verification)
@@ -108,28 +184,7 @@ router.post('/verify', async (req, res) => {
             ipAddress: req.ip
         });
 
-        const payload = { user: { id: user.id } };
-
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token, user: { 
-                    id: user.id, 
-                    name: user.name, 
-                    email: user.email,
-                    username: user.username,
-                    phoneNumber: user.phoneNumber,
-                    phoneVerified: user.phoneVerified,
-                    dateOfBirth: user.dateOfBirth,
-                    anniversary: user.anniversary,
-                    gender: user.gender,
-                    profilePictureUrl: user.profilePictureUrl
-                } });
-            }
-        );
+        await generateTokensAndRespond(user, res);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -172,28 +227,7 @@ router.post('/login', async (req, res) => {
             ipAddress: req.ip
         });
 
-        const payload = { user: { id: user.id } };
-
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token, user: { 
-                    id: user.id, 
-                    name: user.name, 
-                    email: user.email,
-                    username: user.username,
-                    phoneNumber: user.phoneNumber,
-                    phoneVerified: user.phoneVerified,
-                    dateOfBirth: user.dateOfBirth,
-                    anniversary: user.anniversary,
-                    gender: user.gender,
-                    profilePictureUrl: user.profilePictureUrl
-                } });
-            }
-        );
+        await generateTokensAndRespond(user, res);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: err.message, stack: err.stack });
@@ -314,28 +348,7 @@ router.post('/google', async (req, res) => {
             await user.save();
         }
 
-        const jwtPayload = { user: { id: user.id } };
-
-        jwt.sign(
-            jwtPayload,
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token, user: { 
-                    id: user.id, 
-                    name: user.name, 
-                    email: user.email,
-                    username: user.username,
-                    phoneNumber: user.phoneNumber,
-                    phoneVerified: user.phoneVerified,
-                    dateOfBirth: user.dateOfBirth,
-                    anniversary: user.anniversary,
-                    gender: user.gender,
-                    profilePictureUrl: user.profilePictureUrl
-                } });
-            }
-        );
+        await generateTokensAndRespond(user, res);
     } catch (err) {
         console.error('Google auth error:', err.message);
         res.status(401).json({ msg: 'Google authentication failed' });
@@ -375,28 +388,7 @@ router.post('/apple', async (req, res) => {
             await user.save();
         }
 
-        const jwtPayload = { user: { id: user.id } };
-
-        jwt.sign(
-            jwtPayload,
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: 360000 },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token, user: { 
-                    id: user.id, 
-                    name: user.name, 
-                    email: user.email,
-                    username: user.username,
-                    phoneNumber: user.phoneNumber,
-                    phoneVerified: user.phoneVerified,
-                    dateOfBirth: user.dateOfBirth,
-                    anniversary: user.anniversary,
-                    gender: user.gender,
-                    profilePictureUrl: user.profilePictureUrl
-                } });
-            }
-        );
+        await generateTokensAndRespond(user, res);
     } catch (err) {
         console.error('Apple auth error:', err.message);
         res.status(401).json({ msg: 'Apple authentication failed' });

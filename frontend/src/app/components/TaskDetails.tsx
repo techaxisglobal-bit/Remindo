@@ -24,6 +24,7 @@ import { Task } from '@/app/types';
 import { format, parse, isSameDay, addMinutes, isBefore, subMinutes, eachDayOfInterval, endOfMonth, getDay } from 'date-fns';
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface TaskDetailsProps {
   task: Task;
@@ -299,7 +300,7 @@ export function TaskDetails({
     const fetchLatestTask = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/tasks/${task.id}`, {
+        const res = await fetchWithAuth(`${API_BASE_URL}/api/tasks/${task.id}`, {
           headers: { 'x-auth-token': token || '' }
         });
         if (res.ok) {
@@ -796,7 +797,7 @@ export function TaskDetails({
                                   setIsResending(email);
                                   try {
                                     const token = localStorage.getItem('token');
-                                    const res = await fetch(`${API_BASE_URL}/api/tasks/${localTask.id}/resend`, {
+                                    const res = await fetchWithAuth(`${API_BASE_URL}/api/tasks/${localTask.id}/resend`, {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json', 'x-auth-token': token || '' },
                                       body: JSON.stringify({ email })
@@ -831,7 +832,7 @@ export function TaskDetails({
                                   if (!window.confirm('Are you sure you want to cancel this invitation?')) return;
                                   try {
                                     const token = localStorage.getItem('token');
-                                    const res = await fetch(`${API_BASE_URL}/api/invitations/${attendeeId}`, {
+                                    const res = await fetchWithAuth(`${API_BASE_URL}/api/invitations/${attendeeId}`, {
                                       method: 'DELETE',
                                       headers: { 'x-auth-token': token || '' }
                                     });
@@ -882,13 +883,13 @@ export function TaskDetails({
                     Delete
                   </Button>
                   <Button
-                    onClick={() => {
+                    onClick={async () => {
                       const start = parse(`${startDate} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
                       const end = parse(`${endDate} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
 
                       const now = new Date();
                       if (isBefore(start, subMinutes(now, 1))) {
-                        toast.error('Cannot create tasks in the past');
+                        toast.error('Cannot update task to the past');
                         return;
                       }
 
@@ -909,7 +910,10 @@ export function TaskDetails({
                         notifyBefore: notifyBefore.join(',')
                       };
                       
-                      onUpdateTask(updatedTask);
+                      const success = await onUpdateTask(updatedTask);
+                      if (success === false) {
+                        return; // Toast error is handled in App.tsx
+                      }
 
                       if (selectedDays.length > 0 && onCreateTask) {
                         const startRange = parse(startDate, 'yyyy-MM-dd', new Date());

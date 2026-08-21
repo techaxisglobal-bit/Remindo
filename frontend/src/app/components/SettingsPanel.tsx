@@ -12,6 +12,7 @@ import { SocialLogin } from '@capgo/capacitor-social-login';
 import type { User as UserType } from '@/app/types';
 import { EditProfileModal } from './EditProfileModal';
 import { AvatarImage } from '@/app/components/ui/avatar';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface SettingsPanelProps {
   user: UserType;
@@ -92,7 +93,7 @@ export function SettingsPanel({
     setIsChangingPassword(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+      const response = await fetchWithAuth(`${API_URL}/api/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

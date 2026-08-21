@@ -8,6 +8,8 @@ import { Task, User } from "@/app/types";
 import { toast } from "sonner";
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
+import { tokenManager } from '../utils/tokenManager';
+import { fetchWithAuth } from '../utils/apiClient';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -46,20 +48,31 @@ export default function App() {
       document.documentElement.classList.remove("dark");
     }
 
-    // Auto-login if token exists (optional, but good for persistence)
-    const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-        fetchTasks(token);
-      } catch (e) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const initializeUser = async () => {
+      const token = await tokenManager.getAccessToken();
+      if (token && savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          setUser(userData);
+          fetchTasks();
+        } catch (e) {
+          await tokenManager.clearTokens();
+          localStorage.removeItem('user');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initializeUser();
+
+    const handleAuthExpired = () => {
+      setUser(null);
+      localStorage.removeItem('user');
+    };
+
+    window.addEventListener('auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('auth-expired', handleAuthExpired);
   }, []);
 
   useEffect(() => {
@@ -67,25 +80,6 @@ export default function App() {
       registerPush();
     }
   }, [notificationsEnabled, user]);
-
-  /**
-   * Helper to fetch with a simple retry mechanism
-   * Useful for Railway cold starts (server sleep)
-   */
-  const fetchWithRetry = async (url: string, options: RequestInit, retries = 2): Promise<Response> => {
-    try {
-      const response = await fetch(url, options);
-      return response;
-    } catch (err) {
-      if (retries > 0 && err instanceof TypeError && (err.message === 'Failed to fetch' || err.message.includes('NetworkError'))) {
-        console.warn(`Fetch failed, retrying... (${retries} attempts left)`);
-        // Wait 1.5 seconds before retrying
-        await new Promise(res => setTimeout(res, 1500));
-        return fetchWithRetry(url, options, retries - 1);
-      }
-      throw err;
-    }
-  };
 
   const urlBase64ToUint8Array = (base64String: string) => {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -103,16 +97,12 @@ export default function App() {
   };
 
   const saveFCMTokenToBackend = async (fcmToken: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      await fetchWithRetry(`${API_BASE_URL}/api/auth/save-fcm-token`, {
+      await fetchWithAuth(`/api/auth/save-fcm-token`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ fcmToken, timezone })
       });
@@ -206,12 +196,10 @@ export default function App() {
         }
 
         if (subscription) {
-          const token = localStorage.getItem('token');
-          const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/save-subscription`, {
+          const res = await fetchWithAuth(`/api/auth/save-subscription`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'x-auth-token': token || ''
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ subscription })
           });
@@ -232,15 +220,13 @@ export default function App() {
   };
 
   const handleToggleNotifications = async () => {
-    const token = localStorage.getItem('token');
     const newVal = !notificationsEnabled;
 
     try {
-      await fetchWithRetry(`${API_BASE_URL}/api/auth/update-notifications`, {
+      await fetchWithAuth(`/api/auth/update-notifications`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token || ''
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ enabled: newVal })
       });
@@ -260,11 +246,9 @@ export default function App() {
     }
   };
 
-  const fetchTasks = async (token: string) => {
+  const fetchTasks = async () => {
     try {
-      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks`, {
-        headers: { 'x-auth-token': token }
-      });
+      const res = await fetchWithAuth(`/api/tasks`);
       if (res.ok) {
         const data = await res.json();
         console.log('Fetched tasks:', data); // Added logging
@@ -277,11 +261,10 @@ export default function App() {
 
   const handleSignIn = (email: string) => {
     const savedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (savedUser && token) {
+    if (savedUser) {
       const userData = JSON.parse(savedUser);
       setUser(userData);
-      fetchTasks(token);
+      fetchTasks();
     }
   };
 
@@ -293,21 +276,17 @@ export default function App() {
     }
   };
 
-  const handleAddTask = async (task: Task) => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
+  const handleAddTask = async (task: Task): Promise<boolean> => {
     // Optimistic UI: Add task to state immediately with temporary ID
     const tempId = task.id || `temp-${Date.now()}`;
     const taskWithId = { ...task, id: tempId };
     setTasks(prev => [...prev, taskWithId]);
 
     try {
-      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks`, {
+      const res = await fetchWithAuth(`/api/tasks`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(task)
       });
@@ -315,16 +294,19 @@ export default function App() {
         const newTask = await res.json();
         // Replace the temporary task with the real one from the server
         setTasks(prev => prev.map(t => (t.id === tempId || (t as any)._id === tempId) ? newTask : t));
+        return true;
       } else {
         // Rollback on failure
         setTasks(prev => prev.filter(t => t.id !== tempId && (t as any)._id !== tempId));
         toast.error('Failed to save task');
+        return false;
       }
     } catch (err) {
       console.error('Failed to add task:', err);
       // Rollback on error
       setTasks(prev => prev.filter(t => t.id !== tempId && (t as any)._id !== tempId));
       toast.error('Failed to save task');
+      return false;
     }
   };
 
@@ -333,13 +315,9 @@ export default function App() {
     const deletedTask = tasks.find(t => (t as any)._id === id || t.id === id);
     setTasks(prev => prev.filter(task => (task as any)._id !== id && task.id !== id));
 
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     try {
-      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-auth-token': token }
+      const res = await fetchWithAuth(`/api/tasks/${id}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
         setTasks(prev => prev.filter(task => (task as any)._id !== id && task.id !== id));
@@ -350,18 +328,14 @@ export default function App() {
   };
 
   const handleToggleComplete = async (id: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     const taskToToggle = tasks.find(t => (t as any)._id === id || t.id === id);
     if (!taskToToggle) return;
 
     try {
-      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
+      const res = await fetchWithAuth(`/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ completed: !taskToToggle.completed })
       });
@@ -375,21 +349,19 @@ export default function App() {
     }
   };
 
-  const handleUpdateTask = async (updatedTask: Task) => {
-    const token = localStorage.getItem('token');
+  const handleUpdateTask = async (updatedTask: Task): Promise<boolean> => {
     const id = (updatedTask as any)._id || updatedTask.id;
-    if (!token || !id) return;
+    if (!id) return false;
 
     // Optimistic UI: Update state immediately
     const originalTask = tasks.find(t => ((t as any)._id === id || t.id === id));
     setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? updatedTask : t));
 
     try {
-      const res = await fetchWithRetry(`${API_BASE_URL}/api/tasks/${id}`, {
+      const res = await fetchWithAuth(`/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updatedTask)
       });
@@ -408,12 +380,14 @@ export default function App() {
           // Sync with server version
           setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? savedTask : t));
         }
+        return true;
       } else {
         // Rollback on failure
         if (originalTask) {
           setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? originalTask : t));
         }
         toast.error('Failed to update task');
+        return false;
       }
     } catch (err) {
       console.error('Failed to update task:', err);
@@ -421,6 +395,7 @@ export default function App() {
         setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? originalTask : t));
       }
       toast.error('Failed to update task');
+      return false;
     }
   };
 

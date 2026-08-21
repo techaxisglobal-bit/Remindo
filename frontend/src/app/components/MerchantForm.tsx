@@ -6,6 +6,7 @@ import { Label } from '@/app/components/ui/label';
 import { Switch } from '@/app/components/ui/switch';
 import { toast } from 'sonner';
 import { Store, MapPin, Phone, Mail, Globe, UploadCloud, RefreshCw } from 'lucide-react';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface MerchantFormProps {
     onSuccess?: () => void;
@@ -56,7 +57,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const response = await fetchWithAuth(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
                     const data = await response.json();
                     
                     if (data && data.display_name) {
@@ -116,7 +117,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
         if (proofFile) submitData.append('proofDocument', proofFile);
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/merchants`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/merchants`, {
                 method: 'POST',
                 headers: { 'x-auth-token': token || '' },
                 body: submitData

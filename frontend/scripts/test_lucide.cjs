@@ -1,0 +1,12 @@
+const lucide = require('lucide-react');
+console.log('Clock:', !!lucide.Clock);
+console.log('Timer:', !!lucide.Timer);
+console.log('CheckCircle2:', !!lucide.CheckCircle2);
+console.log('CheckCircle:', !!lucide.CheckCircle);
+console.log('BriefcaseBusiness:', !!lucide.BriefcaseBusiness);
+console.log('Building2:', !!lucide.Building2);
+console.log('Store:', !!lucide.Store);
+console.log('UsersRound:', !!lucide.UsersRound);
+console.log('Users2:', !!lucide.Users2);
+console.log('SlidersHorizontal:', !!lucide.SlidersHorizontal);
+console.log('Settings2:', !!lucide.Settings2);

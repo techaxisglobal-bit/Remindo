@@ -24,6 +24,7 @@ import { Task, Group } from '@/app/types';
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
 import { API_BASE_URL } from '@/app/api';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface CreateReminderProps {
   tasks: Task[];
@@ -401,7 +402,7 @@ export function CreateReminder({
          url += `&viewbox=${left},${top},${right},${bottom}&bounded=1`;
       }
       
-      const response = await fetch(url);
+      const response = await fetchWithAuth(url);
       const data = await response.json();
       setLocationSuggestions(data);
     } catch (error) {
@@ -433,7 +434,7 @@ export function CreateReminder({
     const fetchGroups = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/groups`, {
+        const res = await fetchWithAuth(`${API_BASE_URL}/api/groups`, {
           headers: { 'x-auth-token': token || '' }
         });
         if (res.ok) {
@@ -725,7 +726,7 @@ export function CreateReminder({
     const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
     const endRange = endOfMonth(startRange);
 
-    const createSingleTask = async (dateStr: string) => {
+    const createSingleTask = async (dateStr: string): Promise<boolean> => {
       const start = parse(`${dateStr} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
       const end = parse(`${dateStr} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
 
@@ -749,17 +750,22 @@ export function CreateReminder({
         attendees: attendees,
       };
 
-      await onCreateTask(newTask);
+      // Ensure onCreateTask returns a promise by casting or assuming it does
+      const success = await onCreateTask(newTask);
+      return success !== false; // if it returns explicitly false, we know it failed
     };
 
     if (selectedDays.length === 0) {
       // Does not repeat - Create for startDate only
-      toast.success('Event scheduled');
-      createSingleTask(startDate);
+      const success = await createSingleTask(startDate);
+      if (success) {
+        toast.success('Event scheduled');
+        if (onClose) onClose();
+      }
     } else {
       // Create for all matching days from startDate to end of month
       const allDays = eachDayOfInterval({ start: startRange, end: endRange });
-      const creationPromises: Promise<void>[] = [];
+      const creationPromises: Promise<boolean>[] = [];
 
       for (const day of allDays) {
         const dayIndex = getDay(day);
@@ -769,12 +775,14 @@ export function CreateReminder({
       }
 
       if (creationPromises.length > 0) {
-        toast.success(`${creationPromises.length} events scheduled for the month`);
-        Promise.all(creationPromises);
+        const results = await Promise.all(creationPromises);
+        const successful = results.filter(Boolean).length;
+        if (successful > 0) {
+          toast.success(`${successful} events scheduled for the month`);
+          if (onClose) onClose();
+        }
       }
     }
-    
-    if (onClose) onClose();
   };
 
 return (

@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/pop
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
+import { fetchWithAuth } from '../../utils/apiClient';
 
 interface EditProfileModalProps {
   user: User;
@@ -53,7 +54,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       setUsernameStatus('checking');
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/auth/check-username/${formData.username}`, {
+        const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/check-username/${formData.username}`, {
           headers: { 'x-auth-token': token || '' }
         });
         const data = await res.json();
@@ -113,7 +114,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/auth/upload-profile-picture`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/upload-profile-picture`, {
         method: 'POST',
         headers: { 'x-auth-token': token || '' },
         body: formData,
@@ -144,7 +145,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/auth/send-phone-otp`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/send-phone-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +170,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     setIsVerifyingOtp(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/auth/verify-phone-otp`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/verify-phone-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -225,7 +226,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
         anniversary: formData.anniversary ? format(formData.anniversary, 'yyyy-MM-dd') : null,
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/update-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

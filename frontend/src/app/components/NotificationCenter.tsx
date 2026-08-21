@@ -57,13 +57,11 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         return unsubscribe;
     }, []);
 
-    const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-        const token = localStorage.getItem('token');
+    const fetchJson = async (url: string, options: RequestInit = {}) => {
         const headers = new Headers(options.headers || {});
-        if (token) headers.set('x-auth-token', token);
         if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
         
-        const response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
+        const response = await fetchWithAuth(url.startsWith('http') ? url : `${API_BASE_URL}${url}`, { ...options, headers });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw { response: { data: errorData } };
@@ -74,7 +72,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     const fetchNotifications = async (pageNumber: number) => {
         try {
             setIsLoading(true);
-            const data = await fetchWithAuth(`/api/notifications?page=${pageNumber}&limit=20`);
+            const data = await fetchJson(`/api/notifications?page=${pageNumber}&limit=20`);
             if (pageNumber === 1) {
                 setNotifications(data.notifications);
             } else {
@@ -91,7 +89,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const markAsRead = async (id: string) => {
         try {
-            await fetchWithAuth(`/api/notifications/${id}/read`, { method: 'PUT' });
+            await fetchJson(`/api/notifications/${id}/read`, { method: 'PUT' });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: 'Read' } : n));
         } catch (error) {
             console.error('Failed to mark read', error);
@@ -100,7 +98,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const markAllAsRead = async () => {
         try {
-            await fetchWithAuth('/api/notifications/read-all', { method: 'PUT' });
+            await fetchJson('/api/notifications/read-all', { method: 'PUT' });
             setNotifications(prev => prev.map(n => n.status === 'Unread' ? { ...n, status: 'Read' } : n));
         } catch (error) {
             console.error('Failed to mark all read', error);
@@ -109,7 +107,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     const deleteNotification = async (id: string) => {
         try {
-            await fetchWithAuth(`/api/notifications/${id}`, { method: 'DELETE' });
+            await fetchJson(`/api/notifications/${id}`, { method: 'DELETE' });
             setNotifications(prev => prev.filter(n => n.id !== id));
         } catch (error) {
             console.error('Failed to delete notification', error);
@@ -123,7 +121,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         if (!token) return;
 
         try {
-            await fetchWithAuth('/api/invitations/respond', { 
+            await fetchJson('/api/invitations/respond', { 
                 method: 'POST', 
                 body: JSON.stringify({ token, action: 'accept' }) 
             });
@@ -141,7 +139,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         if (!token) return;
 
         try {
-            await fetchWithAuth('/api/invitations/respond', { 
+            await fetchJson('/api/invitations/respond', { 
                 method: 'POST', 
                 body: JSON.stringify({ token, action: 'decline' }) 
             });
