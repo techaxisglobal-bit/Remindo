@@ -3,16 +3,16 @@ const sequelize = require('../config/db');
 
 const Friend = sequelize.define('Friend', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true,
     },
     userId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     contactUserId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: true,
     },
     email: {
