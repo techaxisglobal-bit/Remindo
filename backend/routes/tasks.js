@@ -1,11 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { Task, TaskAttendee } = require('../models');
+const { Task, TaskAttendee, Friend } = require('../models');
 const ActivityLog = require('../models/ActivityLog');
 const { sendInvitation } = require('../services/emailService');
 const User = require('../models/User');
 const crypto = require('crypto');
+
+const saveFriends = async (userId, emails) => {
+    if (!emails || !Array.isArray(emails) || emails.length === 0) return;
+    try {
+        for (const email of emails) {
+            const cleanEmail = email.trim().toLowerCase();
+            const existingUser = await User.findOne({ where: { email: cleanEmail } });
+            
+            const [friend, created] = await Friend.findOrCreate({
+                where: { userId, email: cleanEmail },
+                defaults: {
+                    contactUserId: existingUser ? existingUser.id : null,
+                    name: existingUser ? existingUser.name : null,
+                }
+            });
+            
+            if (!created) {
+                friend.lastInvitedAt = new Date();
+                if (existingUser && !friend.contactUserId) {
+                    friend.contactUserId = existingUser.id;
+                    friend.name = existingUser.name;
+                }
+                await friend.save();
+            }
+        }
+    } catch (err) {
+        console.error('Error saving friends:', err);
+    }
+};
 
 const sanitizeNotifyBefore = (val) => {
     if (val === undefined || val === null) return '15';
@@ -113,6 +142,9 @@ router.post('/', auth, async (req, res) => {
                     sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
                 }
             }
+            
+            // Save friends
+            await saveFriends(req.user.id, attendees);
         }
 
         const taskWithAttendees = await Task.findByPk(task.id, {
@@ -308,6 +340,9 @@ router.put('/:id', auth, async (req, res) => {
                         sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation:', err));
                     }
                 }
+                
+                // Save friends
+                await saveFriends(req.user.id, newAttendees);
             }
         }
 

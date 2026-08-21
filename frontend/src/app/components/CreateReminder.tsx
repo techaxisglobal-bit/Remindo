@@ -21,6 +21,13 @@ import {
 } from 'lucide-react';
 import { Switch } from '@/app/components/ui/switch';
 import { Task, Group } from '@/app/types';
+
+export interface Friend {
+  id: string;
+  email: string;
+  name?: string;
+  lastInvitedAt: string;
+}
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
 import { API_BASE_URL } from '@/app/api';
@@ -307,7 +314,10 @@ export function CreateReminder({
   const [attendees, setAttendees] = useState<string[]>([]);
   const [attendeeInput, setAttendeeInput] = useState('');
   const [groups, setGroups] = useState<Group[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [showGroupsDropdown, setShowGroupsDropdown] = useState(false);
+  const [activePickerTab, setActivePickerTab] = useState<'friends' | 'groups'>('friends');
+  const [isFocused, setIsFocused] = useState(false);
 
   const getNotifyBeforeLabel = (values: number[]) => {
     if (values.includes(0) || values.length === 0) {
@@ -431,21 +441,26 @@ export function CreateReminder({
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetchWithAuth(`${API_BASE_URL}/api/groups`, {
-          headers: { 'x-auth-token': token || '' }
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const [groupsRes, friendsRes] = await Promise.all([
+          fetchWithAuth(`${API_BASE_URL}/api/groups`, { headers: { 'x-auth-token': token || '' } }),
+          fetchWithAuth(`${API_BASE_URL}/api/friends`, { headers: { 'x-auth-token': token || '' } })
+        ]);
+        if (groupsRes.ok) {
+          const data = await groupsRes.json();
           setGroups(data);
         }
+        if (friendsRes.ok) {
+          const data = await friendsRes.json();
+          setFriends(data);
+        }
       } catch (err) {
-        console.error('Failed to fetch groups', err);
+        console.error('Failed to fetch data', err);
       }
     };
-    fetchGroups();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -890,7 +905,7 @@ return (
 
         {/* Attendees Row */}
         <div className="flex flex-col gap-2 mt-2 relative">
-          <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#0a0a0a] p-2 rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px]">
+          <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#0a0a0a] p-2 rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px] relative">
             {attendees.map((email) => (
               <div key={email} className="flex items-center gap-1.5 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full text-[12px] font-bold shadow-sm">
                 <span>{email}</span>
@@ -899,45 +914,90 @@ return (
                 </button>
               </div>
             ))}
-            <input
-              type="email"
-              placeholder={attendees.length === 0 ? "Add email invitations..." : ""}
-              className="flex-1 bg-transparent text-[13px] font-medium placeholder:text-gray-400 focus:outline-none border-none min-w-[150px] p-1"
-              value={attendeeInput}
-              onChange={(e) => setAttendeeInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
-                  e.preventDefault();
-                  const email = attendeeInput.trim();
-                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                  if (email && emailRegex.test(email) && !attendees.includes(email)) {
-                    setAttendees(prev => [...prev, email]);
-                    setAttendeeInput('');
-                  } else if (email && !emailRegex.test(email)) {
-                    if (e.key === 'Enter') {
-                       setAttendeeInput('');
+            
+            <div className="flex-1 min-w-[150px] relative">
+              <input
+                type="email"
+                placeholder={attendees.length === 0 ? "Add email invitations..." : ""}
+                className="w-full bg-transparent text-[13px] font-medium placeholder:text-gray-400 focus:outline-none border-none p-1"
+                value={attendeeInput}
+                onChange={(e) => setAttendeeInput(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={(e) => {
+                  setTimeout(() => {
+                    setIsFocused(false);
+                    const email = attendeeInput.trim();
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (email && emailRegex.test(email) && !attendees.includes(email)) {
+                      setAttendees(prev => [...prev, email]);
+                      setAttendeeInput('');
                     }
+                  }, 200);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
+                    e.preventDefault();
+                    const email = attendeeInput.trim();
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (email && emailRegex.test(email) && !attendees.includes(email)) {
+                      setAttendees(prev => [...prev, email]);
+                      setAttendeeInput('');
+                    } else if (email && !emailRegex.test(email)) {
+                      if (e.key === 'Enter') {
+                         setAttendeeInput('');
+                      }
+                    }
+                  } else if (e.key === 'Backspace' && !attendeeInput && attendees.length > 0) {
+                    setAttendees(prev => prev.slice(0, -1));
                   }
-                } else if (e.key === 'Backspace' && !attendeeInput && attendees.length > 0) {
-                  setAttendees(prev => prev.slice(0, -1));
-                }
-              }}
-              onBlur={() => {
-                const email = attendeeInput.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (email && emailRegex.test(email) && !attendees.includes(email)) {
-                  setAttendees(prev => [...prev, email]);
-                  setAttendeeInput('');
-                }
-              }}
-            />
-            {groups.length > 0 && (
+                }}
+              />
+              
+              {/* Autocomplete Suggestions */}
+              <AnimatePresence>
+                {isFocused && attendeeInput.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="absolute z-20 left-0 top-full mt-1 w-[200px] bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] shadow-lg rounded-xl overflow-hidden"
+                  >
+                    <div className="max-h-40 overflow-y-auto custom-scrollbar">
+                      {friends.filter(f => f.email.toLowerCase().includes(attendeeInput.toLowerCase()) || (f.name && f.name.toLowerCase().includes(attendeeInput.toLowerCase()))).length > 0 ? (
+                        friends.filter(f => f.email.toLowerCase().includes(attendeeInput.toLowerCase()) || (f.name && f.name.toLowerCase().includes(attendeeInput.toLowerCase())))
+                          .filter(f => !attendees.includes(f.email))
+                          .slice(0, 5)
+                          .map(friend => (
+                          <button
+                            key={friend.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-black border-b border-gray-100 dark:border-white/[0.04] last:border-0"
+                            onMouseDown={(e) => {
+                              e.preventDefault(); // prevent blur
+                              setAttendees(prev => [...prev, friend.email]);
+                              setAttendeeInput('');
+                            }}
+                          >
+                            <div className="font-semibold text-gray-900 dark:text-gray-100">{friend.name || friend.email.split('@')[0]}</div>
+                            <div className="text-[10px] text-gray-500 truncate">{friend.email}</div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-xs text-gray-500">No matching friends found</div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {(groups.length > 0 || friends.length > 0) && (
               <button
                 type="button"
                 onClick={() => setShowGroupsDropdown(!showGroupsDropdown)}
-                className="text-xs font-semibold text-[#e0b596] hover:text-[#d4a37f] bg-[#e0b596]/10 px-2 py-1 rounded-lg ml-auto"
+                className="text-xs font-semibold text-[#e0b596] hover:text-[#d4a37f] bg-[#e0b596]/10 px-2 py-1 rounded-lg ml-auto whitespace-nowrap"
               >
-                + Group
+                + Contact
               </button>
             )}
           </div>
@@ -948,29 +1008,75 @@ return (
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="absolute z-10 right-0 top-full mt-1 w-48 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-lg rounded-xl overflow-hidden"
+                className="absolute z-10 right-0 top-full mt-1 w-64 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-lg rounded-xl overflow-hidden flex flex-col"
               >
-                <div className="max-h-40 overflow-y-auto custom-scrollbar">
-                  {groups.map(group => (
-                    <button
-                      key={group.id}
-                      type="button"
-                      className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-black border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] last:border-0"
-                      onClick={() => {
-                        const newEmails = (group.members || []).filter(email => !attendees.includes(email));
-                        if (newEmails.length > 0) {
-                          setAttendees(prev => [...prev, ...newEmails]);
-                          toast.success(`Added ${newEmails.length} member(s) from ${group.name}`);
-                        } else {
-                          toast.info(`All members of ${group.name} are already added`);
-                        }
-                        setShowGroupsDropdown(false);
-                      }}
-                    >
-                      {group.name}
-                      <span className="block text-[10px] text-gray-500 font-normal mt-0.5">{group.members?.length || 0} members</span>
-                    </button>
-                  ))}
+                {/* Tabs */}
+                <div className="flex items-center border-b border-gray-100 dark:border-white/[0.04]">
+                  <button
+                    type="button"
+                    onClick={() => setActivePickerTab('friends')}
+                    className={`flex-1 py-2 text-xs font-bold text-center transition-colors ${activePickerTab === 'friends' ? 'text-[#e0b596] border-b-2 border-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                  >
+                    Friends
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePickerTab('groups')}
+                    className={`flex-1 py-2 text-xs font-bold text-center transition-colors ${activePickerTab === 'groups' ? 'text-[#e0b596] border-b-2 border-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                  >
+                    Groups
+                  </button>
+                </div>
+
+                <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                  {activePickerTab === 'groups' ? (
+                    groups.length > 0 ? (
+                      groups.map(group => (
+                        <button
+                          key={group.id}
+                          type="button"
+                          className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-black border-b border-gray-100 dark:border-white/[0.04] last:border-0"
+                          onClick={() => {
+                            const newEmails = (group.members || []).filter(email => !attendees.includes(email));
+                            if (newEmails.length > 0) {
+                              setAttendees(prev => [...prev, ...newEmails]);
+                              toast.success(`Added ${newEmails.length} member(s) from ${group.name}`);
+                            } else {
+                              toast.info(`All members of ${group.name} are already added`);
+                            }
+                            setShowGroupsDropdown(false);
+                          }}
+                        >
+                          {group.name}
+                          <span className="block text-[10px] text-gray-500 font-normal mt-0.5">{group.members?.length || 0} members</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-xs text-gray-500">No groups found</div>
+                    )
+                  ) : (
+                    friends.length > 0 ? (
+                      friends.filter(f => !attendees.includes(f.email)).map(friend => (
+                        <button
+                          key={friend.id}
+                          type="button"
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-black border-b border-gray-100 dark:border-white/[0.04] last:border-0"
+                          onClick={() => {
+                            setAttendees(prev => [...prev, friend.email]);
+                            setShowGroupsDropdown(false);
+                          }}
+                        >
+                          <div className="font-semibold text-gray-900 dark:text-gray-100">{friend.name || friend.email.split('@')[0]}</div>
+                          <div className="text-[10px] text-gray-500 truncate">{friend.email}</div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-xs text-gray-500">No friends found. Invite someone to add them!</div>
+                    )
+                  )}
+                  {activePickerTab === 'friends' && friends.filter(f => !attendees.includes(f.email)).length === 0 && friends.length > 0 && (
+                     <div className="p-4 text-center text-xs text-gray-500">All friends are already added</div>
+                  )}
                 </div>
               </motion.div>
             )}
