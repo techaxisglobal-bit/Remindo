@@ -14,7 +14,7 @@ router.get('/', auth, async (req, res) => {
         });
         res.json(groups);
     } catch (err) {
-        console.error(err.message);
+        console.error("GET /api/groups ERROR:", err);
         res.status(500).send('Server Error');
     }
 });

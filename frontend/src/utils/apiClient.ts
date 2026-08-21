@@ -62,7 +62,7 @@ axiosClient.interceptors.response.use(
         onRefreshed(token);
 
         originalRequest.headers['x-auth-token'] = token;
-        return axiosClient(originalRequest);
+        return await axiosClient(originalRequest);
       } catch (refreshErr) {
         isRefreshing = false;
         refreshSubscribers = [];
@@ -94,10 +94,25 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
       try { parsedData = JSON.parse(options.body); } catch (e) {}
     }
 
+    let plainHeaders: Record<string, string> = {};
+    if (options.headers) {
+      if (options.headers instanceof Headers) {
+        options.headers.forEach((value, key) => {
+          plainHeaders[key] = value;
+        });
+      } else if (Array.isArray(options.headers)) {
+        options.headers.forEach(([key, value]) => {
+          plainHeaders[key] = value;
+        });
+      } else {
+        plainHeaders = { ...(options.headers as Record<string, string>) };
+      }
+    }
+
     const response = await axiosClient({
       url: finalUrl,
       method: options.method || 'GET',
-      headers: options.headers as any,
+      headers: plainHeaders,
       data: parsedData,
     });
 
@@ -119,10 +134,21 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
       await new Promise(res => setTimeout(res, 1500));
       // Basic 1-time retry
       try {
+        let retryHeaders: Record<string, string> = {};
+        if (options.headers) {
+          if (options.headers instanceof Headers) {
+            options.headers.forEach((value, key) => { retryHeaders[key] = value; });
+          } else if (Array.isArray(options.headers)) {
+            options.headers.forEach(([key, value]) => { retryHeaders[key] = value; });
+          } else {
+            retryHeaders = { ...(options.headers as Record<string, string>) };
+          }
+        }
+        
         const retryRes = await axiosClient({
           url: url.startsWith('http') ? url : `${API_BASE_URL}${url}`,
           method: options.method || 'GET',
-          headers: options.headers as any,
+          headers: retryHeaders,
           data: typeof options.body === 'string' ? JSON.parse(options.body) : options.body,
         });
         return new Response(JSON.stringify(retryRes.data), {
