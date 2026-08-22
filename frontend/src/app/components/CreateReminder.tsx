@@ -401,19 +401,11 @@ export function CreateReminder({
         }
       }
 
-      // Build Nominatim query URL. Ask for more results so we can sort them by distance locally.
-      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=15`;
+      // Build Photon query URL (Photon natively prioritizes by distance when lat/lon are provided)
+      let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=15`;
       
-      // If we have user coordinates, we can add a viewbox to bias results to their area
       if (lat && lon) {
-        // Create a ~55km bounding box around the user (approx 0.5 degrees)
-        const offset = 0.5; 
-        const minLon = lon - offset;
-        const maxLon = lon + offset;
-        const minLat = lat - offset;
-        const maxLat = lat + offset;
-        // bounded=1 strictly restricts results to this bounding box
-        url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1`; 
+        url += `&lat=${lat}&lon=${lon}&zoom=14`; 
       }
 
       const response = await fetch(url, {
@@ -421,24 +413,33 @@ export function CreateReminder({
       });
 
       if (!response.ok) {
-        throw new Error(`Nominatim API error: ${response.status}`);
+        throw new Error(`Photon API error: ${response.status}`);
       }
 
       let data = await response.json();
       
-      // Sort results by distance if we have user coordinates
-      if (lat && lon && data && data.length > 0) {
-        data.sort((a: any, b: any) => {
-          const distA = Math.pow(parseFloat(a.lat) - lat, 2) + Math.pow(parseFloat(a.lon) - lon, 2);
-          const distB = Math.pow(parseFloat(b.lat) - lat, 2) + Math.pow(parseFloat(b.lon) - lon, 2);
+      let features = data.features || [];
+      
+      // Sort results by exact Euclidean distance if we have user coordinates
+      if (lat && lon && features.length > 0) {
+        features.sort((a: any, b: any) => {
+          const [lonA, latA] = a.geometry.coordinates;
+          const [lonB, latB] = b.geometry.coordinates;
+          const distA = Math.pow(latA - lat, 2) + Math.pow(lonA - lon, 2);
+          const distB = Math.pow(latB - lat, 2) + Math.pow(lonB - lon, 2);
           return distA - distB;
         });
       }
 
-      const mappedSuggestions = (data || []).slice(0, 3).map((place: any) => {
+      const mappedSuggestions = features.slice(0, 3).map((feature: any) => {
+        const props = feature.properties;
+        const name = props.name || props.street || props.city || "Location";
+        const addressParts = [props.street, props.city, props.state, props.country].filter(Boolean);
+        const display_name = addressParts.length > 0 ? `${name}, ${addressParts.join(', ')}` : name;
+        
         return {
-          display_name: place.display_name,
-          name: place.name || place.display_name.split(',')[0]
+          display_name: display_name,
+          name: name
         };
       });
 

@@ -61,33 +61,43 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
             setIsSearchingLocation(true);
             try {
-                let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=15`;
+                let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(formData.location)}&limit=15`;
                 
                 if (userCoords) {
                     const { lat, lon } = userCoords;
-                    const offset = 0.5; // ~55km
-                    const minLon = lon - offset;
-                    const maxLon = lon + offset;
-                    const minLat = lat - offset;
-                    const maxLat = lat + offset;
-                    url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1`;
+                    url += `&lat=${lat}&lon=${lon}&zoom=14`;
                 }
 
                 const response = await fetch(url, {
                     headers: { 'Accept-Language': 'en' }
                 });
                 let data = await response.json();
+                let features = data.features || [];
                 
-                // Sort results by distance if we have user coordinates
-                if (userCoords && data && data.length > 0) {
-                    data.sort((a: any, b: any) => {
-                        const distA = Math.pow(parseFloat(a.lat) - userCoords.lat, 2) + Math.pow(parseFloat(a.lon) - userCoords.lon, 2);
-                        const distB = Math.pow(parseFloat(b.lat) - userCoords.lat, 2) + Math.pow(parseFloat(b.lon) - userCoords.lon, 2);
+                // Sort results by exact Euclidean distance if we have user coordinates
+                if (userCoords && features.length > 0) {
+                    features.sort((a: any, b: any) => {
+                        const [lonA, latA] = a.geometry.coordinates;
+                        const [lonB, latB] = b.geometry.coordinates;
+                        const distA = Math.pow(latA - userCoords.lat, 2) + Math.pow(lonA - userCoords.lon, 2);
+                        const distB = Math.pow(latB - userCoords.lat, 2) + Math.pow(lonB - userCoords.lon, 2);
                         return distA - distB;
                     });
                 }
                 
-                setLocationSuggestions(data.slice(0, 5));
+                const mappedSuggestions = features.slice(0, 5).map((feature: any) => {
+                    const props = feature.properties;
+                    const name = props.name || props.street || props.city || "Location";
+                    const addressParts = [props.street, props.city, props.state, props.country].filter(Boolean);
+                    const display_name = addressParts.length > 0 ? `${name}, ${addressParts.join(', ')}` : name;
+                    
+                    return {
+                        display_name,
+                        name
+                    };
+                });
+                
+                setLocationSuggestions(mappedSuggestions);
             } catch (error) {
                 console.error('Location search error:', error);
             } finally {
