@@ -61,7 +61,7 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
             setIsSearchingLocation(true);
             try {
-                let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=5`;
+                let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=15`;
                 
                 if (userCoords) {
                     const { lat, lon } = userCoords;
@@ -76,8 +76,18 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                 const response = await fetch(url, {
                     headers: { 'Accept-Language': 'en' }
                 });
-                const data = await response.json();
-                setLocationSuggestions(data);
+                let data = await response.json();
+                
+                // Sort results by distance if we have user coordinates
+                if (userCoords && data && data.length > 0) {
+                    data.sort((a: any, b: any) => {
+                        const distA = Math.pow(parseFloat(a.lat) - userCoords.lat, 2) + Math.pow(parseFloat(a.lon) - userCoords.lon, 2);
+                        const distB = Math.pow(parseFloat(b.lat) - userCoords.lat, 2) + Math.pow(parseFloat(b.lon) - userCoords.lon, 2);
+                        return distA - distB;
+                    });
+                }
+                
+                setLocationSuggestions(data.slice(0, 5));
             } catch (error) {
                 console.error('Location search error:', error);
             } finally {

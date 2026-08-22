@@ -401,8 +401,8 @@ export function CreateReminder({
         }
       }
 
-      // Build Nominatim query URL
-      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=3`;
+      // Build Nominatim query URL. Ask for more results so we can sort them by distance locally.
+      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=15`;
       
       // If we have user coordinates, we can add a viewbox to bias results to their area
       if (lat && lon) {
@@ -424,9 +424,18 @@ export function CreateReminder({
         throw new Error(`Nominatim API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      let data = await response.json();
       
-      const mappedSuggestions = (data || []).map((place: any) => {
+      // Sort results by distance if we have user coordinates
+      if (lat && lon && data && data.length > 0) {
+        data.sort((a: any, b: any) => {
+          const distA = Math.pow(parseFloat(a.lat) - lat, 2) + Math.pow(parseFloat(a.lon) - lon, 2);
+          const distB = Math.pow(parseFloat(b.lat) - lat, 2) + Math.pow(parseFloat(b.lon) - lon, 2);
+          return distA - distB;
+        });
+      }
+
+      const mappedSuggestions = (data || []).slice(0, 3).map((place: any) => {
         return {
           display_name: place.display_name,
           name: place.name || place.display_name.split(',')[0]
