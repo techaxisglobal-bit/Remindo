@@ -392,20 +392,37 @@ export function CreateReminder({
       
       if (!lat || !lon) {
         try {
-          const position = await Geolocation.getCurrentPosition({ timeout: 10000 });
+          const position = await Geolocation.getCurrentPosition({ timeout: 5000 });
           lat = position.coords.latitude;
           lon = position.coords.longitude;
           setUserCoords({ lat, lon });
         } catch (e) {
-          console.warn("Could not get location for suggestions", e);
+          console.warn("Could not get location for suggestions, trying IP fallback", e);
+          try {
+            const ipRes = await fetch('https://ipapi.co/json/');
+            const ipData = await ipRes.json();
+            if (ipData.latitude && ipData.longitude) {
+              lat = ipData.latitude;
+              lon = ipData.longitude;
+              setUserCoords({ lat, lon });
+            }
+          } catch (fallbackErr) {
+            console.warn("IP fallback failed");
+          }
         }
       }
 
-      // Build Photon query URL (Photon natively prioritizes by distance when lat/lon are provided)
+      // Build Photon query URL
       let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=15`;
       
       if (lat && lon) {
-        url += `&lat=${lat}&lon=${lon}&zoom=14`; 
+        // ~100km strict bounding box
+        const offset = 0.9; 
+        const minLon = lon - offset;
+        const maxLon = lon + offset;
+        const minLat = lat - offset;
+        const maxLat = lat + offset;
+        url += `&bbox=${minLon},${minLat},${maxLon},${maxLat}&lat=${lat}&lon=${lon}`; 
       }
 
       const response = await fetch(url, {

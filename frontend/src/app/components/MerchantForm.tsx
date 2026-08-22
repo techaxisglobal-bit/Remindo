@@ -42,13 +42,27 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
     // Get location once on mount to bias search results
     useEffect(() => {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => setUserCoords({ lat: position.coords.latitude, lon: position.coords.longitude }),
-                () => console.warn('Could not get initial location'),
-                { timeout: 10000 }
-            );
-        }
+        const fetchLocation = async () => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => setUserCoords({ lat: position.coords.latitude, lon: position.coords.longitude }),
+                    async () => {
+                        console.warn('Could not get initial location, trying IP fallback');
+                        try {
+                            const ipRes = await fetch('https://ipapi.co/json/');
+                            const ipData = await ipRes.json();
+                            if (ipData.latitude && ipData.longitude) {
+                                setUserCoords({ lat: ipData.latitude, lon: ipData.longitude });
+                            }
+                        } catch (e) {
+                            console.warn("IP fallback failed");
+                        }
+                    },
+                    { timeout: 5000 }
+                );
+            }
+        };
+        fetchLocation();
     }, []);
 
     useEffect(() => {
@@ -65,7 +79,13 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                 
                 if (userCoords) {
                     const { lat, lon } = userCoords;
-                    url += `&lat=${lat}&lon=${lon}&zoom=14`;
+                    // ~100km strict bounding box
+                    const offset = 0.9; 
+                    const minLon = lon - offset;
+                    const maxLon = lon + offset;
+                    const minLat = lat - offset;
+                    const maxLat = lat + offset;
+                    url += `&bbox=${minLon},${minLat},${maxLon},${maxLat}&lat=${lat}&lon=${lon}`;
                 }
 
                 const response = await fetch(url, {
