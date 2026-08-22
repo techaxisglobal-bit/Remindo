@@ -406,14 +406,14 @@ export function CreateReminder({
       
       // If we have user coordinates, we can add a viewbox to bias results to their area
       if (lat && lon) {
-        // Create a ~20km bounding box around the user (approx 0.2 degrees)
-        const offset = 0.2; 
+        // Create a ~55km bounding box around the user (approx 0.5 degrees)
+        const offset = 0.5; 
         const minLon = lon - offset;
         const maxLon = lon + offset;
         const minLat = lat - offset;
         const maxLat = lat + offset;
-        // bounded=0 means prefer this area, but don't strictly restrict
-        url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=0`; 
+        // bounded=1 strictly restricts results to this bounding box
+        url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1`; 
       }
 
       const response = await fetch(url, {

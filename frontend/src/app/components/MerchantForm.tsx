@@ -38,6 +38,18 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+    const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
+
+    // Get location once on mount to bias search results
+    useEffect(() => {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => setUserCoords({ lat: position.coords.latitude, lon: position.coords.longitude }),
+                () => console.warn('Could not get initial location'),
+                { timeout: 10000 }
+            );
+        }
+    }, []);
 
     useEffect(() => {
         const searchLocation = async () => {
@@ -49,7 +61,19 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
 
             setIsSearchingLocation(true);
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=5`, {
+                let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=5`;
+                
+                if (userCoords) {
+                    const { lat, lon } = userCoords;
+                    const offset = 0.5; // ~55km
+                    const minLon = lon - offset;
+                    const maxLon = lon + offset;
+                    const minLat = lat - offset;
+                    const maxLat = lat + offset;
+                    url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1`;
+                }
+
+                const response = await fetch(url, {
                     headers: { 'Accept-Language': 'en' }
                 });
                 const data = await response.json();
