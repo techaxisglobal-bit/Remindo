@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '@/app/api';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -34,6 +34,42 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
     const [customCategory, setCustomCategory] = useState('');
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [proofFile, setProofFile] = useState<File | null>(null);
+
+    const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+
+    useEffect(() => {
+        const searchLocation = async () => {
+            if (!formData.location || formData.location.length < 3) {
+                setLocationSuggestions([]);
+                return;
+            }
+            if (!showSuggestions) return;
+
+            setIsSearchingLocation(true);
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}&limit=5`, {
+                    headers: { 'Accept-Language': 'en' }
+                });
+                const data = await response.json();
+                setLocationSuggestions(data);
+            } catch (error) {
+                console.error('Location search error:', error);
+            } finally {
+                setIsSearchingLocation(false);
+            }
+        };
+
+        const timeoutId = setTimeout(searchLocation, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [formData.location, showSuggestions]);
+
+    const handleLocationSelect = (suggestion: any) => {
+        setFormData(prev => ({ ...prev, location: suggestion.display_name }));
+        setShowSuggestions(false);
+        setLocationSuggestions([]);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -228,14 +264,53 @@ export function MerchantForm({ onSuccess }: MerchantFormProps) {
                                 <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className="pl-9" placeholder="hello@acme.com" required />
                             </div>
                         </div>
-                        <div className="space-y-2 md:col-span-2">
+                        <div className="space-y-2 md:col-span-2 relative">
                             <div className="flex justify-between items-center">
                                 <Label htmlFor="location">Location / Address *</Label>
                                 <Button type="button" variant="ghost" size="sm" onClick={handleUseCurrentLocation} className="h-6 text-xs text-[#e0b596]">
                                     <MapPin className="w-3 h-3 mr-1" /> Use Current Location
                                 </Button>
                             </div>
-                            <Input id="location" name="location" value={formData.location} onChange={handleChange} placeholder="Full address" required />
+                            <Input 
+                                id="location" 
+                                name="location" 
+                                value={formData.location} 
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setShowSuggestions(true);
+                                }} 
+                                onFocus={() => setShowSuggestions(true)}
+                                onBlur={() => {
+                                    // Delay hiding suggestions so click event on suggestion can fire
+                                    setTimeout(() => setShowSuggestions(false), 200);
+                                }}
+                                placeholder="Start typing to search address..." 
+                                autoComplete="off"
+                                required 
+                            />
+                            
+                            {/* Suggestions Dropdown */}
+                            {showSuggestions && formData.location.length >= 3 && (
+                                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-md shadow-lg max-h-60 overflow-auto">
+                                    {isSearchingLocation ? (
+                                        <div className="p-3 text-sm text-gray-500 text-center">Searching...</div>
+                                    ) : locationSuggestions.length > 0 ? (
+                                        <ul className="py-1">
+                                            {locationSuggestions.map((suggestion, index) => (
+                                                <li 
+                                                    key={index} 
+                                                    className="px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800 last:border-0"
+                                                    onClick={() => handleLocationSelect(suggestion)}
+                                                >
+                                                    {suggestion.display_name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <div className="p-3 text-sm text-gray-500 text-center">No results found</div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

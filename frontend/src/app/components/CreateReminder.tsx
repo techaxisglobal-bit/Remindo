@@ -387,13 +387,6 @@ export function CreateReminder({
     setIsSearchingLocation(true);
     setLocationError(null);
     try {
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        console.warn('Google Maps API key is missing. Set VITE_GOOGLE_MAPS_API_KEY in .env');
-        setLocationSuggestions([]);
-        return;
-      }
-
       let lat = userCoords?.lat;
       let lon = userCoords?.lon;
       
@@ -405,51 +398,38 @@ export function CreateReminder({
           setUserCoords({ lat, lon });
         } catch (e) {
           console.warn("Could not get location for suggestions", e);
-          setLocationError("Enable location access to see nearby suggestions.");
-          setLocationSuggestions([]);
-          setIsSearchingLocation(false);
-          return;
         }
       }
 
-      const requestBody: any = {
-        textQuery: query,
-      };
-
+      // Build Nominatim query URL
+      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=3`;
+      
+      // If we have user coordinates, we can add a viewbox to bias results to their area
       if (lat && lon) {
-        requestBody.locationBias = {
-          circle: {
-            center: {
-              latitude: lat,
-              longitude: lon
-            },
-            radius: 20000.0 // 20km radius
-          }
-        };
+        // Create a ~20km bounding box around the user (approx 0.2 degrees)
+        const offset = 0.2; 
+        const minLon = lon - offset;
+        const maxLon = lon + offset;
+        const minLat = lat - offset;
+        const maxLat = lat + offset;
+        // bounded=0 means prefer this area, but don't strictly restrict
+        url += `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=0`; 
       }
 
-      const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress'
-        },
-        body: JSON.stringify(requestBody)
+      const response = await fetch(url, {
+        headers: { 'Accept-Language': 'en' }
       });
 
       if (!response.ok) {
-        throw new Error(`Google Maps API error: ${response.status}`);
+        throw new Error(`Nominatim API error: ${response.status}`);
       }
 
       const data = await response.json();
       
-      // Map Google Places data to match the UI's expected format ({ display_name: string })
-      const mappedSuggestions = (data.places || []).slice(0, 3).map((place: any) => {
-        const name = place.displayName?.text || '';
-        const address = place.formattedAddress || '';
+      const mappedSuggestions = (data || []).map((place: any) => {
         return {
-          display_name: name && address ? `${name}, ${address}` : (name || address)
+          display_name: place.display_name,
+          name: place.name || place.display_name.split(',')[0]
         };
       });
 
