@@ -84,7 +84,7 @@ import { MerchantForm } from '@/app/components/MerchantForm';
 import { MerchantAdmin } from '@/app/components/MerchantAdmin';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
 import { notificationSocket } from '@/app/services/NotificationSocket';
-import { PushNotifications } from '@capacitor/push-notifications';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { API_BASE_URL } from '@/app/api';
 
 import { Calendar } from '@/app/components/ui/calendar';
@@ -343,12 +343,12 @@ export function Dashboard({
 
       const setupPush = async () => {
          try {
-             let permStatus = await PushNotifications.checkPermissions();
+             let permStatus = await FirebaseMessaging.checkPermissions();
              if (permStatus.receive === 'prompt') {
-                 permStatus = await PushNotifications.requestPermissions();
+                 permStatus = await FirebaseMessaging.requestPermissions();
              }
              if (permStatus.receive === 'granted') {
-                 await PushNotifications.register();
+                 await FirebaseMessaging.getToken();
              }
          } catch(e) {
              console.log("Push notifications not supported on web/dev", e);
@@ -357,14 +357,14 @@ export function Dashboard({
       
       setupPush();
 
-      PushNotifications.addListener('registration', (token) => {
+      FirebaseMessaging.addListener('tokenReceived', (event) => {
           fetchWithAuth(`${API_BASE_URL}/api/auth/profile`, {
               method: 'PUT',
               headers: {
                   'x-auth-token': localStorage.getItem('token') || '',
                   'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ fcmToken: token.value })
+              body: JSON.stringify({ fcmToken: event.token })
           }).catch(console.error);
       });
 

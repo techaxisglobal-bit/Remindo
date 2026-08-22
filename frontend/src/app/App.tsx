@@ -6,7 +6,7 @@ import { Dashboard } from "@/app/components/Dashboard";
 import InvitationHandler from "@/app/components/InvitationHandler";
 import { Task, User } from "@/app/types";
 import { toast } from "sonner";
-import { PushNotifications } from '@capacitor/push-notifications';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { Capacitor } from '@capacitor/core';
 import { tokenManager } from '../utils/tokenManager';
 import { fetchWithAuth } from '../utils/apiClient';
@@ -115,10 +115,10 @@ export default function App() {
   const registerPush = async () => {
     if (Capacitor.isNativePlatform()) {
       try {
-        let permStatus = await PushNotifications.checkPermissions();
+        let permStatus = await FirebaseMessaging.checkPermissions();
 
         if (permStatus.receive === 'prompt') {
-          permStatus = await PushNotifications.requestPermissions();
+          permStatus = await FirebaseMessaging.requestPermissions();
         }
 
         if (permStatus.receive !== 'granted') {
@@ -127,8 +127,6 @@ export default function App() {
           return;
         }
 
-        await PushNotifications.register();
-
         // Instantly synchronize if we already have a cached token in localStorage!
         const cachedToken = localStorage.getItem('fcmToken');
         if (cachedToken) {
@@ -136,25 +134,23 @@ export default function App() {
           await saveFCMTokenToBackend(cachedToken);
         }
 
-        await PushNotifications.addListener('registration', async (token) => {
-          console.log('Native FCM Token received:', token.value);
-          localStorage.setItem('fcmToken', token.value);
-          await saveFCMTokenToBackend(token.value);
+        await FirebaseMessaging.addListener('tokenReceived', async (event) => {
+          console.log('Native FCM Token received:', event.token);
+          localStorage.setItem('fcmToken', event.token);
+          await saveFCMTokenToBackend(event.token);
         });
 
-        await PushNotifications.addListener('registrationError', (error) => {
-          console.error('Capacitor registration error:', error);
-          toast.error('Failed to register device for push notifications');
+        await FirebaseMessaging.addListener('notificationReceived', (event) => {
+          console.log('Foreground push notification received:', event.notification);
+          toast.info(`${event.notification.title}: ${event.notification.body || ''}`);
         });
 
-        await PushNotifications.addListener('pushNotificationReceived', (notification) => {
-          console.log('Foreground push notification received:', notification);
-          toast.info(`${notification.title}: ${notification.body || ''}`);
+        await FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
+          console.log('Push notification click action performed:', event.notification);
         });
 
-        await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-          console.log('Push notification click action performed:', action);
-        });
+        // Request token to trigger tokenReceived
+        await FirebaseMessaging.getToken();
 
       } catch (err) {
         console.error('Native push registration failed:', err);
@@ -408,7 +404,7 @@ export default function App() {
     return (
       <>
         <InvitationHandler onNavigate={(path) => window.location.href = path} />
-        <Toaster position="top-center" richColors duration={2000} />
+        <Toaster position="top-center" duration={3000} />
       </>
     );
   }
@@ -417,7 +413,7 @@ export default function App() {
     return (
       <>
         <SignIn onSignIn={handleSignIn} />
-        <Toaster position="top-center" richColors duration={2000} />
+        <Toaster position="top-center" duration={3000} />
       </>
     );
   }
@@ -435,7 +431,7 @@ export default function App() {
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={handleToggleNotifications}
       />
-      <Toaster position="top-center" richColors duration={2000} />
+      <Toaster position="top-center" duration={3000} />
     </>
   );
 }

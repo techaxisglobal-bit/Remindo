@@ -45,6 +45,18 @@
 }
 
 @layer base {
+  body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input, textarea, [contenteditable] {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
   /* Fix browser autofill styling in dark mode */
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 

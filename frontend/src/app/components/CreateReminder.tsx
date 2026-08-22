@@ -15,8 +15,6 @@ import {
   CircleAlert,
   Sparkles,
   Check,
-  Mic,
-  MicOff,
   Loader2
 } from 'lucide-react';
 import { Switch } from '@/app/components/ui/switch';
@@ -485,12 +483,6 @@ export function CreateReminder({
     { value: 1440, label: '1 day before' },
   ];
 
-  // --- Voice Assistant State ---
-  const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [voiceText, setVoiceText] = useState('');
-  const recognitionRef = useRef<any>(null);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -513,248 +505,6 @@ export function CreateReminder({
     };
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = 'en-US';
-
-        recognitionRef.current.onresult = (event: any) => {
-          let currentTranscript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            currentTranscript += event.results[i][0].transcript;
-          }
-          setVoiceText(currentTranscript);
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          console.error('Speech error', event.error);
-          setIsListening(false);
-          setIsProcessing(false);
-          
-          if (event.error === 'not-allowed') {
-            toast.error("Microphone access denied. Please check your browser settings.");
-          } else if (event.error === 'no-speech') {
-            toast.error("No speech detected. Please try again.");
-          } else {
-            toast.error(`Speech recognition error: ${event.error}`);
-          }
-        };
-
-        recognitionRef.current.onend = () => {
-          setIsListening(false);
-        };
-      }
-    }
-    return () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (e) { }
-      }
-    };
-  }, []);
-
-  const parseVoiceCommand = (text: string) => {
-    try {
-      let newTitle = text;
-      const lowerText = text.toLowerCase();
-
-      // 1. Regex Extractor for ANY Time (e.g. 5:30 pm, 14:00, 8am)
-      const timeRegex = /\b(1[0-2]|[1-9])(?::([0-5]\d))?\s*(am|pm|a\.m\.|p\.m\.)\b|\b([01]?\d|2[0-3]):([0-5]\d)\b/i;
-      const timeMatch = lowerText.match(timeRegex);
-
-      if (timeMatch) {
-        const fullTimeStr = timeMatch[0];
-        let hours = 0;
-        let minutes = 0;
-
-        if (timeMatch[4] !== undefined) {
-          hours = parseInt(timeMatch[4]);
-          minutes = parseInt(timeMatch[5]);
-        } else {
-          hours = parseInt(timeMatch[1]);
-          minutes = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-          const period = timeMatch[3].replace(/\./g, '').toLowerCase();
-
-          if (period === 'pm' && hours < 12) hours += 12;
-          if (period === 'am' && hours === 12) hours = 0;
-        }
-
-        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        handleStartTimeChange(formattedTime);
-
-        const timeCleanRegex = new RegExp(`(?:at\\s+)?${fullTimeStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
-        newTitle = newTitle.replace(timeCleanRegex, '').trim();
-      } else {
-        handleStartTimeChange(format(new Date(), 'HH:mm'));
-      }
-
-      // 2. Extractor for Dates (today, tomorrow, next week, monday-sunday)
-      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-      const today = new Date();
-      let targetDate = new Date();
-      let dateFound = false;
-      let dateStrToRemove = '';
-
-      if (lowerText.includes('tomorrow')) {
-        targetDate = addDays(today, 1);
-        dateFound = true;
-        dateStrToRemove = 'tomorrow';
-      } else if (lowerText.includes('today') || lowerText.includes('tonight')) {
-        targetDate = today;
-        dateFound = true;
-        dateStrToRemove = lowerText.includes('tonight') ? 'tonight' : 'today';
-      } else if (lowerText.match(/\bnext\s+(week|month|year|sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i)) {
-        const match = lowerText.match(/\bnext\s+(week|month|year|sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-        if (match) {
-          dateStrToRemove = match[0];
-          dateFound = true;
-          const token = match[1].toLowerCase();
-          if (token === 'week') targetDate = addDays(today, 7);
-          else if (token === 'month') targetDate = addDays(today, 30);
-          else if (token === 'year') targetDate = addDays(today, 365);
-          else {
-            const dayIndex = daysOfWeek.indexOf(token);
-            const currentDay = today.getDay();
-            let diff = dayIndex - currentDay;
-            if (diff <= 0) diff += 7;
-            targetDate = addDays(today, diff + 7);
-          }
-        }
-      } else {
-        for (let day of daysOfWeek) {
-          const match = lowerText.match(new RegExp(`\\b(?:on\\s+|this\\s+)?${day}\\b`, 'i'));
-          if (match) {
-            dateStrToRemove = match[0];
-            dateFound = true;
-            const dayIndex = daysOfWeek.indexOf(day);
-            const currentDay = today.getDay();
-            let diff = dayIndex - currentDay;
-            if (diff <= 0) diff += 7;
-            targetDate = addDays(today, diff);
-            break;
-          }
-        }
-      }
-
-      if (dateFound) {
-        const formattedDate = format(targetDate, 'yyyy-MM-dd');
-        setStartDate(formattedDate);
-        setEndDate(formattedDate);
-        newTitle = newTitle.replace(new RegExp(dateStrToRemove, 'i'), '').trim();
-      } else {
-        const formattedDate = format(today, 'yyyy-MM-dd');
-        setStartDate(formattedDate);
-        setEndDate(formattedDate);
-      }
-
-      // Clean up intent prefix for title
-      if (lowerText.startsWith('remind me to ')) {
-        newTitle = newTitle.substring('remind me to '.length);
-      } else if (lowerText.startsWith('remind me ')) {
-        newTitle = newTitle.substring('remind me '.length);
-      }
-      newTitle = newTitle.trim();
-
-      // Prepare description and clean up "remind me"
-      let finalDesc = text.trim();
-      if (finalDesc.toLowerCase().startsWith('remind me to ')) {
-        finalDesc = finalDesc.substring('remind me to '.length);
-      } else if (finalDesc.toLowerCase().startsWith('remind me ')) {
-        finalDesc = finalDesc.substring('remind me '.length);
-      }
-      if (finalDesc) {
-        finalDesc = finalDesc.charAt(0).toUpperCase() + finalDesc.slice(1);
-      }
-
-      if (newTitle) {
-        const cleanWords = newTitle.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/\s+/);
-        const allStopWords = ['a', 'an', 'the', 'is', 'are', 'am', 'was', 'were', 'be', 'been', 'being', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'to', 'of', 'in', 'for', 'on', 'with', 'as', 'at', 'by', 'from', 'about', 'into', 'through', 'after', 'over', 'between', 'out', 'against', 'during', 'without', 'before', 'under', 'around', 'among', 'and', 'but', 'or', 'nor', 'so', 'yet', 'if', 'because', 'although', 'unless', 'since', 'that', 'this', 'do', 'does', 'did', 'have', 'has', 'had', 'can', 'could', 'shall', 'should', 'will', 'would', 'may', 'might', 'must', 'very', 'too', 'really', 'quite', 'just', 'only', 'some', 'any', 'all', 'every', 'remind', 'me', 'please', 'something'];
-        const keywords = cleanWords.filter(w => w && !allStopWords.includes(w.toLowerCase()));
-
-        let finalTitle = "";
-        if (keywords.length > 0) {
-          finalTitle = keywords.reduce((a, b) => a.length >= b.length ? a : b, "");
-        } else {
-          finalTitle = cleanWords[0] || "Reminder";
-        }
-
-        finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);
-        setTitle(finalTitle);
-        setDescription(finalDesc);
-      } else {
-        setDescription(finalDesc);
-      }
-    } catch (err) {
-      console.error('Parser error:', err);
-      // Fallback cleanly
-      setTitle('Reminder');
-      setDescription(text);
-    }
-  };
-
-  const handleCloseAttempt = () => {
-    if (title.trim() || description.trim()) {
-      setShowCloseConfirm(true);
-    } else {
-      onClose?.();
-    }
-  };
-
-  const toggleVoice = async () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      
-      if (voiceText.trim()) {
-        setIsProcessing(true);
-        setTimeout(() => {
-          parseVoiceCommand(voiceText);
-          setIsProcessing(false);
-          setVoiceText('');
-          toast.success("Command processed");
-        }, 800);
-      }
-    } else {
-      if (!recognitionRef.current) {
-        toast.error("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
-        return;
-      }
-      
-      setVoiceText('');
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {
-        console.error('Start error:', e);
-        toast.error("Could not start microphone. It might be already in use.");
-        setIsListening(false);
-      }
-    }
-  };
-
-  // Auto-stop after 4 seconds of silence
-  useEffect(() => {
-    if (isListening && voiceText.trim() !== '') {
-      const timer = setTimeout(() => {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-        setIsProcessing(true);
-        setTimeout(() => {
-          parseVoiceCommand(voiceText);
-          setIsProcessing(false);
-          setVoiceText('');
-          toast.success("Done listening");
-        }, 800);
-      }, 3000); // Stop after 3 seconds of silence (down from 4s)
-
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceText, isListening]);
 
   // Sync End Time when Start Time changes
   const handleStartTimeChange = (newStartTime: string) => {
@@ -854,37 +604,6 @@ export function CreateReminder({
 return (
   <div className="flex flex-col md:flex-row bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] max-w-2xl w-full mx-auto h-full relative">
 
-    <AnimatePresence>
-      {(isListening || isProcessing) && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 dark:bg-[#0a0a0a] backdrop-blur-sm rounded-[2rem]"
-        >
-          <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(224,181,150,0.4)] transition-all ${isListening ? 'bg-[#e0b596] animate-pulse' : 'bg-[#e0b596]/50'}`}>
-            {isProcessing ? <Loader2 className="w-10 h-10 text-white animate-spin" /> : <Mic className="w-10 h-10 text-white" />}
-          </div>
-
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-            {isProcessing ? 'Processing...' : 'Listening...'}
-          </h3>
-
-          <p className="text-lg text-gray-500 dark:text-gray-400 text-center max-w-[80%] min-h-[60px] italic font-medium leading-relaxed">
-            {voiceText || (isListening ? 'Speak now, e.g. "Remind me to submit assignment tomorrow at 5 PM"' : '')}
-          </p>
-
-          <Button
-            onClick={toggleVoice}
-            variant="ghost"
-            className="mt-8 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-[#0a0a0a] hover:bg-gray-200 dark:hover:bg-black rounded-full px-8 py-2 font-bold transition-colors"
-          >
-            {isProcessing ? 'Cancel' : 'Stop Listening'}
-          </Button>
-        </motion.div>
-      )}
-    </AnimatePresence>
-
     <div className="flex-[1.5] flex flex-col p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Reminder</h2>
@@ -898,36 +617,20 @@ return (
           <input
             type="text"
             placeholder="What's the plan?"
-            className="w-full bg-transparent text-3xl font-bold placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-0 border-none p-0 pr-12 selection:bg-[#e0b596]/30"
+            className="w-full bg-transparent text-3xl font-bold placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-0 border-none p-0 selection:bg-[#e0b596]/30"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
           />
-          <button
-            type="button"
-            onClick={toggleVoice}
-            title="Speak task title"
-            className={`absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all ${isListening ? 'text-white bg-[#e0b596] shadow-md scale-105 animate-pulse' : 'text-gray-300 dark:text-gray-600 hover:text-[#e0b596] hover:bg-[#e0b596]/10 hover:scale-105'}`}
-          >
-            {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-          </button>
         </div>
 
         <div className="relative group bg-gray-50/80 dark:bg-[#0a0a0a] p-3.5 rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all">
           <textarea
             placeholder="Add detailed description, steps, or notes..."
-            className="w-full bg-transparent text-[14px] font-medium leading-relaxed placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-0 border-none p-0 min-h-[70px] resize-none pr-10"
+            className="w-full bg-transparent text-[14px] font-medium leading-relaxed placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-0 border-none p-0 min-h-[70px] resize-none"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <button
-            type="button"
-            onClick={toggleVoice}
-            title="Speak description"
-            className={`absolute bottom-3 right-3 p-2 rounded-full transition-all ${isListening ? 'text-white bg-[#e0b596] shadow-md scale-105 animate-pulse' : 'text-gray-400 dark:text-gray-500 hover:text-[#e0b596] hover:bg-[#e0b596]/10 hover:scale-105'}`}
-          >
-            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-          </button>
         </div>
 
         <div className="space-y-2">

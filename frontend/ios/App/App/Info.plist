@@ -60,5 +60,9 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>733914668823-6vilngcr5ta83g48aa45vs4kju7jvkl9.apps.googleusercontent.com</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
