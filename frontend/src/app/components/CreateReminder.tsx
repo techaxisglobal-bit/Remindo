@@ -387,6 +387,14 @@ export function CreateReminder({
     setIsSearchingLocation(true);
     setLocationError(null);
     try {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        console.error('Google Maps API key is missing. Set VITE_GOOGLE_MAPS_API_KEY in .env');
+        setLocationError("Location suggestions are currently unavailable (missing API key).");
+        setLocationSuggestions([]);
+        return;
+      }
+
       let lat = userCoords?.lat;
       let lon = userCoords?.lon;
       
@@ -405,21 +413,55 @@ export function CreateReminder({
         }
       }
 
-      let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=3`;
+      const requestBody: any = {
+        textQuery: query,
+      };
+
       if (lat && lon) {
-         // Create a viewbox of roughly 20x20km around the user
-         const left = lon - 0.1;
-         const top = lat + 0.1;
-         const right = lon + 0.1;
-         const bottom = lat - 0.1;
-         url += `&viewbox=${left},${top},${right},${bottom}&bounded=1`;
+        requestBody.locationBias = {
+          circle: {
+            center: {
+              latitude: lat,
+              longitude: lon
+            },
+            radius: 20000.0 // 20km radius
+          }
+        };
       }
-      
-      const response = await fetchWithAuth(url);
+
+      const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Maps API error: ${response.status}`);
+      }
+
       const data = await response.json();
-      setLocationSuggestions(data);
+      
+      // Map Google Places data to match the UI's expected format ({ display_name: string })
+      const mappedSuggestions = (data.places || []).slice(0, 3).map((place: any) => {
+        const name = place.displayName?.text || '';
+        const address = place.formattedAddress || '';
+        return {
+          display_name: name && address ? `${name}, ${address}` : (name || address)
+        };
+      });
+
+      if (mappedSuggestions.length === 0) {
+        setLocationError("No location suggestions found.");
+      }
+
+      setLocationSuggestions(mappedSuggestions);
     } catch (error) {
       console.error('Error fetching locations:', error);
+      setLocationError("Failed to load location suggestions.");
       setLocationSuggestions([]);
     } finally {
       setIsSearchingLocation(false);
