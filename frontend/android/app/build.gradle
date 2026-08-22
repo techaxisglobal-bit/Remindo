@@ -11,8 +11,8 @@ android {
             sourceCompatibility JavaVersion.VERSION_17
             targetCompatibility JavaVersion.VERSION_17
         }
-        versionCode 10
-        versionName "9.1"
+        versionCode 11
+        versionName "9.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -22,10 +22,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file("release.keystore")
-            storePassword "remindo"
-            keyAlias "release"
-            keyPassword "remindo"
+            storeFile file(project.hasProperty('MYAPP_RELEASE_STORE_FILE') ? MYAPP_RELEASE_STORE_FILE : "release.keystore")
+            storePassword project.hasProperty('MYAPP_RELEASE_STORE_PASSWORD') ? MYAPP_RELEASE_STORE_PASSWORD : "dummy_password"
+            keyAlias project.hasProperty('MYAPP_RELEASE_KEY_ALIAS') ? MYAPP_RELEASE_KEY_ALIAS : "release"
+            keyPassword project.hasProperty('MYAPP_RELEASE_KEY_PASSWORD') ? MYAPP_RELEASE_KEY_PASSWORD : "dummy_password"
         }
     }
     buildTypes {

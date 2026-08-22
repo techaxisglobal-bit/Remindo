@@ -203,14 +203,8 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       return;
     }
     
-    if (formData.phoneNumber !== user.phoneNumber && !showOtpInput) {
-      // Need to verify phone first
-      handleSendOtp();
-      return;
-    }
-
     if (showOtpInput) {
-      toast.error('Please verify your new phone number first');
+      toast.error('Please complete phone verification first');
       return;
     }
 
@@ -238,8 +232,15 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       if (res.ok) {
         const data = await res.json();
         onUpdateUser(data.user);
-        toast.success('Profile updated successfully');
-        onClose();
+        
+        const phoneChanged = formData.phoneNumber !== (user.phoneNumber || '');
+        if (phoneChanged) {
+          toast.success('Profile updated. Please verify your new phone number.');
+          handleSendOtp();
+        } else {
+          toast.success('Profile updated successfully');
+          onClose();
+        }
       } else {
         const data = await res.json();
         toast.error(data.msg || 'Failed to update profile');
@@ -354,7 +355,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
                   placeholder="+1234567890"
                   disabled={showOtpInput}
                 />
-                {formData.phoneNumber !== user.phoneNumber && !showOtpInput && formData.phoneNumber && (
+                {formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput && formData.phoneNumber && (
                   <Button onClick={handleSendOtp} variant="secondary">Verify</Button>
                 )}
               </div>
@@ -428,7 +429,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
             disabled={(!hasChanges && !showOtpInput) || isSaving || usernameStatus === 'checking' || showOtpInput}
             className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (formData.phoneNumber !== user.phoneNumber && !showOtpInput ? 'Verify to Save' : 'Save Changes')}
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput ? 'Save & Verify Phone' : 'Save Changes')}
           </Button>
         </div>
       </motion.div>

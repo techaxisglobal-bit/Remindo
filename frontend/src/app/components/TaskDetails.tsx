@@ -840,7 +840,7 @@ export function TaskDetails({
                                       toast.success('Invitation cancelled');
                                       setLocalTask(prev => ({
                                         ...prev,
-                                        attendees: prev.attendees?.filter((a: any) => a.id !== attendeeId)
+                                        attendees: prev.attendees?.filter((a: any) => a.id !== attendeeId) as any
                                       }));
                                     } else {
                                       toast.error('Failed to cancel invitation');
@@ -910,7 +910,7 @@ export function TaskDetails({
                         notifyBefore: notifyBefore.join(',')
                       };
                       
-                      const success = await onUpdateTask(updatedTask);
+                      const success = (await onUpdateTask(updatedTask)) as unknown as boolean;
                       if (success === false) {
                         return; // Toast error is handled in App.tsx
                       }

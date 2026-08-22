@@ -111,7 +111,7 @@ interface DashboardProps {
   onToggleNotifications: () => void;
 }
 
-type View = 'settings' | 'pending' | 'completed' | 'calendar' | 'merchants' | 'merchantAdmin' | 'merchantForm';
+type View = 'home' | 'locations' | 'settings' | 'pending' | 'completed' | 'calendar' | 'merchants' | 'merchantAdmin' | 'merchantForm';
 type DragMode = 'none' | 'create' | 'move' | 'resize';
 
 // Constants
@@ -361,7 +361,7 @@ export function Dashboard({
           fetchWithAuth(`${API_BASE_URL}/api/auth/profile`, {
               method: 'PUT',
               headers: {
-                  'x-auth-token': token,
+                  'x-auth-token': localStorage.getItem('token') || '',
                   'Content-Type': 'application/json'
               },
               body: JSON.stringify({ fcmToken: token.value })

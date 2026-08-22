@@ -45,6 +45,11 @@ export interface Merchant {
   businessName: string;
   category: string;
   location: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  ownerName?: string;
   serviceArea?: string;
   description?: string;
   website?: string;

@@ -353,7 +353,7 @@ export function CreateReminder({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [userCoords, setUserCoords] = useState<{lat: number, lon: number} | null>(null);
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeout = useRef<any>(null);
 
   // Auto location suggestion effect
   useEffect(() => {
@@ -769,7 +769,7 @@ export function CreateReminder({
       };
 
       // Ensure onCreateTask returns a promise by casting or assuming it does
-      const success = await onCreateTask(newTask);
+      const success = (await onCreateTask(newTask)) as unknown as boolean;
       return success !== false; // if it returns explicitly false, we know it failed
     };
 

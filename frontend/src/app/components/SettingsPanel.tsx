@@ -19,7 +19,7 @@ interface SettingsPanelProps {
   onClose: () => void;
   notificationsEnabled: boolean;
   onNotificationChange: () => void;
-  onUpdateUser: (newName: string) => void;
+  onUpdateUser: (updatedData: Partial<UserType>) => void;
 }
 
 export function SettingsPanel({

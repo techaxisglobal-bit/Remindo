@@ -11,8 +11,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       duration={2000}
-      pauseWhenPageIsHidden={false}
-      pauseOnHover={false}
+
       style={
         {
           "--normal-bg": "var(--popover)",

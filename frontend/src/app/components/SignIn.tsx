@@ -412,20 +412,20 @@ export function SignIn({ onSignIn }: SignInProps) {
           }
         });
 
-        if (result.result && result.result.idToken) {
+        if (result.result && (result.result as any).idToken) {
           setLoading(true);
           const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/apple`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id_token: result.result.idToken,
-              code: result.result.authorizationCode,
-              user: result.profile?.name ? {
+              id_token: (result.result as any).idToken,
+              code: (result.result as any).authorizationCode,
+              user: (result as any).profile?.name ? {
                 name: {
-                  firstName: result.profile.givenName || result.profile.name,
-                  lastName: result.profile.familyName || ''
+                  firstName: (result as any).profile.givenName || (result as any).profile.name,
+                  lastName: (result as any).profile.familyName || ''
                 },
-                email: result.profile.email
+                email: (result as any).profile.email
               } : null
             })
           });
@@ -477,7 +477,7 @@ export function SignIn({ onSignIn }: SignInProps) {
             scopes: ['email', 'profile'],
           }
         });
-        const idToken = result.result.idToken;
+        const idToken = (result.result as any).idToken || (result.result as any).accessToken;
         
         const res = await fetchWithRetry(`${API_BASE_URL}/api/auth/google`, {
           method: 'POST',

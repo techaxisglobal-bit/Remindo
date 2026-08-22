@@ -79,9 +79,9 @@ export function MerchantAdmin() {
             if (res.ok) {
                 toast.success(`Merchant marked as ${status.toLowerCase()}`);
                 // Optimistic update
-                setMerchants(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+                setMerchants(prev => prev.map(m => m.id === id ? { ...m, status: status as Merchant['status'] } : m));
                 if (selectedMerchant?.id === id) {
-                    setSelectedMerchant(prev => prev ? { ...prev, status } : null);
+                    setSelectedMerchant(prev => prev ? { ...prev, status: status as Merchant['status'] } : null);
                 }
             } else {
                 toast.error(`Failed to ${actionName} merchant`);
@@ -165,7 +165,7 @@ export function MerchantAdmin() {
             const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
             const matchesCategory = categoryFilter === 'ALL' || m.category === categoryFilter;
             return matchesSearch && matchesStatus && matchesCategory;
-        }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     }, [merchants, searchTerm, statusFilter, categoryFilter]);
 
 
@@ -358,7 +358,7 @@ export function MerchantAdmin() {
                                                 )}
                                             </div>
                                             <span className="text-[11px] font-medium text-gray-400">
-                                                Added {format(new Date(merchant.createdAt), 'MMM d, yyyy')}
+                                                Added {format(new Date(merchant.createdAt || 0), 'MMM d, yyyy')}
                                             </span>
                                         </div>
 
@@ -379,7 +379,7 @@ export function MerchantAdmin() {
                                                 </Tooltip>
                                             )}
                                             <Tooltip content={merchant.isFeatured ? "Unfeature" : "Feature"}>
-                                                <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-black' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-black'}`}>
+                                                <button onClick={() => toggleFeature(merchant.id, merchant.isFeatured || false)} className={`p-2 rounded-lg transition-colors ${merchant.isFeatured ? 'text-purple-500 bg-purple-50 dark:bg-black' : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-black'}`}>
                                                     <Star className={`w-4 h-4 ${merchant.isFeatured ? 'fill-current' : ''}`} />
                                                 </button>
                                             </Tooltip>
@@ -468,7 +468,7 @@ export function MerchantAdmin() {
                                         <X className="w-4 h-4 text-orange-600" /> <span className={selectedMerchant.status === 'REJECTED' ? 'text-orange-600' : 'text-gray-700 dark:text-gray-300'}>Reject</span>
                                     </button>
                                     <button 
-                                        onClick={() => toggleFeature(selectedMerchant.id, selectedMerchant.isFeatured)}
+                                        onClick={() => toggleFeature(selectedMerchant.id, selectedMerchant.isFeatured || false)}
                                         className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-white dark:hover:bg-black hover:shadow-sm"
                                     >
                                         <Star className={`w-4 h-4 ${selectedMerchant.isFeatured ? 'text-purple-600 fill-current' : 'text-gray-400'}`} /> 
@@ -558,11 +558,11 @@ export function MerchantAdmin() {
                                         <div className="bg-white dark:bg-[#0a0a0a] rounded-xl border border-gray-200 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] p-4 flex flex-col gap-3 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Created On</span>
-                                                <span className="font-semibold text-gray-900 dark:text-white">{format(new Date(selectedMerchant.createdAt), 'PPpp')}</span>
+                                                <span className="font-semibold text-gray-900 dark:text-white">{format(new Date(selectedMerchant.createdAt || 0), 'PPpp')}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Last Updated</span>
-                                                <span className="font-semibold text-gray-900 dark:text-white">{format(new Date(selectedMerchant.updatedAt), 'PPpp')}</span>
+                                                <span className="font-semibold text-gray-900 dark:text-white">{format(new Date(selectedMerchant.updatedAt || 0), 'PPpp')}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Owner ID</span>
