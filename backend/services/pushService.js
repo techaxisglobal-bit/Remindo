@@ -77,7 +77,8 @@ const sendPushNotification = async (target, payload) => {
                             payload: {
                                 aps: {
                                     sound: 'default',
-                                    badge: 1
+                                    badge: 1,
+                                    'content-available': 1
                                 }
                             }
                         },
