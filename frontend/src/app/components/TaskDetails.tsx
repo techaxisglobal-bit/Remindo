@@ -958,9 +958,9 @@ export function TaskDetails({
             ) : (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => { onDeleteTask(task.id); onClose(); }}
-                  className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black text-sm font-bold h-auto py-4 px-4 rounded-xl"
+                  className="text-red-400 border-red-400/50 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 text-sm font-bold border-2 rounded-2xl h-auto py-4 px-6 transition-all"
                 >
                   Delete
                 </Button>
@@ -968,7 +968,7 @@ export function TaskDetails({
                   <Button
                     variant="outline"
                     onClick={() => { if (!task.completed) { onToggleComplete(task.id); onClose(); } }}
-                    className={`text-sm font-bold border-2 rounded-2xl h-auto py-4 px-6 transition-all ${task.completed ? 'text-green-500 border-green-500 cursor-default bg-green-50/50' : 'text-gray-400 border-gray-200 hover:border-[#e0b596]'}`}
+                    className={`text-sm font-bold border-2 rounded-2xl h-auto py-4 px-6 transition-all ${task.completed ? 'text-green-500 border-green-500 cursor-default bg-green-50/50' : 'text-gray-400 border-gray-200 dark:border-white/10 hover:border-[#e0b596] hover:text-[#e0b596]'}`}
                   >
                     {task.completed ? 'Completed' : 'Mark Done'}
                   </Button>

@@ -346,6 +346,14 @@ export function CreateReminder({
   const [showNotifyDropdown, setShowNotifyDropdown] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
+  const handleCloseAttempt = () => {
+    if (title.trim() || description.trim()) {
+      setShowCloseConfirm(true);
+    } else if (onClose) {
+      onClose();
+    }
+  };
+
   const [location, setLocation] = useState('');
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);

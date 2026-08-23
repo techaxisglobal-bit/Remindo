@@ -64,5 +64,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Remindo uses your location to intelligently suggest relevant places for your reminders.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Remindo uses your location to intelligently suggest relevant places for your reminders.</string>
 </dict>
 </plist>
