@@ -115,17 +115,16 @@ export default function App() {
   const registerPush = async () => {
     if (Capacitor.isNativePlatform()) {
       try {
-        let permStatus = await FirebaseMessaging.checkPermissions();
-
-        if (permStatus.receive === 'prompt') {
-          permStatus = await FirebaseMessaging.requestPermissions();
-        }
+        // Forcefully request permissions without checking first, as checkPermissions can sometimes hang or fail on clean installs
+        let permStatus = await FirebaseMessaging.requestPermissions();
 
         if (permStatus.receive !== 'granted') {
           console.warn('Push notification permissions denied by user');
-          toast.warning('Push notification permissions are required.');
+          toast.warning(`Push permissions are: ${permStatus.receive}`);
           return;
         }
+
+        toast.success('Push permissions granted natively!');
 
         // Instantly synchronize if we already have a cached token in localStorage!
         const cachedToken = localStorage.getItem('fcmToken');
@@ -152,8 +151,9 @@ export default function App() {
         // Request token to trigger tokenReceived
         await FirebaseMessaging.getToken();
 
-      } catch (err) {
-        console.error('Native push registration failed:', err);
+      } catch (err: any) {
+        console.error('Failed to register for push notifications:', err);
+        toast.error(`Push Setup Failed: ${err?.message || err}`);
       }
     } else {
       if (!('serviceWorker' in navigator)) return;
