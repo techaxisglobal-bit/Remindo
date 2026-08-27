@@ -665,6 +665,57 @@ return (
           </div>
         </div>
 
+        {/* Notify Before Row */}
+        <div className="relative mt-2">
+          <button
+            type="button"
+            onClick={() => setShowNotifyDropdown(!showNotifyDropdown)}
+            className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#0a0a0a] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm hover:border-[#e0b596]/30 transition-all group"
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
+              <span className="text-[13px] font-bold">
+                {getNotifyBeforeLabel(notifyBefore)}
+              </span>
+            </div>
+            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showNotifyDropdown ? 'rotate-180' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {showNotifyDropdown && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifyDropdown(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: -5, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                  className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-2xl shadow-2xl z-[100] overflow-hidden"
+                >
+                  <div className="p-2 space-y-1">
+                    {NOTIFICATION_OPTIONS.map((option) => {
+                      const isSelected = notifyBefore.includes(option.value);
+                      return (
+                        <div
+                          key={option.value}
+                          className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-black ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
+                          onClick={() => handleToggleNotifyBefore(option.value)}
+                        >
+                          <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
+                            {option.label}
+                          </span>
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
+                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
         {/* Attendees Row */}
         <div className="flex flex-col gap-2 mt-2 relative">
           <div className="flex flex-wrap items-center gap-2 bg-gray-50/80 dark:bg-[#0a0a0a] p-2 rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm focus-within:border-[#e0b596]/40 focus-within:ring-1 focus-within:ring-[#e0b596]/10 transition-all min-h-[44px] relative">
@@ -956,55 +1007,7 @@ return (
                   )}
                 </AnimatePresence>
               </div>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowNotifyDropdown(!showNotifyDropdown)}
-                  className="flex items-center justify-between w-full bg-gray-50 dark:bg-[#0a0a0a] px-3 py-2 rounded-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm hover:border-[#e0b596]/30 transition-all group"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-[#e0b596]" />
-                    <span className="text-[13px] font-bold">
-                      {getNotifyBeforeLabel(notifyBefore)}
-                    </span>
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showNotifyDropdown ? 'rotate-180' : ''}`} />
-                </button>
 
-                <AnimatePresence>
-                  {showNotifyDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowNotifyDropdown(false)} />
-                      <motion.div
-                        initial={{ opacity: 0, y: 5, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 5, scale: 0.98 }}
-                        className="absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] rounded-2xl shadow-2xl z-[100] overflow-hidden"
-                      >
-                        <div className="p-2 space-y-1">
-                          {NOTIFICATION_OPTIONS.map((option) => {
-                            const isSelected = notifyBefore.includes(option.value);
-                            return (
-                              <div
-                                key={option.value}
-                                className={`flex items-center justify-between p-2 rounded-xl transition-colors cursor-pointer group hover:bg-gray-100 dark:hover:bg-black ${isSelected ? 'bg-[#e0b596]/10' : ''}`}
-                                onClick={() => handleToggleNotifyBefore(option.value)}
-                              >
-                                <span className={`text-[12px] font-bold ${isSelected ? 'text-[#e0b596]' : 'text-gray-500 dark:text-gray-400'}`}>
-                                  {option.label}
-                                </span>
-                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-[#e0b596] border-[#e0b596]' : 'border-gray-300 dark:border-gray-600'}`}>
-                                  {isSelected && <Check className="w-3 h-3 text-white" />}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
 
               <div className="flex items-center justify-between gap-2 bg-gray-50/50 dark:bg-[#0a0a0a] px-3 py-2 rounded-2xl border border-gray-100 dark:border-transparent dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm group hover:border-[#e0b596]/30 transition-all cursor-pointer" onClick={() => setIsSpecial(!isSpecial)}>
                 <div className="flex items-center gap-2">
