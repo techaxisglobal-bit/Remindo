@@ -227,36 +227,7 @@ router.put('/:id', auth, async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        // Check if date is changing - if so, create a new task instead of updating
-        if (date !== undefined && date !== task.date) {
-            const newTask = await Task.create({
-                userId: req.user.id,
-                title: title !== undefined ? title : task.title,
-                description: description !== undefined ? description : task.description,
-                category: category !== undefined ? category : task.category,
-                date: date,
-                time: time !== undefined ? time : task.time,
-                duration: duration !== undefined ? duration : task.duration,
-                location: location !== undefined ? location : task.location,
-                isAllDay: isAllDay !== undefined ? isAllDay : task.isAllDay,
-                isSpecial: isSpecial !== undefined ? isSpecial : task.isSpecial,
-                specialType: specialType !== undefined ? specialType : task.specialType,
-                notifyAt: notifyAt !== undefined ? notifyAt : task.notifyAt,
-                notifyBefore: notifyBefore !== undefined ? sanitizeNotifyBefore(notifyBefore) : task.notifyBefore,
-                completed: false, // New task should be fresh
-            });
-
-            await ActivityLog.create({
-                userId: req.user.id,
-                action: 'TASK_DUPLICATED',
-                details: { originalTaskId: task.id, newTaskId: newTask.id, title: newTask.title },
-                ipAddress: req.ip
-            });
-
-            return res.json(newTask);
-        }
-
-        // Update fields (normal update on same date)
+        if (date !== undefined) task.date = date;
         let notifyBeforeChanged = false;
         if (notifyBefore !== undefined) {
             const sanitized = sanitizeNotifyBefore(notifyBefore);

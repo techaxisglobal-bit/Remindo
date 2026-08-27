@@ -294,6 +294,7 @@ export function TaskDetails({
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [localTask, setLocalTask] = useState<Task>(task);
   const [isResending, setIsResending] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (isEditing) return;
@@ -883,75 +884,80 @@ export function TaskDetails({
                     Delete
                   </Button>
                   <Button
+                    disabled={isSaving}
                     onClick={async () => {
-                      const start = parse(`${startDate} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
-                      const end = parse(`${endDate} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                      if (isSaving) return;
+                      setIsSaving(true);
+                      try {
+                        const start = parse(`${startDate} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                        const end = parse(`${endDate} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
 
-                      const now = new Date();
-                      if (isBefore(start, subMinutes(now, 1))) {
-                        toast.error('Cannot update task to the past');
-                        return;
-                      }
+                        const now = new Date();
+                        if (isBefore(start, subMinutes(now, 1))) {
+                          toast.error('Cannot update task to the past');
+                          return;
+                        }
 
-                      const finalDuration = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60));
-                      const metaData = JSON.stringify({ duration: finalDuration, selectedDays, endDate, endTime, isSpecial });
-                      const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
-                      
-                      const updatedTask = {
-                        ...localTask,
-                        title,
-                        description: finalDescription,
-                        date: startDate,
-                        time: startTime,
-                        duration: finalDuration,
-                        category: localTask.category || 'general',
-                        location: localTask.location || '',
-                        isSpecial,
-                        notifyBefore: notifyBefore.join(',')
-                      };
-                      
-                      const success = (await onUpdateTask(updatedTask)) as unknown as boolean;
-                      if (success === false) {
-                        return; // Toast error is handled in App.tsx
-                      }
+                        const finalDuration = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60));
+                        const metaData = JSON.stringify({ duration: finalDuration, selectedDays, endDate, endTime, isSpecial });
+                        const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
+                        
+                        const updatedTask = {
+                          ...localTask,
+                          title,
+                          description: finalDescription,
+                          date: startDate,
+                          time: startTime,
+                          duration: finalDuration,
+                          category: localTask.category || 'general',
+                          location: localTask.location || '',
+                          isSpecial,
+                          notifyBefore: notifyBefore.join(',')
+                        };
+                        
+                        const success = (await onUpdateTask(updatedTask)) as unknown as boolean;
+                        if (success === false) {
+                          return; // Toast error is handled in App.tsx
+                        }
 
-                      if (selectedDays.length > 0 && onCreateTask) {
-                        const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
-                        const endRange = endOfMonth(startRange);
-                        const allDays = eachDayOfInterval({ start: startRange, end: endRange });
+                        if (selectedDays.length > 0 && onCreateTask) {
+                          const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
+                          const endRange = endOfMonth(startRange);
+                          const allDays = eachDayOfInterval({ start: startRange, end: endRange });
 
-                        for (const day of allDays) {
-                          const dayIndex = getDay(day);
-                          const dayStr = format(day, 'yyyy-MM-dd');
-                          
-                          // Avoid duplicate creation for the currently edited date
-                          if (selectedDays.includes(dayIndex) && dayStr !== startDate) {
-                            // Check if a task with same title and date exists to prevent double creation? 
-                            // Since tasks are independent, we just spawn them.
-                            const newStart = parse(`${dayStr} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
-                            const newEnd = parse(`${dayStr} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
-                            const newDuration = Math.max(0, (newEnd.getTime() - newStart.getTime()) / (1000 * 60));
-                            const newMeta = JSON.stringify({ duration: newDuration, selectedDays, endDate: dayStr, endTime, isSpecial });
-                            const newDesc = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${newMeta} -->` : `<!-- metadata: ${newMeta} -->`;
+                          for (const day of allDays) {
+                            const dayIndex = getDay(day);
+                            const dayStr = format(day, 'yyyy-MM-dd');
                             
-                            onCreateTask({
-                              ...updatedTask,
-                              id: (Date.now() + Math.random()).toString(),
-                              date: dayStr,
-                              description: newDesc,
-                              duration: newDuration,
-                            });
+                            // Avoid duplicate creation for the currently edited date
+                            if (selectedDays.includes(dayIndex) && dayStr !== startDate) {
+                              const newStart = parse(`${dayStr} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                              const newEnd = parse(`${dayStr} ${endTime}`, 'yyyy-MM-dd HH:mm', new Date());
+                              const newDuration = Math.max(0, (newEnd.getTime() - newStart.getTime()) / (1000 * 60));
+                              const newMeta = JSON.stringify({ duration: newDuration, selectedDays, endDate: dayStr, endTime, isSpecial });
+                              const newDesc = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${newMeta} -->` : `<!-- metadata: ${newMeta} -->`;
+                              
+                              onCreateTask({
+                                ...updatedTask,
+                                id: (Date.now() + Math.random()).toString(),
+                                date: dayStr,
+                                description: newDesc,
+                                duration: newDuration,
+                              });
+                            }
                           }
                         }
-                      }
 
-                      toast.success('Changes saved');
-                      setIsEditing(false);
-                      onClose();
+                        toast.success('Changes saved');
+                        setIsEditing(false);
+                        onClose();
+                      } finally {
+                        setIsSaving(false);
+                      }
                     }}
-                    className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-sm font-bold px-8 py-4 h-auto rounded-2xl shadow-lg transition-all"
+                    className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-sm font-bold px-8 py-4 h-auto rounded-2xl shadow-lg transition-all flex items-center justify-center disabled:opacity-70"
                   >
-                    Save Changes
+                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
                   </Button>
                 </div>
               </>
