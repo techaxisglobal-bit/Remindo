@@ -125,8 +125,6 @@ export default function App() {
           return;
         }
 
-        toast.success('Push permissions granted natively!');
-
         // Instantly synchronize if we already have a cached token in localStorage!
         const cachedToken = localStorage.getItem('fcmToken');
         if (cachedToken) {
