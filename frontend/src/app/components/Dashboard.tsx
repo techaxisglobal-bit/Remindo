@@ -158,7 +158,7 @@ export function Dashboard({
   const [showFilters, setShowFilters] = useState(false);
   const [showSpecialsOnly, setShowSpecialsOnly] = useState(false);
   const [showViewOptions, setShowViewOptions] = useState(false);
-  const [mobileViewMode, setMobileViewMode] = useState<'schedule' | 'day'>('schedule');
+  const [mobileViewMode, setMobileViewMode] = useState<'schedule' | 'day'>('day');
   const [expandedScheduleDays, setExpandedScheduleDays] = useState<Record<string, boolean>>({});
   const [isMobileCalendarExpanded, setIsMobileCalendarExpanded] = useState(false);
   const [showMobileMiniCalendar, setShowMobileMiniCalendar] = useState(false);
