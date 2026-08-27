@@ -8,6 +8,7 @@ import { Task, User } from "@/app/types";
 import { toast } from "sonner";
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { tokenManager } from '../utils/tokenManager';
 import { fetchWithAuth } from '../utils/apiClient';
 
@@ -139,6 +140,13 @@ export default function App() {
           await saveFCMTokenToBackend(event.token);
         });
 
+        const { token } = await FirebaseMessaging.getToken();
+        if (token) {
+          console.log('Got FCM token from getToken():', token);
+          localStorage.setItem('fcmToken', token);
+          await saveFCMTokenToBackend(token);
+        }
+
         await FirebaseMessaging.addListener('notificationReceived', (event) => {
           console.log('Foreground push notification received:', event.notification);
           toast.info(`${event.notification.title}: ${event.notification.body || ''}`);
@@ -148,8 +156,13 @@ export default function App() {
           console.log('Push notification click action performed:', event.notification);
         });
 
-        // Request token to trigger tokenReceived
-        await FirebaseMessaging.getToken();
+        await LocalNotifications.addListener('localNotificationReceived', (notification) => {
+          console.log('Local notification fired:', notification);
+        });
+
+        await LocalNotifications.addListener('localNotificationActionPerformed', (notificationAction) => {
+          console.log('Local notification action performed:', notificationAction);
+        });
 
       } catch (err: any) {
         console.error('Failed to register for push notifications:', err);
@@ -272,6 +285,100 @@ export default function App() {
     }
   };
 
+  const generateNotificationId = (taskId: string, offset: number) => {
+    let hash = 0;
+    const str = `${taskId}-${offset}`;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  const scheduleLocalNotifications = async (task: Task) => {
+    if (!Capacitor.isNativePlatform() || !notificationsEnabled) return;
+    try {
+      const permStatus = await LocalNotifications.checkPermissions();
+      if (permStatus.display !== 'granted') {
+        const reqStatus = await LocalNotifications.requestPermissions();
+        if (reqStatus.display !== 'granted') return;
+      }
+      
+      if (!task.date || !task.time) return;
+      
+      const taskDate = new Date(`${task.date}T${task.time}:00`);
+      
+      const notificationsToSchedule = [];
+      const cancelIds = [];
+      
+      const taskId = String(task.id || (task as any)._id);
+      cancelIds.push({ id: generateNotificationId(taskId, 0) });
+      [5, 10, 15, 30, 60, 1440].forEach(m => {
+         cancelIds.push({ id: generateNotificationId(taskId, m) });
+      });
+      await LocalNotifications.cancel({ notifications: cancelIds });
+      
+      if (task.completed) {
+         console.log(`Task completed, cancelled notifications for ${taskId}`);
+         return;
+      }
+      
+      if (taskDate.getTime() > Date.now()) {
+        notificationsToSchedule.push({
+          id: generateNotificationId(taskId, 0),
+          title: task.title,
+          body: 'This task is starting now!',
+          schedule: { at: taskDate },
+          sound: 'default',
+          extra: { taskId }
+        });
+      }
+      
+      if (task.notifyBefore) {
+        const minutesList = String(task.notifyBefore)
+            .split(',')
+            .map(m => parseInt(m.trim(), 10))
+            .filter(m => !isNaN(m) && m > 0);
+            
+        for (const minute of minutesList) {
+          const notifyDate = new Date(taskDate.getTime() - minute * 60000);
+          if (notifyDate.getTime() > Date.now()) {
+             notificationsToSchedule.push({
+                id: generateNotificationId(taskId, minute),
+                title: task.title,
+                body: `Starting in ${minute} minutes`,
+                schedule: { at: notifyDate },
+                sound: 'default',
+                extra: { taskId }
+             });
+          }
+        }
+      }
+      
+      if (notificationsToSchedule.length > 0) {
+        await LocalNotifications.schedule({ notifications: notificationsToSchedule });
+        console.log(`Scheduled ${notificationsToSchedule.length} local notifications for task ${taskId}:`, notificationsToSchedule.map(n => n.schedule?.at));
+      }
+    } catch (err) {
+      console.error('Failed to schedule local notifications:', err);
+    }
+  };
+
+  const cancelLocalNotifications = async (taskId: string) => {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      const cancelIds = [];
+      cancelIds.push({ id: generateNotificationId(taskId, 0) });
+      [5, 10, 15, 30, 60, 1440].forEach(m => {
+         cancelIds.push({ id: generateNotificationId(taskId, m) });
+      });
+      await LocalNotifications.cancel({ notifications: cancelIds });
+      console.log(`Cancelled local notifications for task ${taskId}`);
+    } catch (err) {
+      console.error('Failed to cancel local notifications:', err);
+    }
+  };
+
   const handleAddTask = async (task: Task): Promise<boolean> => {
     // Optimistic UI: Add task to state immediately with temporary ID
     const tempId = task.id || `temp-${Date.now()}`;
@@ -290,6 +397,7 @@ export default function App() {
         const newTask = await res.json();
         // Replace the temporary task with the real one from the server
         setTasks(prev => prev.map(t => (t.id === tempId || (t as any)._id === tempId) ? newTask : t));
+        scheduleLocalNotifications(newTask);
         return true;
       } else {
         // Rollback on failure
@@ -317,6 +425,7 @@ export default function App() {
       });
       if (res.ok) {
         setTasks(prev => prev.filter(task => (task as any)._id !== id && task.id !== id));
+        cancelLocalNotifications(id);
       }
     } catch (err) {
       console.error('Failed to delete task:', err);
@@ -339,6 +448,11 @@ export default function App() {
         const updatedTask = await res.json();
         setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? updatedTask : t));
         toast.success(updatedTask.completed ? "Task completed! 🎉" : "Task marked as pending");
+        if (updatedTask.completed) {
+           cancelLocalNotifications(id);
+        } else {
+           scheduleLocalNotifications(updatedTask);
+        }
       }
     } catch (err) {
       console.error('Failed to toggle task:', err);
@@ -372,9 +486,12 @@ export default function App() {
             const filtered = prev.filter(t => (t as any)._id !== id && t.id !== id);
             return [...filtered, savedTask];
           });
+          cancelLocalNotifications(id);
+          scheduleLocalNotifications(savedTask);
         } else {
           // Sync with server version
           setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? savedTask : t));
+          scheduleLocalNotifications(savedTask);
         }
         return true;
       } else {
