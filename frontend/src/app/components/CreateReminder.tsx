@@ -539,13 +539,7 @@ export function CreateReminder({
       return;
     }
 
-    // Validation: Block creating tasks in the past
-    const taskDateTime = parse(`${startDate} ${startTime}`, 'yyyy-MM-dd HH:mm', new Date());
-    const now = new Date();
-    if (isBefore(taskDateTime, now)) {
-      toast.error('Cannot create a task in the past! Please select a future date or time.');
-      return;
-    }
+    // Removed past time validation so users can log past tasks
 
     const startRange = parse(startDate, 'yyyy-MM-dd', new Date());
     const endRange = endOfMonth(startRange);

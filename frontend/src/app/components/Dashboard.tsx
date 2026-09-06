@@ -543,16 +543,7 @@ export function Dashboard({
       const mins = startMin % 60;
       const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 
-      // Validate past time (with 1 min buffer)
-      const clickedDateTime = setMinutes(setHours(startOfDay(dayDate), hours), mins);
-      if (isBefore(clickedDateTime, subMinutes(new Date(), 1))) {
-        toast.error('Cannot create tasks in the past');
-        setDragMode('none');
-        setDragStart(null);
-        setDragCurrent(null);
-        touchStartPos.current = null;
-        return;
-      }
+      // Allow creating tasks in the past
 
       setCreateModal({
         isOpen: true,
