@@ -2186,9 +2186,9 @@ export function Dashboard({
           >
             {[
               { id: 'calendar', icon: Home, label: 'Home' },
-              { id: 'merchants', icon: BriefcaseBusiness, label: 'Explore Businesses' },
-              { id: 'add', icon: Plus, label: 'Add', isSpecial: true },
               { id: 'groups', icon: UsersRound, label: 'Friends' },
+              { id: 'add', icon: Plus, label: 'Add', isSpecial: true },
+              { id: 'merchants', icon: BriefcaseBusiness, label: 'Explore Businesses' },
               { id: 'settings', icon: SlidersHorizontal, label: 'Settings', isAction: true }
             ].map((item) => {
               if (item.isSpecial) {
