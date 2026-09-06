@@ -1333,7 +1333,7 @@ export function Dashboard({
                     {/* Mobile View Mode Toggle */}
                     <div className="px-4 py-2.5 flex items-center justify-center bg-white/95 dark:bg-black backdrop-blur-md z-10">
                       <div className="flex w-full max-w-[240px] bg-gray-100/80 dark:bg-white/5 p-1 rounded-2xl shadow-inner border border-gray-200/60 dark:border-transparent">
-                        {['schedule', 'day'].map((mode) => {
+                        {['day', 'schedule'].map((mode) => {
                           const isActive = mobileViewMode === mode;
                           return (
                             <button
