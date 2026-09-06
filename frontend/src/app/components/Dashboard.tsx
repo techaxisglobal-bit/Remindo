@@ -568,7 +568,8 @@ export function Dashboard({
         const dayDiff = dragCurrent.dayIndex - dragStart.dayIndex;
 
         // Helper to parse "HH:mm"
-        const [h, m] = task.time!.split(':').map(Number);
+        const taskTime = task.time || '00:00';
+        const [h, m] = taskTime.split(':').map(Number);
         const originalMins = h * 60 + m;
         let newMins = originalMins + timeDiff;
         // Clamp to 0-24h
@@ -578,7 +579,7 @@ export function Dashboard({
         newMins = snapToGrid(newMins);
 
         // Calculate new date
-        const originalDate = new Date(task.date);
+        const originalDate = task.date ? new Date(task.date) : new Date();
         const newDate = addDays(originalDate, dayDiff);
 
         // Format
@@ -590,6 +591,7 @@ export function Dashboard({
         // Check if actually moved
         const hasMoved = task.date !== newDateStr || task.time !== newTimeStr;
         if (!hasMoved) {
+          document.body.style.overflow = '';
           setDragMode('none');
           setDragStart(null);
           setDragCurrent(null);
@@ -601,12 +603,14 @@ export function Dashboard({
         const newDateTime = setMinutes(setHours(startOfDay(newDate), newH), newM);
         const now = new Date();
         if (isToday(newDate) && isBefore(newDateTime, subMinutes(now, 1))) {
+          document.body.style.overflow = '';
           setInlineWarning('Tasks can only be moved to a future time');
           setActiveTaskId(null);
           setDragMode('none');
           return;
         } else if (!isToday(newDate) && isBefore(newDate, startOfDay(now))) {
           // Prevent moving to entirely past days as well
+          document.body.style.overflow = '';
           setInlineWarning('Tasks can only be moved to a future time');
           setActiveTaskId(null);
           setDragMode('none');
@@ -621,12 +625,13 @@ export function Dashboard({
       const task = tasks.find(t => String(t.id) === String(activeTaskId) || String((t as any)._id) === String(activeTaskId));
       if (task) {
         const endMins = dragCurrent.time;
-        const [h, m] = task.time!.split(':').map(Number);
+        const taskTime = task.time || '00:00';
+        const [h, m] = taskTime.split(':').map(Number);
         const startMins = h * 60 + m;
         const newDuration = Math.max(15, endMins - startMins);
 
         // Final validation for resizing on today
-        const taskDate = new Date(task.date);
+        const taskDate = task.date ? new Date(task.date) : new Date();
         const endDateTime = setMinutes(setHours(startOfDay(taskDate), Math.floor(endMins / 60)), endMins % 60);
         if (isToday(taskDate) && isBefore(endDateTime, subMinutes(new Date(), 1))) {
           toast.error('Task cannot end in the past');
