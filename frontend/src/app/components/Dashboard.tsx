@@ -569,7 +569,9 @@ export function Dashboard({
 
         // Helper to parse "HH:mm"
         const taskTime = task.time || '00:00';
-        const [h, m] = taskTime.split(':').map(Number);
+        const parts = taskTime.split(':');
+        const h = Number(parts[0]) || 0;
+        const m = Number(parts[1]) || 0;
         const originalMins = h * 60 + m;
         let newMins = originalMins + timeDiff;
         // Clamp to 0-24h
@@ -626,7 +628,9 @@ export function Dashboard({
       if (task) {
         const endMins = dragCurrent.time;
         const taskTime = task.time || '00:00';
-        const [h, m] = taskTime.split(':').map(Number);
+        const parts = taskTime.split(':');
+        const h = Number(parts[0]) || 0;
+        const m = Number(parts[1]) || 0;
         const startMins = h * 60 + m;
         const newDuration = Math.max(15, endMins - startMins);
 
@@ -1621,7 +1625,9 @@ export function Dashboard({
                           
                           const timeDiff = dragCurrent.time - dragStart.time;
                           const taskTime = task.time || '00:00';
-                          const [h, m] = taskTime.split(':').map(Number);
+                          const parts = taskTime.split(':');
+                          const h = Number(parts[0]) || 0;
+                          const m = Number(parts[1]) || 0;
                           const newMins = snapToGrid(Math.max(0, h * 60 + m + timeDiff));
                           const newY = (newMins / 60) * HOUR_HEIGHT;
                           
