@@ -5,7 +5,7 @@ import { Button } from '@/app/components/ui/button';
 import { Label } from '@/app/components/ui/label';
 import { Switch } from '@/app/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
-import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown } from 'lucide-react';
+import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown, Timer, CheckCircle2, ListTodo, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
 import { SocialLogin } from '@capgo/capacitor-social-login';
@@ -20,6 +20,7 @@ interface SettingsPanelProps {
   notificationsEnabled: boolean;
   onNotificationChange: () => void;
   onUpdateUser: (updatedData: Partial<UserType>) => void;
+  onViewTasks?: (view: 'pending' | 'completed') => void;
 }
 
 export function SettingsPanel({
@@ -28,6 +29,7 @@ export function SettingsPanel({
   notificationsEnabled,
   onNotificationChange,
   onUpdateUser,
+  onViewTasks,
 }: SettingsPanelProps) {
 
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -198,6 +200,48 @@ export function SettingsPanel({
                   <span>{user.email}</span>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* Task Management Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <ListTodo className="w-4 h-4 text-gray-500" />
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tasks</h3>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => onViewTasks && onViewTasks('pending')}
+                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-black transition-all duration-300 border border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/30 text-orange-500 shadow-inner ring-1 ring-orange-500/20">
+                    <Timer className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <Label className="font-medium text-gray-900 dark:text-white block cursor-pointer">Pending Tasks</Label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">View your upcoming or incomplete tasks</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+              </button>
+
+              <button
+                onClick={() => onViewTasks && onViewTasks('completed')}
+                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-white/40 dark:hover:bg-black transition-all duration-300 border border-transparent hover:border-white/20 hover:shadow-lg hover:backdrop-blur-md group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-green-50 dark:bg-green-950/30 text-green-500 shadow-inner ring-1 ring-green-500/20">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <Label className="font-medium text-gray-900 dark:text-white block cursor-pointer">Completed Tasks</Label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">View tasks you have finished</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+              </button>
             </div>
           </section>
 

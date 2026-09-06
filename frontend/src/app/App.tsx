@@ -344,7 +344,7 @@ export default function App() {
              notificationsToSchedule.push({
                 id: generateNotificationId(taskId, minute),
                 title: task.title,
-                body: `Starting in ${minute} minutes`,
+                body: `It’s time for ${task.title}`,
                 schedule: { at: notifyDate },
                 sound: 'default',
                 extra: { taskId }

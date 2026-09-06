@@ -862,29 +862,6 @@ export function Dashboard({
             <TooltipContent side="right" hideArrow>Home</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveView('pending')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'pending' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
-              >
-                <Hourglass className="w-6 h-6" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" hideArrow>Pending</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActiveView('completed')}
-                className={`group relative p-3 rounded-xl transition-all ${activeView === 'completed' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
-              >
-                <Check className="w-6 h-6" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" hideArrow>Completed</TooltipContent>
-          </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -987,6 +964,17 @@ export function Dashboard({
           className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-black sticky top-0 z-40`}
           style={isMobile ? { paddingTop: 'max(env(safe-area-inset-top), 16px)' } : {}}
         >
+          {/* Floating Convex Add Button */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 z-[60] pt-4 md:pt-6 pointer-events-none">
+            <button
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-gradient-to-b from-[#f0d6b6] to-[#C9A878] dark:from-[#d4b081] dark:to-[#ab8a5f] text-[#1f1f1f] font-bold shadow-[0_15px_30px_-5px_rgba(201,168,120,0.6),inset_0_4px_10px_rgba(255,255,255,0.7),inset_0_-4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-5px_rgba(201,168,120,0.8),inset_0_4px_10px_rgba(255,255,255,0.8),inset_0_-4px_10px_rgba(0,0,0,0.2)] transform hover:-translate-y-1 active:scale-95 transition-all duration-300 pointer-events-auto"
+              onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
+            >
+              <Plus className="w-5 h-5 stroke-[2.5]" />
+              <span className="text-sm">Add</span>
+            </button>
+          </div>
+
           {isMobile ? (
             /* --- Mobile Header Layout --- */
             <div className="flex flex-col gap-3">
@@ -1133,14 +1121,7 @@ export function Dashboard({
                     </AnimatePresence>
                   </div>
 
-                  {/* Add Button */}
-                  <button
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e0b596]/20 dark:bg-[#0a0a0a] text-[#8c5a3c] dark:text-[#e0b596] rounded-[12px] text-[13px] font-bold active:scale-95 transition-transform"
-                    onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add</span>
-                  </button>
+
                 </div>
               </div>
             </div>
@@ -1252,13 +1233,7 @@ export function Dashboard({
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-b from-[#e0b596] to-[#c69472] text-[#1f1f1f] shadow-lg rounded-xl text-sm font-semibold hover:scale-105 transition-transform"
-                    onClick={() => setCreateModal({ isOpen: true, duration: 30 })}
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add reminder</span>
-                  </button>
+
 
                   <button
                     onClick={() => { setShowNotifications(true); setUnreadCount(0); }}
@@ -2213,8 +2188,6 @@ export function Dashboard({
           >
             {[
               { id: 'calendar', icon: Home, label: 'Home' },
-              { id: 'pending', icon: Timer, label: 'Pending' },
-              { id: 'completed', icon: CheckCircle2, label: 'Completed' },
               { id: 'merchants', icon: BriefcaseBusiness, label: 'Explore Businesses' },
               { id: 'groups', icon: UsersRound, label: 'Groups', isAction: true },
               { id: 'settings', icon: SlidersHorizontal, label: 'Settings', isAction: true }
@@ -2228,7 +2201,7 @@ export function Dashboard({
                       else if (item.id === 'groups') setIsGroupsModalOpen(true);
                       else setActiveView(item.id as View);
                   }}
-                  className={`flex flex-col items-center justify-center w-1/5 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
+                  className={`flex flex-col items-center justify-center w-1/4 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
                 >
                   {isActive && !item.isAction && (
                     <motion.div 
@@ -2289,6 +2262,10 @@ export function Dashboard({
                 onNotificationChange={onToggleNotifications}
                 onClose={() => setShowSettings(false)}
                 onUpdateUser={onUpdateUser}
+                onViewTasks={(view) => {
+                  setActiveView(view);
+                  setShowSettings(false);
+                }}
               />
             )
           }

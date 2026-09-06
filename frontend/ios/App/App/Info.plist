@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Remindo</string>
+        <string>Milli</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>Milli</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -65,8 +65,8 @@
 		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Remindo uses your location to intelligently suggest relevant places for your reminders.</string>
+	<string>Milli uses your location to intelligently suggest relevant places for your reminders.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Remindo uses your location to intelligently suggest relevant places for your reminders.</string>
+	<string>Milli uses your location to intelligently suggest relevant places for your reminders.</string>
 </dict>
 </plist>

@@ -543,7 +543,7 @@ export function SignIn({ onSignIn }: SignInProps) {
     if (signupOtpStep) return `We sent a 6-digit code to ${email}`;
     if (forgotStep === 'email') return 'Enter your email to receive a reset code';
     if (forgotStep === 'otp') return `Enter the code sent to ${email}`;
-    if (isSignUp) return 'Get started with RemindMe';
+    if (isSignUp) return 'Get started with Milli';
     return 'Sign in to your account';
   };
 
@@ -838,7 +838,7 @@ export function SignIn({ onSignIn }: SignInProps) {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6">
-          RemindMe &copy; {new Date().getFullYear()}
+          Milli &copy; {new Date().getFullYear()}
         </p>
       </motion.div>
     </div>
