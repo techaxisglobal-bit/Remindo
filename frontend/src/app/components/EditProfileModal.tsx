@@ -404,7 +404,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
                   <SelectTrigger className="w-[90px] shrink-0">
                     <SelectValue placeholder="+91" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[70] bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                     <SelectItem value="+1">+1 (US)</SelectItem>
                     <SelectItem value="+91">+91 (IN)</SelectItem>
                     <SelectItem value="+44">+44 (UK)</SelectItem>
