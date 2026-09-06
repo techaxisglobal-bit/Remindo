@@ -264,6 +264,8 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.2 }}
       className="fixed inset-0 z-[60] bg-white dark:bg-[#0a0a0a] flex flex-col overscroll-none h-[100dvh] w-full"
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <div
         className="w-full h-full max-w-2xl mx-auto overflow-hidden flex flex-col"
