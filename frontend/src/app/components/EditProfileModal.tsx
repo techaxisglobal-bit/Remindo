@@ -268,14 +268,17 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       <div
         className="w-full h-full max-w-2xl mx-auto overflow-hidden flex flex-col"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] sticky top-0 bg-white/80 dark:bg-[#0a0a0a] backdrop-blur-md z-10">
+        <div 
+          className="flex items-center justify-between px-6 pb-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] sticky top-0 bg-white/95 dark:bg-[#0a0a0a] backdrop-blur-md z-10"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 16px)' }}
+        >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
           <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 overscroll-contain">
           
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4">
