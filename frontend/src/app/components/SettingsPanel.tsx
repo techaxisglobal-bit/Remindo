@@ -180,7 +180,7 @@ export function SettingsPanel({
           <section>
             <div className="flex items-center justify-between mb-4 px-1">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Profile</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowEditProfile(true)} className="h-8 text-[#e0b596] hover:text-[#d4a37f] hover:bg-[#e0b596]/10">
+              <Button variant="ghost" size="sm" onClick={() => setShowEditProfile(true)} className="h-8 text-[#b07d4b] dark:text-[#e0b596] hover:text-[#8a633e] dark:hover:text-[#d4a37f] hover:bg-[#e0b596]/10 font-bold">
                 <Pencil className="w-3.5 h-3.5 mr-1" /> Edit Profile
               </Button>
             </div>
