@@ -76,7 +76,7 @@ import {
 import { Task, User as UserType } from '@/app/types';
 import { TaskDetails } from '@/app/components/TaskDetails';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
-import { GroupsModal } from '@/app/components/GroupsModal';
+import { GroupsView } from '@/app/components/GroupsView';
 import { CreateReminder } from '@/app/components/CreateReminder';
 import { ProfileMenu } from '@/app/components/ProfileMenu';
 import { MerchantList } from '@/app/components/MerchantList';
@@ -111,7 +111,7 @@ interface DashboardProps {
   onToggleNotifications: () => void;
 }
 
-type View = 'home' | 'locations' | 'settings' | 'pending' | 'completed' | 'calendar' | 'merchants' | 'merchantAdmin' | 'merchantForm';
+type View = 'home' | 'locations' | 'settings' | 'pending' | 'completed' | 'calendar' | 'merchants' | 'merchantAdmin' | 'merchantForm' | 'groups';
 type DragMode = 'none' | 'create' | 'move' | 'resize';
 
 // Constants
@@ -139,7 +139,6 @@ export function Dashboard({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [isGroupsModalOpen, setIsGroupsModalOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -878,8 +877,8 @@ export function Dashboard({
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setIsGroupsModalOpen(true)}
-                className={`group relative p-3 rounded-xl transition-all text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black`}
+                onClick={() => setActiveView('groups')}
+                className={`group relative p-3 rounded-xl transition-all ${activeView === 'groups' ? 'bg-gray-100 dark:bg-black text-[#e0b596]' : 'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-black'}`}
               >
                 <Users className="w-6 h-6" />
               </button>
@@ -1276,6 +1275,10 @@ export function Dashboard({
         <div className="flex-1 relative flex bg-gray-50 dark:bg-black overflow-hidden">
           <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${showSpecialsOnly ? 'mr-0 lg:mr-64' : ''} pb-[88px] lg:pb-0`}>
             
+            {activeView === 'groups' && (
+              <GroupsView />
+            )}
+
             {activeView === 'merchants' && (
               <div className="h-full overflow-y-auto custom-scrollbar">
                 <div className="flex justify-end px-4 md:px-8 pt-6 max-w-7xl mx-auto">
@@ -2185,7 +2188,7 @@ export function Dashboard({
               { id: 'calendar', icon: Home, label: 'Home' },
               { id: 'merchants', icon: BriefcaseBusiness, label: 'Explore Businesses' },
               { id: 'add', icon: Plus, label: 'Add', isSpecial: true },
-              { id: 'groups', icon: UsersRound, label: 'Groups', isAction: true },
+              { id: 'groups', icon: UsersRound, label: 'Groups' },
               { id: 'settings', icon: SlidersHorizontal, label: 'Settings', isAction: true }
             ].map((item) => {
               if (item.isSpecial) {
@@ -2208,7 +2211,6 @@ export function Dashboard({
                   key={item.id}
                   onClick={() => {
                       if (item.id === 'settings') setShowSettings(true);
-                      else if (item.id === 'groups') setIsGroupsModalOpen(true);
                       else setActiveView(item.id as View);
                   }}
                   className={`flex flex-col items-center justify-center w-1/5 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
@@ -2286,7 +2288,6 @@ export function Dashboard({
           />
         </AnimatePresence >
 
-        <GroupsModal isOpen={isGroupsModalOpen} onClose={() => setIsGroupsModalOpen(false)} />
       </div >
     </div >
   );
