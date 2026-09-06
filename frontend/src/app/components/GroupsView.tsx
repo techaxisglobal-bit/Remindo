@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export function GroupsView() {
     const [groups, setGroups] = useState<Group[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [activeTab, setActiveTab] = useState<'groups' | 'friends'>('groups');
+    const [activeTab, setActiveTab] = useState<'groups' | 'friends'>('friends');
     const [isLoading, setIsLoading] = useState(true);
     const [editingGroup, setEditingGroup] = useState<Group | null>(null);
     const [groupName, setGroupName] = useState('');
@@ -135,11 +135,11 @@ export function GroupsView() {
             {/* Top Tabs (WhatsApp style inline tab switching) */}
             <div className="flex items-center pt-2 px-4 border-b border-gray-100 dark:border-white/[0.04] bg-white dark:bg-[#0a0a0a] z-10 sticky top-0">
                 <button
-                    onClick={() => { setActiveTab('groups'); setIsFormVisible(false); }}
-                    className={`flex-1 py-3 text-[15px] font-bold text-center transition-colors relative ${activeTab === 'groups' ? 'text-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                    onClick={() => { setActiveTab('friends'); setIsFormVisible(false); }}
+                    className={`flex-1 py-3 text-[15px] font-bold text-center transition-colors relative ${activeTab === 'friends' ? 'text-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
-                    Groups
-                    {activeTab === 'groups' && (
+                    Friends
+                    {activeTab === 'friends' && (
                         <motion.div
                             layoutId="whatsappTabIndicator"
                             className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#e0b596]"
@@ -148,11 +148,11 @@ export function GroupsView() {
                     )}
                 </button>
                 <button
-                    onClick={() => { setActiveTab('friends'); setIsFormVisible(false); }}
-                    className={`flex-1 py-3 text-[15px] font-bold text-center transition-colors relative ${activeTab === 'friends' ? 'text-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                    onClick={() => { setActiveTab('groups'); setIsFormVisible(false); }}
+                    className={`flex-1 py-3 text-[15px] font-bold text-center transition-colors relative ${activeTab === 'groups' ? 'text-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
-                    My Contacts
-                    {activeTab === 'friends' && (
+                    Groups
+                    {activeTab === 'groups' && (
                         <motion.div
                             layoutId="whatsappTabIndicator"
                             className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#e0b596]"
@@ -167,9 +167,9 @@ export function GroupsView() {
                 <AnimatePresence initial={false} custom={activeTab} mode="wait">
                     <motion.div
                         key={activeTab + (isFormVisible ? '-form' : '')}
-                        initial={{ x: activeTab === 'groups' ? (isFormVisible ? 0 : -20) : 20, opacity: 0 }}
+                        initial={{ x: activeTab === 'friends' ? -20 : (isFormVisible ? 0 : 20), opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: activeTab === 'groups' ? (isFormVisible ? 0 : 20) : -20, opacity: 0 }}
+                        exit={{ x: activeTab === 'friends' ? -20 : (isFormVisible ? 0 : 20), opacity: 0 }}
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="absolute inset-0 overflow-y-auto custom-scrollbar p-4"
                         style={{ paddingBottom: '120px' }} // extra padding for bottom bar
