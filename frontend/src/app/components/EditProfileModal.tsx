@@ -215,7 +215,6 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       const payload = {
         name: formData.name,
         username: formData.username,
-        phoneNumber: formData.phoneNumber,
         gender: formData.gender,
         dateOfBirth: formData.dateOfBirth ? format(formData.dateOfBirth, 'yyyy-MM-dd') : null,
         anniversary: formData.anniversary ? format(formData.anniversary, 'yyyy-MM-dd') : null,
@@ -233,8 +232,15 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       if (res.ok) {
         const data = await res.json();
         onUpdateUser(data.user);
-        toast.success('Profile updated successfully');
-        onClose();
+        
+        const phoneChanged = formData.phoneNumber !== (user.phoneNumber || '');
+        if (phoneChanged) {
+          toast.success('Profile updated. Please verify your new phone number.');
+          handleSendOtp();
+        } else {
+          toast.success('Profile updated successfully');
+          onClose();
+        }
       } else {
         const data = await res.json();
         toast.error(data.msg || 'Failed to update profile');
@@ -253,18 +259,14 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]"
-      onClick={onClose}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[60] bg-white dark:bg-[#0a0a0a] flex flex-col overscroll-none h-[100dvh] w-full"
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-[#0a0a0a] rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] ring-1 ring-black/5 dark:ring-white/10"
+      <div
+        className="w-full h-full max-w-2xl mx-auto overflow-hidden flex flex-col"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] sticky top-0 bg-white/80 dark:bg-[#0a0a0a] backdrop-blur-md z-10">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
@@ -339,35 +341,40 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
             </div>
 
             {/* Phone Number */}
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <Label>Phone Number</Label>
               <div className="flex gap-2">
-                <select 
-                  className="bg-transparent border border-gray-200 dark:border-white/10 rounded-md px-2 text-sm focus:outline-none dark:bg-[#0a0a0a] w-[80px]"
-                  onChange={(e) => {
-                    const num = formData.phoneNumber.replace(/^\+\d+\s*/, '');
-                    setFormData({...formData, phoneNumber: `${e.target.value} ${num}`.trim()});
-                  }}
-                  value={formData.phoneNumber.match(/^\+(\d+)/) ? formData.phoneNumber.match(/^\+(\d+)/)![0] : '+91'}
-                >
-                  <option value="+1">+1</option>
-                  <option value="+44">+44</option>
-                  <option value="+91">+91</option>
-                  <option value="+61">+61</option>
-                  <option value="+971">+971</option>
-                </select>
                 <Input 
                   name="phoneNumber"
-                  value={formData.phoneNumber.replace(/^\+\d+\s*/, '')}
-                  onChange={(e) => {
-                    const code = formData.phoneNumber.match(/^\+(\d+)/) ? formData.phoneNumber.match(/^\+(\d+)/)![0] : '+91';
-                    setFormData({...formData, phoneNumber: `${code} ${e.target.value}`});
-                  }}
-                  placeholder="9999999999"
-                  className="flex-1"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="+1234567890"
+                  disabled={showOtpInput}
                 />
+                {formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput && formData.phoneNumber && (
+                  <Button onClick={handleSendOtp} variant="secondary">Verify</Button>
+                )}
               </div>
             </div>
+
+            {/* OTP Verification */}
+            {showOtpInput && (
+              <div className="space-y-2 md:col-span-2 bg-[#e0b596]/10 p-4 rounded-xl border border-[#e0b596]/30">
+                <Label>Enter OTP sent to {formData.phoneNumber}</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="123456"
+                    maxLength={6}
+                  />
+                  <Button onClick={handleVerifyOtp} disabled={isVerifyingOtp} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white">
+                    {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+                  </Button>
+                  <Button onClick={() => setShowOtpInput(false)} variant="ghost">Cancel</Button>
+                </div>
+              </div>
+            )}
 
             {/* Date of Birth */}
             <div className="space-y-2 flex flex-col">
@@ -415,13 +422,13 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSave} 
-            disabled={!hasChanges || isSaving || usernameStatus === 'checking'}
+            disabled={(!hasChanges && !showOtpInput) || isSaving || usernameStatus === 'checking' || showOtpInput}
             className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput ? 'Save & Verify Phone' : 'Save Changes')}
           </Button>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
