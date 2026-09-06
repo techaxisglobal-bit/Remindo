@@ -43,6 +43,18 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  const defaultCode = user.phoneNumber?.startsWith('+1') ? '+1' : (user.phoneNumber?.startsWith('+44') ? '+44' : (user.phoneNumber?.startsWith('+61') ? '+61' : '+91'));
+  const [countryCode, setCountryCode] = useState(defaultCode);
+  const [phoneNumberBase, setPhoneNumberBase] = useState(user.phoneNumber?.replace(/^\+\d+\s?/, '') || '');
+
+  useEffect(() => {
+    if (phoneNumberBase) {
+      setFormData(prev => ({ ...prev, phoneNumber: `${countryCode}${phoneNumberBase}` }));
+    } else {
+      setFormData(prev => ({ ...prev, phoneNumber: '' }));
+    }
+  }, [countryCode, phoneNumberBase]);
+
   // Check username availability with debounce
   useEffect(() => {
     if (!formData.username || formData.username === user.username) {
@@ -302,7 +314,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[60] bg-white dark:bg-[#0a0a0a] flex flex-col overscroll-none h-[100dvh] w-full"
+      className="fixed inset-0 z-[60] bg-white dark:bg-[#0a0a0a] flex flex-col overscroll-none h-[100dvh] max-h-[100dvh] w-full touch-none"
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -319,7 +331,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 overscroll-contain">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 overscroll-contain touch-pan-y">
           
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4">
@@ -388,12 +400,24 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
             <div className="space-y-2">
               <Label>Phone Number</Label>
               <div className="flex gap-2">
+                <Select value={countryCode} onValueChange={setCountryCode}>
+                  <SelectTrigger className="w-[90px] shrink-0">
+                    <SelectValue placeholder="+91" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="+1">+1 (US)</SelectItem>
+                    <SelectItem value="+91">+91 (IN)</SelectItem>
+                    <SelectItem value="+44">+44 (UK)</SelectItem>
+                    <SelectItem value="+61">+61 (AU)</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input 
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+1234567890"
+                  name="phoneNumberBase"
+                  value={phoneNumberBase}
+                  onChange={(e) => setPhoneNumberBase(e.target.value)}
+                  placeholder="9999999999"
                   disabled={showOtpInput}
+                  className="flex-1 min-w-0"
                 />
                 {formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput && formData.phoneNumber && (
                   <Button onClick={handleSendOtp} variant="secondary">Verify</Button>
@@ -421,23 +445,25 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
             )}
 
             {/* Date of Birth */}
-            <div className="space-y-2 flex flex-col">
+            <div className="space-y-2">
               <Label>Date of Birth</Label>
               <Input
                 type="date"
                 max={format(new Date(), 'yyyy-MM-dd')}
                 value={formData.dateOfBirth ? format(formData.dateOfBirth, 'yyyy-MM-dd') : ''}
                 onChange={(e) => handleDateChange('dateOfBirth', e.target.value ? parseISO(e.target.value) : undefined)}
+                className="w-full appearance-none min-w-0"
               />
             </div>
 
             {/* Anniversary */}
-            <div className="space-y-2 flex flex-col">
+            <div className="space-y-2">
               <Label>Anniversary (Optional)</Label>
               <Input
                 type="date"
                 value={formData.anniversary ? format(formData.anniversary, 'yyyy-MM-dd') : ''}
                 onChange={(e) => handleDateChange('anniversary', e.target.value ? parseISO(e.target.value) : undefined)}
+                className="w-full appearance-none min-w-0"
               />
             </div>
 
