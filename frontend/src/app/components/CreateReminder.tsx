@@ -725,7 +725,7 @@ return (
             <div className="flex-1 min-w-[150px] relative">
               <input
                 type="email"
-                placeholder={attendees.length === 0 ? "Add email invitations..." : ""}
+                placeholder={attendees.length === 0 ? "Invite Friends..." : ""}
                 className="w-full bg-transparent text-[13px] font-medium placeholder:text-gray-400 focus:outline-none border-none p-1"
                 value={attendeeInput}
                 onChange={(e) => setAttendeeInput(e.target.value)}
