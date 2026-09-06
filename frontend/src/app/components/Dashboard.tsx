@@ -1615,12 +1615,15 @@ export function Dashboard({
                           if (!task) return null;
                           
                           const timeDiff = dragCurrent.time - dragStart.time;
-                          const [h, m] = task.time!.split(':').map(Number);
+                          const taskTime = task.time || '00:00';
+                          const [h, m] = taskTime.split(':').map(Number);
                           const newMins = snapToGrid(Math.max(0, h * 60 + m + timeDiff));
                           const newY = (newMins / 60) * HOUR_HEIGHT;
                           
                           const dayDiff = dragCurrent.dayIndex - dragStart.dayIndex;
-                          const originalDayIndex = weekDays.findIndex(d => isSameDay(d, new Date(task.date)));
+                          const taskDate = task.date ? new Date(task.date) : new Date();
+                          let originalDayIndex = weekDays.findIndex(d => isSameDay(d, taskDate));
+                          if (originalDayIndex === -1) originalDayIndex = dragStart.dayIndex;
                           const newDayIndex = Math.max(0, Math.min(weekDays.length - 1, originalDayIndex + dayDiff));
                           
                           const newX = `calc(60px + (100% - 60px) / ${weekDays.length} * ${newDayIndex})`;
@@ -1709,7 +1712,7 @@ export function Dashboard({
                                 if (wasDragging.current) return;
                                 setSelectedTask(event);
                               }}
-                              className={`absolute px-1 py-0.5 group overflow-hidden transition-all duration-200 ${isDragging ? 'z-[60]' : 'z-10'}`}
+                              className={`absolute px-1 py-0.5 group overflow-hidden transition-all duration-200 touch-none ${isDragging ? 'z-[60]' : 'z-10'}`}
                             >
                               <div
                                 className={`h-full w-full rounded-md p-1.5 text-xs cursor-pointer shadow-sm hover:shadow-md transition-all relative flex flex-col justify-center border-l-4
