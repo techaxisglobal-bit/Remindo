@@ -581,7 +581,7 @@ export function Dashboard({
         newMins = snapToGrid(newMins);
 
         // Calculate new date
-        const originalDate = task.date ? new Date(task.date) : new Date();
+        const originalDate = parseTaskDate(task.date);
         const newDate = addDays(originalDate, dayDiff);
 
         // Format
@@ -635,7 +635,7 @@ export function Dashboard({
         const newDuration = Math.max(15, endMins - startMins);
 
         // Final validation for resizing on today
-        const taskDate = task.date ? new Date(task.date) : new Date();
+        const taskDate = parseTaskDate(task.date);
         const endDateTime = setMinutes(setHours(startOfDay(taskDate), Math.floor(endMins / 60)), endMins % 60);
         if (isToday(taskDate) && isBefore(endDateTime, subMinutes(new Date(), 1))) {
           toast.error('Task cannot end in the past');
@@ -1632,7 +1632,7 @@ export function Dashboard({
                           const newY = (newMins / 60) * HOUR_HEIGHT;
                           
                           const dayDiff = dragCurrent.dayIndex - dragStart.dayIndex;
-                          const taskDate = task.date ? new Date(task.date) : new Date();
+                          const taskDate = parseTaskDate(task.date);
                           let originalDayIndex = weekDays.findIndex(d => isSameDay(d, taskDate));
                           if (originalDayIndex === -1) originalDayIndex = dragStart.dayIndex;
                           const newDayIndex = Math.max(0, Math.min(weekDays.length - 1, originalDayIndex + dayDiff));
