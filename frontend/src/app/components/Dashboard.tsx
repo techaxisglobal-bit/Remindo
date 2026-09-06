@@ -174,6 +174,14 @@ export function Dashboard({
   const [dragStart, setDragStart] = useState<{ x: number, y: number, time: number, dayIndex: number, originalTime?: number } | null>(null);
   const [dragCurrent, setDragCurrent] = useState<{ x: number, y: number, time: number, dayIndex: number } | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null); // For move/resize
+  const [inlineWarning, setInlineWarning] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (inlineWarning) {
+      const timer = setTimeout(() => setInlineWarning(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [inlineWarning]);
   const wasDragging = useRef(false);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
 
@@ -507,6 +515,7 @@ export function Dashboard({
   }, [dragMode, dragStart, weekDays, startDate, dragCurrent, isMobile]);
 
   const handlePointerUp = useCallback((e?: MouseEvent | TouchEvent) => {
+    document.body.style.overflow = '';
     if ((dragMode === 'create' || (isMobile && dragMode === 'none' && dragStart)) && dragStart) {
       const current = dragCurrent || dragStart;
 
@@ -592,13 +601,13 @@ export function Dashboard({
         const newDateTime = setMinutes(setHours(startOfDay(newDate), newH), newM);
         const now = new Date();
         if (isToday(newDate) && isBefore(newDateTime, subMinutes(now, 1))) {
-          toast.error('Tasks can only be moved to a future time');
+          setInlineWarning('Tasks can only be moved to a future time');
           setActiveTaskId(null);
           setDragMode('none');
           return;
         } else if (!isToday(newDate) && isBefore(newDate, startOfDay(now))) {
           // Prevent moving to entirely past days as well
-          toast.error('Cannot move tasks to the past');
+          setInlineWarning('Tasks can only be moved to a future time');
           setActiveTaskId(null);
           setDragMode('none');
           return;
@@ -645,6 +654,7 @@ export function Dashboard({
   }, [dragMode, dragStart, dragCurrent, startDate, tasks, onUpdateTask, isMobile]);
 
   const handleTouchCancel = useCallback(() => {
+    document.body.style.overflow = '';
     setDragMode('none');
     setDragStart(null);
     setDragCurrent(null);
@@ -1598,10 +1608,41 @@ export function Dashboard({
                         {weekDays.map((_, i) => (
                           <div key={i} className="border-r border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] last:border-r-0 h-full relative" />
                         ))}
+                        
+                        {/* Ghost Drag Preview */}
+                        {dragMode === 'move' && activeTaskId && dragCurrent && dragStart && (() => {
+                          const task = tasks.find(t => String(t.id) === String(activeTaskId) || String((t as any)._id) === String(activeTaskId));
+                          if (!task) return null;
+                          
+                          const timeDiff = dragCurrent.time - dragStart.time;
+                          const [h, m] = task.time!.split(':').map(Number);
+                          const newMins = snapToGrid(Math.max(0, h * 60 + m + timeDiff));
+                          const newY = (newMins / 60) * HOUR_HEIGHT;
+                          
+                          const dayDiff = dragCurrent.dayIndex - dragStart.dayIndex;
+                          const originalDayIndex = weekDays.findIndex(d => isSameDay(d, new Date(task.date)));
+                          const newDayIndex = Math.max(0, Math.min(weekDays.length - 1, originalDayIndex + dayDiff));
+                          
+                          const newX = `calc(60px + (100% - 60px) / ${weekDays.length} * ${newDayIndex})`;
+                          
+                          return (
+                            <div
+                              className="absolute z-[40] rounded-md bg-[#C9A878]/10 border-2 border-dashed border-[#C9A878]/50 transition-all duration-300 pointer-events-none"
+                              style={{
+                                top: `${newY}px`,
+                                left: newX,
+                                width: `calc((100% - 60px) / ${weekDays.length} - 16px)`,
+                                height: `${((task.duration || 60) / 60) * HOUR_HEIGHT}px`,
+                                marginLeft: '8px'
+                              }}
+                            />
+                          );
+                        })()}
 
                         {/* Events */}
                         {eventsForGrid.map((event) => {
                           const isShort = (event.duration || 60) <= 30;
+                          const isDragging = activeTaskId === event.id && dragMode === 'move';
                           return (
                             <div
                               key={event.id}
@@ -1612,6 +1653,7 @@ export function Dashboard({
                               onMouseDown={(e) => {
                                 e.stopPropagation();
                                 if (event.completed) return;
+                                document.body.style.overflow = 'hidden';
                                 setActiveTaskId(event.id);
                                 const { clientX, clientY } = getCoordinates(e);
                                 const rect = containerRef.current?.getBoundingClientRect();
@@ -1638,6 +1680,7 @@ export function Dashboard({
                               onTouchStart={(e) => {
                                 e.stopPropagation();
                                 if (event.completed) return;
+                                document.body.style.overflow = 'hidden';
                                 setActiveTaskId(event.id);
                                 const { clientX, clientY } = getCoordinates(e);
                                 const rect = containerRef.current?.getBoundingClientRect();
@@ -1666,15 +1709,16 @@ export function Dashboard({
                                 if (wasDragging.current) return;
                                 setSelectedTask(event);
                               }}
-                              className="absolute px-1 py-0.5 z-10 group overflow-hidden transition-all duration-200"
+                              className={`absolute px-1 py-0.5 group overflow-hidden transition-all duration-200 ${isDragging ? 'z-[60]' : 'z-10'}`}
                             >
                               <div
                                 className={`h-full w-full rounded-md p-1.5 text-xs cursor-pointer shadow-sm hover:shadow-md transition-all relative flex flex-col justify-center border-l-4
-                                  ${event.completed ? 'bg-gray-100 border-gray-400 text-gray-500 dark:bg-[#0a0a0a] dark:border-l-gray-600 dark:text-gray-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
-                                    event.isPast ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-[#0a0a0a] dark:border-l-amber-600 dark:text-amber-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
-                                      event.category?.toLowerCase() === 'work' ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-[#0a0a0a] dark:border-l-blue-600 dark:text-blue-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
-                                        event.category?.toLowerCase() === 'personal' ? 'bg-green-50 border-green-500 text-green-700 dark:bg-[#0a0a0a] dark:border-l-green-600 dark:text-green-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
-                                          'bg-purple-50 border-purple-500 text-purple-700 dark:bg-[#0a0a0a] dark:border-l-purple-600 dark:text-purple-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]'}
+                                  ${isDragging ? 'bg-[#fcf8f2] border-[#C9A878] text-[#8a6840] shadow-[0_15px_30px_-5px_rgba(201,168,120,0.5)] scale-105' :
+                                    event.completed ? 'bg-gray-100 border-gray-400 text-gray-500 dark:bg-[#0a0a0a] dark:border-l-gray-600 dark:text-gray-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
+                                      event.isPast ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-[#0a0a0a] dark:border-l-amber-600 dark:text-amber-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
+                                        event.category?.toLowerCase() === 'work' ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-[#0a0a0a] dark:border-l-blue-600 dark:text-blue-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
+                                          event.category?.toLowerCase() === 'personal' ? 'bg-green-50 border-green-500 text-green-700 dark:bg-[#0a0a0a] dark:border-l-green-600 dark:text-green-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]' :
+                                            'bg-purple-50 border-purple-500 text-purple-700 dark:bg-[#0a0a0a] dark:border-l-purple-600 dark:text-purple-400 dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]'}
                                 `}
                               >
                                 {!event.completed && !event.isPast && (
@@ -1682,6 +1726,7 @@ export function Dashboard({
                                     className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize opacity-0 group-hover:opacity-100 z-20"
                                     onMouseDown={(e) => {
                                       e.stopPropagation();
+                                      document.body.style.overflow = 'hidden';
                                       setActiveTaskId(event.id);
                                       const rect = containerRef.current?.getBoundingClientRect();
                                       const dayIdx = rect ? getDayIndexFromX(e.clientX - rect.left - 60, rect.width - 60, weekDays.length) : 0;
@@ -2277,6 +2322,21 @@ export function Dashboard({
             isOpen={showNotifications}
             onClose={() => setShowNotifications(false)}
           />
+
+          {/* Inline Drag Warning */}
+          <AnimatePresence>
+            {inlineWarning && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-[#C9A878] text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-[0_10px_20px_-5px_rgba(201,168,120,0.5)] z-[100] flex items-center gap-2 pointer-events-none whitespace-nowrap"
+              >
+                <AlertCircle className="w-4 h-4" />
+                {inlineWarning}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </AnimatePresence >
 
       </div >
