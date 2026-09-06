@@ -109,10 +109,49 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     }
 
     setUploadingImage(true);
-    const formData = new FormData();
-    formData.append('profilePicture', file);
+
+    const applyCartoonFilter = (originalFile: File): Promise<Blob> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(originalFile);
+        
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Failed to get canvas context'));
+          
+          // Crop to a perfect square for avatars
+          const size = Math.min(img.width, img.height);
+          canvas.width = size;
+          canvas.height = size;
+          
+          const startX = (img.width - size) / 2;
+          const startY = (img.height - size) / 2;
+          
+          // Apply a vibrant, illustrated "avatar/comic" style filter
+          ctx.filter = 'contrast(1.4) saturate(2) sepia(0.15) brightness(1.1)';
+          
+          // Draw the cropped and filtered image
+          ctx.drawImage(img, startX, startY, size, size, 0, 0, size, size);
+          
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Canvas to Blob failed'));
+          }, 'image/jpeg', 0.9);
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = url;
+      });
+    };
 
     try {
+      const processedBlob = await applyCartoonFilter(file);
+      const processedFile = new File([processedBlob], `avatar_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      
+      const formData = new FormData();
+      formData.append('profilePicture', processedFile);
+
       const token = localStorage.getItem('token');
       const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/upload-profile-picture`, {
         method: 'POST',
