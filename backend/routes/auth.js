@@ -589,7 +589,7 @@ router.get('/check-username/:username', auth, async (req, res) => {
 // @desc    Update user profile information
 // @access  Private
 router.put('/update-profile', auth, async (req, res) => {
-    const { name, username, dateOfBirth, anniversary, gender } = req.body;
+    const { name, username, dateOfBirth, anniversary, gender, phoneNumber } = req.body;
 
     try {
         let user = await User.findByPk(req.user.id);
@@ -601,6 +601,7 @@ router.put('/update-profile', auth, async (req, res) => {
         if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
         if (anniversary !== undefined) user.anniversary = anniversary;
         if (gender !== undefined) user.gender = gender;
+        if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
 
         if (username) {
             const formattedUsername = username.trim().toLowerCase();
