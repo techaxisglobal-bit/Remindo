@@ -68,5 +68,11 @@
 	<string>Milli uses your location to intelligently suggest relevant places for your reminders.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Milli uses your location to intelligently suggest relevant places for your reminders.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Milli needs access to your camera to let you take a new profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Milli needs access to your photos so you can choose a profile picture.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Milli needs permission to save images to your photo library.</string>
 </dict>
 </plist>
