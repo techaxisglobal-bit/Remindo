@@ -132,7 +132,8 @@ export function Dashboard({
   onToggleNotifications,
 }: DashboardProps) {
   const userEmail = user?.email || '';
-  const userName = user?.name || (user as any)?.displayName || (user as any)?.username || (user as any)?.firstName || userEmail.split('@')[0] || '';
+  const fullUserName = user?.name || (user as any)?.displayName || (user as any)?.username || (user as any)?.firstName || userEmail.split('@')[0] || '';
+  const userName = fullUserName.split(' ')[0];
   const isAdmin = userEmail === 'techaxisglobal@gmail.com';
   const [activeView, setActiveView] = useState<View>('calendar');
   const isMobile = useIsMobile();
@@ -980,7 +981,7 @@ export function Dashboard({
               <div className="flex items-start justify-between">
                 <div className="flex flex-col">
                   <h1 className="text-[28px] font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2 leading-none">
-                    {userName} <span className="text-2xl">👋🏻</span>
+                    {userName}
                   </h1>
                   <h2 className="text-sm font-medium text-gray-500 dark:text-[#e0b596] mt-2">
                     {new Date().getHours() < 12 ? 'Good Morning,' : new Date().getHours() < 18 ? 'Good Afternoon,' : 'Good Evening,'}
