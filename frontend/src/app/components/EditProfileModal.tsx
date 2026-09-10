@@ -34,10 +34,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   
-  // OTP State
-  const [showOtpInput, setShowOtpInput] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
   
   // Profile Picture State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -188,77 +185,12 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     }
   };
 
-  const handleSendOtp = async () => {
-    if (!formData.phoneNumber) {
-      toast.error('Please enter a valid phone number');
-      return;
-    }
-    
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/send-phone-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token || ''
-        },
-        body: JSON.stringify({ phoneNumber: formData.phoneNumber })
-      });
-      if (res.ok) {
-        setShowOtpInput(true);
-        toast.success('OTP sent to phone');
-      } else {
-        toast.error('Failed to send OTP');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Error sending OTP');
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otp) return;
-    setIsVerifyingOtp(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/verify-phone-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-auth-token': token || ''
-        },
-        body: JSON.stringify({ phoneNumber: formData.phoneNumber, otp })
-      });
-      if (res.ok) {
-        toast.success('Phone verified!');
-        setShowOtpInput(false);
-        onUpdateUser({ phoneNumber: formData.phoneNumber, phoneVerified: true });
-        
-        // Refresh local user state reference to prevent showing changes again
-        setHasChanges(false); 
-      } else {
-        const data = await res.json();
-        toast.error(data.msg || 'Invalid OTP');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Error verifying OTP');
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
   const handleSave = async () => {
     if (usernameStatus === 'taken') {
       toast.error('Please choose an available username');
       return;
     }
     
-    if (showOtpInput) {
-      toast.error('Please complete phone verification first');
-      return;
-    }
-
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
@@ -269,6 +201,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
         gender: formData.gender,
         dateOfBirth: formData.dateOfBirth ? format(formData.dateOfBirth, 'yyyy-MM-dd') : null,
         anniversary: formData.anniversary ? format(formData.anniversary, 'yyyy-MM-dd') : null,
+        phoneNumber: formData.phoneNumber,
       };
 
       const res = await fetchWithAuth(`${API_BASE_URL}/api/auth/update-profile`, {
@@ -284,14 +217,8 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
         const data = await res.json();
         onUpdateUser(data.user);
         
-        const phoneChanged = formData.phoneNumber !== (user.phoneNumber || '');
-        if (phoneChanged) {
-          toast.success('Profile updated. Please verify your new phone number.');
-          handleSendOtp();
-        } else {
-          toast.success('Profile updated successfully');
-          onClose();
-        }
+        toast.success('Profile updated successfully');
+        onClose();
       } else {
         const data = await res.json();
         toast.error(data.msg || 'Failed to update profile');
@@ -323,7 +250,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
       >
         <div 
           className="flex items-center justify-between px-6 pb-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] sticky top-0 bg-white/95 dark:bg-[#0a0a0a] backdrop-blur-md z-10"
-          style={{ paddingTop: 'calc(env(safe-area-inset-top, 44px) + 16px)' }}
+          style={{ paddingTop: 'max(env(safe-area-inset-top), 48px)' }}
         >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Profile</h2>
           <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-black rounded-full transition-colors">
@@ -416,33 +343,10 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
                   value={phoneNumberBase}
                   onChange={(e) => setPhoneNumberBase(e.target.value)}
                   placeholder="9999999999"
-                  disabled={showOtpInput}
                   className="flex-1 min-w-0"
                 />
-                {formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput && formData.phoneNumber && (
-                  <Button onClick={handleSendOtp} variant="secondary">Verify</Button>
-                )}
               </div>
             </div>
-
-            {/* OTP Verification */}
-            {showOtpInput && (
-              <div className="space-y-2 md:col-span-2 bg-[#e0b596]/10 p-4 rounded-xl border border-[#e0b596]/30">
-                <Label>Enter OTP sent to {formData.phoneNumber}</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="123456"
-                    maxLength={6}
-                  />
-                  <Button onClick={handleVerifyOtp} disabled={isVerifyingOtp} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white">
-                    {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
-                  </Button>
-                  <Button onClick={() => setShowOtpInput(false)} variant="ghost">Cancel</Button>
-                </div>
-              </div>
-            )}
 
             {/* Date of Birth */}
             <div className="space-y-2">
@@ -492,10 +396,10 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSave} 
-            disabled={(!hasChanges && !showOtpInput) || isSaving || usernameStatus === 'checking' || showOtpInput}
+            disabled={!hasChanges || isSaving || usernameStatus === 'checking'}
             className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (formData.phoneNumber !== (user.phoneNumber || '') && !showOtpInput ? 'Save & Verify Phone' : 'Save Changes')}
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
           </Button>
         </div>
       </div>
