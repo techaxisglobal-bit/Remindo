@@ -6,6 +6,7 @@ import { Button } from '@/app/components/ui/button';
 import { Label } from '@/app/components/ui/label';
 import { Input } from '@/app/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
+import { AvatarBuilderModal } from './AvatarBuilderModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import { Calendar } from '@/app/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
@@ -39,6 +40,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
   // Profile Picture State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
 
   const defaultCode = user.phoneNumber?.startsWith('+1') ? '+1' : (user.phoneNumber?.startsWith('+44') ? '+44' : (user.phoneNumber?.startsWith('+61') ? '+61' : '+91'));
   const [countryCode, setCountryCode] = useState(defaultCode);
@@ -185,6 +187,16 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
     }
   };
 
+  const handleAvatarGenerated = async (file: File) => {
+    setShowAvatarBuilder(false);
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    const mockEvent = {
+      target: { files: dataTransfer.files }
+    } as ChangeEvent<HTMLInputElement>;
+    await handleImageUpload(mockEvent);
+  };
+
   const handleSave = async () => {
     if (usernameStatus === 'taken') {
       toast.error('Please choose an available username');
@@ -278,7 +290,12 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
               </button>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
             </div>
-            <p className="text-sm text-gray-500">Click picture to update</p>
+            <div className="flex flex-col items-center gap-1 mt-1">
+              <p className="text-sm text-gray-500">Click picture to update</p>
+              <Button variant="ghost" size="sm" className="text-[#e0b596] hover:text-[#c69472] hover:bg-[#e0b596]/10" onClick={() => setShowAvatarBuilder(true)}>
+                Or create an animated avatar ✨
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -403,6 +420,12 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           </Button>
         </div>
       </div>
+      {showAvatarBuilder && (
+        <AvatarBuilderModal
+          onClose={() => setShowAvatarBuilder(false)}
+          onSave={handleAvatarGenerated}
+        />
+      )}
     </motion.div>
   );
 }
