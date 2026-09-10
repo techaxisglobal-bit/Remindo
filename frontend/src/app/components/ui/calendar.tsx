@@ -1,11 +1,117 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { DayPicker, useNavigation, CaptionProps } from "react-day-picker";
+import { format } from "date-fns";
 
 import { cn } from "./utils";
 import { buttonVariants } from "./button";
+
+function CustomCaption(props: CaptionProps) {
+  const { goToMonth, nextMonth, previousMonth, currentMonth } = useNavigation();
+  const [showPicker, setShowPicker] = React.useState(false);
+  const [pickerYear, setPickerYear] = React.useState(currentMonth.getFullYear());
+
+  // Reset picker year when current month changes externally
+  React.useEffect(() => {
+    setPickerYear(currentMonth.getFullYear());
+  }, [currentMonth]);
+
+  const handlePreviousYear = () => {
+    goToMonth(new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth()));
+  };
+  const handleNextYear = () => {
+    goToMonth(new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth()));
+  };
+
+  const handleMonthSelect = (monthIndex: number) => {
+    goToMonth(new Date(pickerYear, monthIndex));
+    setShowPicker(false);
+  };
+
+  return (
+    <div className="flex flex-col w-full relative">
+      <div className="flex justify-between items-center w-full px-1 pt-1 mb-3">
+        <button
+          type="button"
+          onClick={() => setShowPicker(!showPicker)}
+          className="text-sm font-bold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-white/[0.04] px-2 py-1 rounded-md transition-colors flex items-center gap-1"
+          aria-label="Select month and year"
+        >
+          {format(currentMonth, 'MMMM yyyy')}
+          <span className="text-[10px] opacity-50 ml-1">{showPicker ? '▲' : '▼'}</span>
+        </button>
+
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={handlePreviousYear}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md hover:bg-gray-100 dark:hover:bg-white/[0.04]")}
+            aria-label="Previous year"
+          >
+            <ChevronsLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => previousMonth && goToMonth(previousMonth)}
+            disabled={!previousMonth}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md hover:bg-gray-100 dark:hover:bg-white/[0.04] disabled:opacity-20")}
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => nextMonth && goToMonth(nextMonth)}
+            disabled={!nextMonth}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md hover:bg-gray-100 dark:hover:bg-white/[0.04] disabled:opacity-20")}
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleNextYear}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md hover:bg-gray-100 dark:hover:bg-white/[0.04]")}
+            aria-label="Next year"
+          >
+            <ChevronsRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {showPicker && (
+        <div className="absolute top-10 left-0 w-full bg-white dark:bg-[#0a0a0a] z-50 p-3 border border-gray-100 dark:border-white/[0.08] rounded-md shadow-xl grid grid-cols-3 gap-2">
+          <div className="col-span-3 flex justify-between items-center mb-2 px-1">
+             <button type="button" onClick={() => setPickerYear(y => y - 1)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/[0.04] rounded-md transition-colors">
+                <ChevronLeft className="w-4 h-4 opacity-70" />
+             </button>
+             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{pickerYear}</span>
+             <button type="button" onClick={() => setPickerYear(y => y + 1)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/[0.04] rounded-md transition-colors">
+                <ChevronRight className="w-4 h-4 opacity-70" />
+             </button>
+          </div>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <button
+              type="button"
+              key={i}
+              onClick={() => handleMonthSelect(i)}
+              className={cn(
+                "text-xs py-2.5 rounded-md transition-colors font-medium",
+                currentMonth.getMonth() === i && currentMonth.getFullYear() === pickerYear 
+                  ? "bg-[#e0b596] text-white hover:bg-[#d6a583] shadow-md" 
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.04]"
+              )}
+            >
+              {format(new Date(2000, i, 1), 'MMM')}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Calendar({
   className,
@@ -20,15 +126,7 @@ function Calendar({
       classNames={{
         months: "flex flex-col w-full gap-2",
         month: "flex flex-col gap-2 w-full",
-        caption: "flex justify-between items-center w-full px-1 pt-1 relative items-center mb-3",
-        caption_label: "text-sm font-bold text-gray-900 dark:text-gray-100",
-        nav: "flex items-center gap-1",
-        nav_button: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-black"
-        ),
-        nav_button_previous: "",
-        nav_button_next: "",
+        caption: "hidden", // We use CustomCaption which wraps everything, but let's just replace Caption directly
         table: "w-full border-collapse",
         head_row: "grid grid-cols-7 gap-1 mb-2",
         head_cell: "text-gray-400 font-medium text-[10px] uppercase text-center w-full h-8 flex items-center justify-center",
@@ -41,7 +139,7 @@ function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 w-8 p-0 font-medium aria-selected:opacity-100 rounded-full transition-all hover:bg-gray-100 dark:hover:bg-black"
+          "h-8 w-8 p-0 font-medium aria-selected:opacity-100 rounded-full transition-all hover:bg-gray-100 dark:hover:bg-white/[0.04]"
         ),
         day_range_start: "day-range-start",
         day_range_end: "day-range-end",
@@ -57,12 +155,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
-        ),
+        Caption: CustomCaption,
       }}
       {...props}
     />
