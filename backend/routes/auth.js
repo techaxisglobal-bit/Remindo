@@ -695,6 +695,7 @@ router.post('/verify-phone-otp', auth, async (req, res) => {
 
 // Multer setup for profile picture upload using Cloudinary
 const multer = require('multer');
+const path = require('path');
 const { getStorage } = require('../config/cloudinary');
 const storage = getStorage('profiles');
 
