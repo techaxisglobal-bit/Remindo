@@ -1006,9 +1006,13 @@ export function Dashboard({
                   </button>
                   <button
                     onClick={() => setShowProfileMenu(true)}
-                    className="h-9 w-9 rounded-full bg-[#e0b596] flex items-center justify-center text-sm font-bold text-[#1f1f1f] shadow-sm flex-shrink-0"
+                    className="h-9 w-9 rounded-full bg-[#e0b596] flex items-center justify-center text-sm font-bold text-[#1f1f1f] shadow-sm flex-shrink-0 overflow-hidden"
                   >
-                    {userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'}
+                    {user?.profilePictureUrl ? (
+                      <img src={user.profilePictureUrl} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'
+                    )}
                   </button>
                 </div>
               </div>
@@ -1252,9 +1256,13 @@ export function Dashboard({
 
                   <button
                     onClick={() => setShowProfileMenu(true)}
-                    className="h-10 w-10 rounded-full bg-gradient-to-br from-[#e0b596] to-[#dcb49a] flex items-center justify-center text-xs font-bold text-[#1f1f1f] border-2 border-white shadow-lg ml-2 cursor-pointer"
+                    className="h-10 w-10 rounded-full bg-gradient-to-br from-[#e0b596] to-[#dcb49a] flex items-center justify-center text-xs font-bold text-[#1f1f1f] border-2 border-white shadow-lg ml-2 cursor-pointer overflow-hidden"
                   >
-                    {userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'}
+                    {user?.profilePictureUrl ? (
+                      <img src={user.profilePictureUrl} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      userName && userName.length > 0 ? userName[0].toUpperCase() : 'U'
+                    )}
                   </button>
                 </div>
               </div>
