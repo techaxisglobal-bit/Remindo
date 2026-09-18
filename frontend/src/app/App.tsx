@@ -154,12 +154,46 @@ export default function App() {
           console.log('Push notification click action performed:', event.notification);
         });
 
+        await LocalNotifications.registerActionTypes({
+          types: [
+            {
+              id: 'REMINDER_ACTIONS',
+              actions: [
+                {
+                  id: 'snooze',
+                  title: 'Snooze 10 min'
+                }
+              ]
+            }
+          ]
+        });
+
         await LocalNotifications.addListener('localNotificationReceived', (notification) => {
           console.log('Local notification fired:', notification);
         });
 
-        await LocalNotifications.addListener('localNotificationActionPerformed', (notificationAction) => {
+        await LocalNotifications.addListener('localNotificationActionPerformed', async (notificationAction) => {
           console.log('Local notification action performed:', notificationAction);
+          if (notificationAction.actionId === 'snooze') {
+            const taskId = notificationAction.notification.extra?.taskId;
+            const originalTitle = notificationAction.notification.title;
+            const snoozeDate = new Date(Date.now() + 10 * 60000); // 10 minutes from now
+
+            await LocalNotifications.schedule({
+              notifications: [
+                {
+                  id: Math.floor(Math.random() * 100000) + 900000,
+                  title: `Snoozed: ${originalTitle}`,
+                  body: 'Reminder snoozed for 10 minutes.',
+                  schedule: { at: snoozeDate },
+                  sound: 'mixkit-sci-fi-reject-notification-896.caf',
+                  actionTypeId: 'REMINDER_ACTIONS',
+                  extra: { taskId }
+                }
+              ]
+            });
+            toast.success('Reminder snoozed for 10 minutes');
+          }
         });
 
       } catch (err: any) {
@@ -327,7 +361,8 @@ export default function App() {
           title: task.title,
           body: 'This task is starting now!',
           schedule: { at: taskDate },
-          sound: 'default',
+          sound: 'mixkit-sci-fi-reject-notification-896.caf',
+          actionTypeId: 'REMINDER_ACTIONS',
           extra: { taskId }
         });
       }
@@ -346,7 +381,8 @@ export default function App() {
                 title: task.title,
                 body: `It’s time for ${task.title}`,
                 schedule: { at: notifyDate },
-                sound: 'default',
+                sound: 'mixkit-sci-fi-reject-notification-896.caf',
+                actionTypeId: 'REMINDER_ACTIONS',
                 extra: { taskId }
              });
           }

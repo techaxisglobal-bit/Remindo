@@ -35,4 +35,52 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   POST api/friends
+// @desc    Add a friend manually
+// @access  Private
+router.post('/', auth, async (req, res) => {
+    try {
+        const { email, name } = req.body;
+        if (!email) {
+            return res.status(400).json({ msg: 'Email is required' });
+        }
+
+        // Check if already exists
+        let friend = await Friend.findOne({ where: { userId: req.user.id, email: email.toLowerCase() } });
+        if (friend) {
+            return res.status(400).json({ msg: 'Contact already exists' });
+        }
+
+        friend = await Friend.create({
+            userId: req.user.id,
+            email: email.toLowerCase(),
+            name: name || email.split('@')[0],
+            lastInvitedAt: new Date()
+        });
+
+        res.json(friend);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   DELETE api/friends/:id
+// @desc    Remove a friend
+// @access  Private
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const friend = await Friend.findOne({ where: { id: req.params.id, userId: req.user.id } });
+        if (!friend) {
+            return res.status(404).json({ msg: 'Contact not found' });
+        }
+
+        await friend.destroy();
+        res.json({ msg: 'Contact removed' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

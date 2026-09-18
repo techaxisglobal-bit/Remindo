@@ -62,7 +62,7 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                             </AvatarFallback>
                         </Avatar>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h3>
-                        {user.username && <p className="text-sm font-medium text-[#e0b596] mb-1">@{user.username}</p>}
+                        {user.username && <p className="text-sm font-medium text-gray-500 dark:text-[#e0b596] mb-1">@{user.username}</p>}
                         <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
 

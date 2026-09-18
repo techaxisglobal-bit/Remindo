@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		4B9A1974305D9F5300A46844 /* mixkit-sci-fi-reject-notification-896.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4B9A1973305D9F5200A46844 /* mixkit-sci-fi-reject-notification-896.caf */; };
 		4BE37595303C604500FFE646 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4BE37594303C604500FFE646 /* FirebaseCore */; };
 		4BE37597303C605100FFE646 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 4BE37596303C605100FFE646 /* FirebaseMessaging */; };
 		4BE6D045303A185C004140BD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4BE6D044303A185C004140BD /* GoogleService-Info.plist */; };
@@ -22,6 +23,7 @@
 
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		4B9A1973305D9F5200A46844 /* mixkit-sci-fi-reject-notification-896.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "mixkit-sci-fi-reject-notification-896.caf"; sourceTree = "<group>"; };
 		4BBBE628301DADE600A3CD52 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		4BE6D044303A185C004140BD /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				504EC3061FED79650016851F /* App */,
 				4BE37593303C604500FFE646 /* Frameworks */,
 				504EC3051FED79650016851F /* Products */,
+				4B9A1973305D9F5200A46844 /* mixkit-sci-fi-reject-notification-896.caf */,
 			);
 			sourceTree = "<group>";
 		};
@@ -160,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
+				4B9A1974305D9F5300A46844 /* mixkit-sci-fi-reject-notification-896.caf in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,

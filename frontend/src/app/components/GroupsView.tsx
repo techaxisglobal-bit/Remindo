@@ -18,6 +18,9 @@ export function GroupsView() {
     const [members, setMembers] = useState<string[]>([]);
     const [memberInput, setMemberInput] = useState('');
     const [isFormVisible, setIsFormVisible] = useState(false);
+    const [isFriendFormVisible, setIsFriendFormVisible] = useState(false);
+    const [friendEmail, setFriendEmail] = useState('');
+    const [friendName, setFriendName] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -96,6 +99,39 @@ export function GroupsView() {
         }
     };
 
+    const handleAddFriend = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!friendEmail.trim()) {
+            toast.error('Email is required');
+            return;
+        }
+
+        try {
+            const newFriend = await fetchJson('/api/friends', {
+                method: 'POST',
+                body: JSON.stringify({ email: friendEmail, name: friendName })
+            });
+            setFriends(prev => [newFriend, ...prev]);
+            toast.success('Friend added');
+            setFriendEmail('');
+            setFriendName('');
+            setIsFriendFormVisible(false);
+        } catch (error: any) {
+            toast.error(error?.data?.msg || 'Failed to add friend');
+        }
+    };
+
+    const handleDeleteFriend = async (id: string) => {
+        if (!confirm('Are you sure you want to remove this friend?')) return;
+        try {
+            await fetchJson(`/api/friends/${id}`, { method: 'DELETE' });
+            setFriends(prev => prev.filter(f => String(f.id) !== String(id)));
+            toast.success('Friend removed');
+        } catch (error) {
+            console.error(error); toast.error(error?.data?.msg || 'Failed to remove friend. Did you restart the backend?');
+        }
+    };
+
     const handleEditGroup = (group: Group) => {
         setEditingGroup(group);
         setGroupName(group.name);
@@ -148,7 +184,7 @@ export function GroupsView() {
                     )}
                 </button>
                 <button
-                    onClick={() => { setActiveTab('groups'); setIsFormVisible(false); }}
+                    onClick={() => { setActiveTab('groups'); setIsFormVisible(false); setIsFriendFormVisible(false); }}
                     className={`flex-1 py-3 text-[15px] font-bold text-center transition-colors relative ${activeTab === 'groups' ? 'text-[#e0b596]' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
                     Groups
@@ -282,8 +318,42 @@ export function GroupsView() {
                                     </div>
                                 )}
                             </div>
-                        ) : (
+                        ) : activeTab === 'friends' ? (
                             <div className="max-w-3xl mx-auto">
+                                <div className="mb-6 flex justify-end">
+                                    <Button onClick={() => setIsFriendFormVisible(!isFriendFormVisible)} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white flex items-center gap-2 rounded-xl px-5 py-5 font-semibold shadow-sm hover:shadow-md">
+                                        <Plus className="w-4 h-4" /> Add Contact
+                                    </Button>
+                                </div>
+
+                                {isFriendFormVisible && (
+                                    <div className="mb-6 bg-white dark:bg-[#0a0a0a] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-white/[0.04]">
+                                        <form onSubmit={handleAddFriend} className="space-y-4">
+                                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Add New Contact</h2>
+                                            <div>
+                                                <input
+                                                    type="email"
+                                                    value={friendEmail}
+                                                    onChange={e => setFriendEmail(e.target.value)}
+                                                    placeholder="Email address"
+                                                    className="w-full mb-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={friendName}
+                                                    onChange={e => setFriendName(e.target.value)}
+                                                    placeholder="Name (Optional)"
+                                                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <Button type="button" onClick={() => setIsFriendFormVisible(false)} variant="ghost" className="flex-1 py-4 rounded-xl font-semibold">Cancel</Button>
+                                                <Button type="submit" className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">Save Contact</Button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+
                                 {isLoading ? (
                                     <div className="text-center text-gray-500 py-12">Loading contacts...</div>
                                 ) : friends.length === 0 ? (
@@ -295,20 +365,25 @@ export function GroupsView() {
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {friends.map(friend => (
-                                            <div key={friend.id} className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-gray-100 dark:border-white/[0.04] shadow-sm flex items-center gap-4 transition-all hover:border-[#e0b596]/30">
-                                                <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-lg font-bold ring-2 ring-teal-500 dark:ring-teal-400 ring-offset-2 ring-offset-white dark:ring-offset-[#0a0a0a] shrink-0 shadow-sm">
-                                                    {(friend.name || friend.email).charAt(0).toUpperCase()}
+                                            <div key={friend.id} className="bg-white dark:bg-[#0a0a0a] p-4 rounded-2xl border border-gray-100 dark:border-white/[0.04] shadow-sm flex items-center justify-between transition-all hover:border-[#e0b596]/30">
+                                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                    <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-lg font-bold ring-2 ring-teal-500 dark:ring-teal-400 ring-offset-2 ring-offset-white dark:ring-offset-[#0a0a0a] shrink-0 shadow-sm">
+                                                        {(friend.name || friend.email).charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold text-gray-900 dark:text-white truncate text-base">{friend.name || friend.email.split('@')[0]}</h3>
+                                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{friend.email}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-gray-900 dark:text-white truncate text-base">{friend.name || friend.email.split('@')[0]}</h3>
-                                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{friend.email}</p>
-                                                </div>
+                                                <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2 shrink-0">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </div>
-                        )}
+                        ) : null}
                     </motion.div>
                 </AnimatePresence>
             </div>
