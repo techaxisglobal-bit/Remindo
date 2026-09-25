@@ -151,7 +151,7 @@ export function SettingsPanel({
     <div className="flex flex-col w-full h-full overflow-hidden pb-32">
       {/* Header - Minimal & Clean */}
       <div 
-        className="flex items-center justify-between px-6 pb-4 pt-8"
+        className="flex items-center justify-between px-6 pb-4 pt-4"
       >
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
       </div>
