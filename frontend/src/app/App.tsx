@@ -161,7 +161,8 @@ export default function App() {
               actions: [
                 {
                   id: 'snooze',
-                  title: 'Snooze 10 min'
+                  title: 'Snooze 10 min',
+                  foreground: true
                 }
               ]
             }
