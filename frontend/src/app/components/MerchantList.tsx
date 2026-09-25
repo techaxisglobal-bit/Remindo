@@ -57,7 +57,7 @@ export function MerchantList() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Available Listings</h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Discover businesses and services in your area</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Discover stores and services in your area</p>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
