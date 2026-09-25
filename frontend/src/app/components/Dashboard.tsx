@@ -970,8 +970,9 @@ export function Dashboard({
       <div className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-black">
 
         {/* Header */}
-        <header 
-          className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-black sticky top-0 z-40`}
+        {activeView === 'calendar' && (
+          <header 
+            className={`${isMobile ? 'h-auto pb-3' : 'h-24 border-b border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]'} flex flex-col justify-center px-4 md:px-6 bg-white dark:bg-black sticky top-0 z-40`}
           style={isMobile ? { paddingTop: 'max(env(safe-area-inset-top), 16px)' } : {}}
         >
           {isMobile ? (
@@ -1269,6 +1270,7 @@ export function Dashboard({
             </div>
           )}
         </header>
+        )}
 
 
         {/* Profile Menu Overlay */}
