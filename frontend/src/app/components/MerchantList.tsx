@@ -64,7 +64,7 @@ export function MerchantList() {
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         <Input 
-                            placeholder="Search businesses..." 
+                            placeholder="Search stores..." 
                             className="pl-9" 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
