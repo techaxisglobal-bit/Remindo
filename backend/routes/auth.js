@@ -697,7 +697,8 @@ router.post('/verify-phone-otp', auth, async (req, res) => {
 // Multer setup for profile picture upload using Cloudinary
 const multer = require('multer');
 const path = require('path');
-const { getStorage } = require('../config/cloudinary');
+const { getStorage, cloudinary } = require('../config/cloudinary');
+const Replicate = require("replicate");
 const storage = getStorage('profiles');
 
 const upload = multer({ 
@@ -729,7 +730,50 @@ router.post('/upload-profile-picture', auth, upload.single('profilePicture'), as
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        const imageUrl = req.file.path;
+        let imageUrl = req.file.path;
+        
+        if (process.env.REPLICATE_API_TOKEN) {
+            try {
+                const replicate = new Replicate({
+                    auth: process.env.REPLICATE_API_TOKEN,
+                });
+                
+                console.log('Sending image to Replicate...');
+                const output = await replicate.run(
+                    "cjwbw/animegan2-pytorch:8328b030b4da4813589af4813337f71120e23e206013a7da62b32f915cb1d31a",
+                    {
+                        input: {
+                            image: imageUrl,
+                            version: "paprika"
+                        }
+                    }
+                );
+                
+                let replicateImageUrl = null;
+                if (Array.isArray(output)) {
+                    const firstOut = output[0];
+                    if (firstOut && typeof firstOut.url === 'function') replicateImageUrl = firstOut.url().toString();
+                    else if (typeof firstOut === 'string') replicateImageUrl = firstOut;
+                } else if (output && typeof output.url === 'function') {
+                    replicateImageUrl = output.url().toString();
+                } else if (typeof output === 'string') {
+                    replicateImageUrl = output;
+                }
+
+                if (replicateImageUrl) {
+                    console.log('Replicate output received, uploading to Cloudinary...', replicateImageUrl);
+                    const uploadRes = await cloudinary.uploader.upload(replicateImageUrl, {
+                        folder: 'profiles'
+                    });
+                    imageUrl = uploadRes.secure_url;
+                } else {
+                    console.log('Replicate output not in expected format, output was:', output);
+                }
+            } catch (repErr) {
+                console.error('Replicate AI conversion failed, falling back to original image:', repErr);
+            }
+        }
+
         user.profilePictureUrl = imageUrl;
         await user.save();
 

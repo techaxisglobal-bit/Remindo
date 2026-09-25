@@ -149,32 +149,28 @@ export function SettingsPanel({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      onClick={onClose}
+      initial={{ x: '100%', opacity: 1 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: '100%', opacity: 1 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="fixed inset-0 bg-[#f8f9fa] dark:bg-[#0a0a0a] z-50 flex flex-col w-full h-full overflow-hidden"
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] bg-gradient-to-b from-white/40 to-white/10 dark:from-white/5 dark:to-transparent ring-1 ring-white/50 dark:ring-white/10"
+      {/* Header - Minimal & Clean */}
+      <div 
+        className="flex items-center justify-between px-6 pb-4 border-b border-gray-200 dark:border-white/[0.04] bg-white dark:bg-[#0a0a0a] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+        style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))' }}
       >
-        {/* Header - Minimal & Clean */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-black rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
+        <button
+          onClick={onClose}
+          className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1a1a] rounded-full transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-8 w-full max-w-2xl mx-auto">
 
           {/* Profile Section */}
           <section>
@@ -405,7 +401,6 @@ export function SettingsPanel({
           </section>
 
         </div>
-      </motion.div>
 
       <AnimatePresence>
         {showEditProfile && (
