@@ -148,25 +148,12 @@ export function SettingsPanel({
     : '';
 
   return (
-    <motion.div
-      initial={{ x: '100%', opacity: 1 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: '100%', opacity: 1 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-[#f8f9fa] dark:bg-[#0a0a0a] z-50 flex flex-col w-full h-full overflow-hidden"
-    >
+    <div className="flex flex-col w-full h-full overflow-hidden pb-32">
       {/* Header - Minimal & Clean */}
       <div 
-        className="flex items-center justify-between px-6 pb-4 border-b border-gray-200 dark:border-white/[0.04] bg-white dark:bg-[#0a0a0a] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-        style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))' }}
+        className="flex items-center justify-between px-6 pb-4 pt-8"
       >
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h2>
-        <button
-          onClick={onClose}
-          className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1a1a] rounded-full transition-colors"
-        >
-          <X className="w-6 h-6" />
-        </button>
       </div>
 
       {/* Content */}
@@ -411,6 +398,6 @@ export function SettingsPanel({
           />
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

@@ -139,7 +139,7 @@ export function Dashboard({
   const isMobile = useIsMobile();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
+
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -924,7 +924,7 @@ export function Dashboard({
               <TooltipContent side="right" hideArrow>Theme</TooltipContent>
             </Tooltip>
 
-            <button onClick={() => setShowSettings(true)} className="p-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <button onClick={() => setActiveView('settings')} className="p-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
               <Settings className="w-6 h-6" />
             </button>
           </div>
@@ -2248,7 +2248,7 @@ export function Dashboard({
               { id: 'groups', icon: UsersRound, label: 'Friends' },
               { id: 'add', icon: Plus, label: 'Add', isSpecial: true },
               { id: 'merchants', icon: BriefcaseBusiness, label: 'Stores' },
-              { id: 'settings', icon: SlidersHorizontal, label: 'Settings', isAction: true }
+              { id: 'settings', icon: SlidersHorizontal, label: 'Settings' }
             ].map((item) => {
               if (item.isSpecial) {
                 return (
@@ -2269,8 +2269,7 @@ export function Dashboard({
                 <button
                   key={item.id}
                   onClick={() => {
-                      if (item.id === 'settings') setShowSettings(true);
-                      else setActiveView(item.id as View);
+                      setActiveView(item.id as View);
                   }}
                   className={`flex flex-col items-center justify-center w-1/5 py-2.5 relative z-10 transition-colors duration-300 ${isActive && !item.isAction ? 'text-[#e0b596]' : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
                 >
@@ -2326,16 +2325,15 @@ export function Dashboard({
           }
 
           {
-            showSettings && (
+            activeView === 'settings' && (
               <SettingsPanel
                 user={user}
                 notificationsEnabled={notificationsEnabled}
                 onNotificationChange={onToggleNotifications}
-                onClose={() => setShowSettings(false)}
+                onClose={() => setActiveView('calendar')}
                 onUpdateUser={onUpdateUser}
                 onViewTasks={(view) => {
                   setActiveView(view);
-                  setShowSettings(false);
                 }}
               />
             )
