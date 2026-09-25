@@ -83,4 +83,35 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/friends/:id
+// @desc    Update a friend
+// @access  Private
+router.put('/:id', auth, async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ msg: 'Email is required' });
+        }
+
+        const friend = await Friend.findOne({ where: { id: req.params.id, userId: req.user.id } });
+        if (!friend) {
+            return res.status(404).json({ msg: 'Contact not found' });
+        }
+
+        // Check if the new email already exists for another friend of this user
+        const existingFriend = await Friend.findOne({ where: { userId: req.user.id, email: email.toLowerCase() } });
+        if (existingFriend && existingFriend.id !== friend.id) {
+            return res.status(400).json({ msg: 'Contact with this email already exists' });
+        }
+
+        friend.email = email.toLowerCase();
+        await friend.save();
+
+        res.json(friend);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

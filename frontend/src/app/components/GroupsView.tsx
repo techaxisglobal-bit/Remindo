@@ -21,6 +21,8 @@ export function GroupsView() {
     const [isFriendFormVisible, setIsFriendFormVisible] = useState(false);
     const [friendEmail, setFriendEmail] = useState('');
     const [friendName, setFriendName] = useState('');
+    const [editingFriendId, setEditingFriendId] = useState<string | null>(null);
+    const [editFriendEmail, setEditFriendEmail] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -118,6 +120,25 @@ export function GroupsView() {
             setIsFriendFormVisible(false);
         } catch (error: any) {
             toast.error(error?.data?.msg || 'Failed to add friend');
+        }
+    };
+
+    const handleEditFriend = async (friendId: string) => {
+        if (!editFriendEmail) {
+            toast.error('Email is required');
+            return;
+        }
+        try {
+            const updatedFriend = await fetchJson(`/api/friends/${friendId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ email: editFriendEmail })
+            });
+            setFriends(friends.map(f => String(f.id) === friendId ? { ...f, email: editFriendEmail } : f));
+            toast.success('Contact updated');
+            setEditingFriendId(null);
+            setEditFriendEmail('');
+        } catch (error: any) {
+            toast.error(error?.data?.msg || 'Failed to update contact');
         }
     };
 
@@ -371,13 +392,38 @@ export function GroupsView() {
                                                         {(friend.name || friend.email).charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-gray-900 dark:text-white truncate text-base">{friend.name || friend.email.split('@')[0]}</h3>
-                                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{friend.email}</p>
+                                                        {editingFriendId === String(friend.id) ? (
+                                                            <div className="flex gap-2 items-center">
+                                                                <input
+                                                                    type="email"
+                                                                    value={editFriendEmail}
+                                                                    onChange={e => setEditFriendEmail(e.target.value)}
+                                                                    className="flex-1 bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#e0b596] outline-none"
+                                                                    placeholder="New email"
+                                                                    autoFocus
+                                                                />
+                                                                <button onClick={() => handleEditFriend(String(friend.id))} className="text-xs bg-[#e0b596] text-white px-3 py-1.5 rounded-lg">Save</button>
+                                                                <button onClick={() => setEditingFriendId(null)} className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <h3 className="font-bold text-gray-900 dark:text-white truncate text-base">{friend.name || friend.email.split('@')[0]}</h3>
+                                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{friend.email}</p>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2 shrink-0">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <div className="flex items-center">
+                                                    <button onClick={() => {
+                                                        setEditingFriendId(String(friend.id));
+                                                        setEditFriendEmail(friend.email);
+                                                    }} className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 dark:bg-black rounded-lg transition-colors shrink-0">
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2 shrink-0">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
