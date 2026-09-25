@@ -413,17 +413,19 @@ export function GroupsView() {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <button onClick={() => {
-                                                        setEditingFriendId(String(friend.id));
-                                                        setEditFriendEmail(friend.email);
-                                                    }} className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 dark:bg-black rounded-lg transition-colors shrink-0">
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2 shrink-0">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
+                                                {editingFriendId !== String(friend.id) && (
+                                                    <div className="flex items-center shrink-0 ml-2">
+                                                        <button onClick={() => {
+                                                            setEditingFriendId(String(friend.id));
+                                                            setEditFriendEmail(friend.email);
+                                                        }} className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 dark:bg-black rounded-lg transition-colors">
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
