@@ -139,7 +139,116 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// @route   DELETE api/friends/:id
+// @route   POST api/friends/respond
+// @desc    Respond to a friend request
+// @access  Private
+router.post('/respond', auth, async (req, res) => {
+    const { token, action } = req.body; // action: 'accept' | 'decline'
+
+    if (!token || !action || !['accept', 'decline'].includes(action)) {
+        return res.status(400).json({ msg: 'Invalid parameters' });
+    }
+
+    try {
+        const FriendRequest = require('../models/FriendRequest');
+        const User = require('../models/User');
+        const sequelize = require('../config/db');
+
+        // Verify user exists
+        const user = await User.findByPk(req.user.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        const crypto = require('crypto');
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+        const result = await sequelize.transaction(async (t) => {
+            const reqRecord = await FriendRequest.findOne({
+                where: { tokenHash },
+                lock: t.LOCK.UPDATE,
+                transaction: t
+            });
+
+            if (!reqRecord) {
+                return { status: 404, data: { msg: 'Invitation not found' } };
+            }
+
+            if (reqRecord.expiresAt && new Date() > new Date(reqRecord.expiresAt)) {
+                return { status: 400, data: { msg: 'Invitation has expired' } };
+            }
+
+            if (user.email.toLowerCase() !== reqRecord.recipientEmail.toLowerCase()) {
+                return { status: 403, data: { msg: 'This invitation is not for your account' } };
+            }
+
+            if (action === 'decline') {
+                if (reqRecord.status === 'declined') {
+                    return { status: 400, data: { msg: 'Invitation already declined' } };
+                }
+                reqRecord.status = 'declined';
+                reqRecord.respondedAt = new Date();
+                await reqRecord.save({ transaction: t });
+
+                // Also update the sender's local Friend record status if it exists
+                const Friend = require('../models/Friend');
+                await Friend.update(
+                    { status: 'declined' },
+                    { where: { userId: reqRecord.senderId, email: reqRecord.recipientEmail }, transaction: t }
+                );
+
+                return { status: 200, data: { msg: 'Invitation declined' } };
+            }
+
+            // Accept flow
+            if (reqRecord.status === 'accepted') {
+                return { status: 400, data: { msg: 'Invitation already accepted' } };
+            }
+
+            reqRecord.status = 'accepted';
+            reqRecord.respondedAt = new Date();
+            await reqRecord.save({ transaction: t });
+
+            const Friend = require('../models/Friend');
+            
+            // Update sender's local Friend record
+            await Friend.update(
+                { status: 'accepted', contactUserId: user.id, name: user.name },
+                { where: { userId: reqRecord.senderId, email: reqRecord.recipientEmail }, transaction: t }
+            );
+
+            // Create mutual friend record for recipient
+            const senderUser = await User.findByPk(reqRecord.senderId, { transaction: t });
+            if (senderUser) {
+                await Friend.findOrCreate({
+                    where: { userId: user.id, email: senderUser.email },
+                    defaults: {
+                        contactUserId: senderUser.id,
+                        name: senderUser.name,
+                        status: 'accepted'
+                    },
+                    transaction: t
+                });
+
+                // Notify sender
+                const { createAppNotification } = require('../services/notificationService');
+                await createAppNotification(req.app.get('io'), {
+                    userId: senderUser.id,
+                    senderId: user.id,
+                    type: 'FriendAccepted',
+                    title: 'Friend Request Accepted',
+                    message: `${user.name} accepted your friend request!`,
+                    actionUrl: '/friends'
+                }).catch(err => console.error('Failed to send accept notification', err));
+            }
+
+            return { status: 200, data: { msg: 'Invitation accepted' } };
+        });
+
+        return res.status(result.status).json(result.data);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
 // @desc    Remove a friend
 // @access  Private
 router.delete('/:id', auth, async (req, res) => {
