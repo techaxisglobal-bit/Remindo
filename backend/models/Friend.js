@@ -26,6 +26,10 @@ const Friend = sequelize.define('Friend', {
     lastInvitedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
+    },
+    status: {
+        type: DataTypes.ENUM('pending', 'accepted'),
+        defaultValue: 'pending',
     }
 }, {
     timestamps: true,

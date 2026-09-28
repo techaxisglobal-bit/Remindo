@@ -7,6 +7,8 @@ const Group = require('./Group');
 const Friend = require('./Friend');
 
 
+const FriendRequest = require('./FriendRequest');
+
 // Associations
 User.hasMany(Task, { foreignKey: 'userId', as: 'tasks' });
 Task.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -30,6 +32,10 @@ User.hasMany(Friend, { foreignKey: 'userId', as: 'friends' });
 Friend.belongsTo(User, { foreignKey: 'userId', as: 'owner' });
 Friend.belongsTo(User, { foreignKey: 'contactUserId', as: 'contactUser' });
 
+User.hasMany(FriendRequest, { foreignKey: 'senderId', as: 'sentFriendRequests' });
+FriendRequest.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+User.hasMany(FriendRequest, { foreignKey: 'recipientUserId', as: 'receivedFriendRequests' });
+FriendRequest.belongsTo(User, { foreignKey: 'recipientUserId', as: 'recipient' });
 
 module.exports = {
     User,
@@ -38,5 +44,6 @@ module.exports = {
     Merchant,
     Notification,
     Group,
-    Friend
+    Friend,
+    FriendRequest
 };

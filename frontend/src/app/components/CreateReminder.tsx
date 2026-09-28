@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Switch } from '@/app/components/ui/switch';
 import { Task, Group } from '@/app/types';
+import { getCategoryForReminder, CATEGORIES, CategoryName } from '@/app/utils/reminderCategories';
 
 export interface Friend {
   id: string;
@@ -300,6 +301,9 @@ export function CreateReminder({
     return format(new Date(), 'HH:mm');
   });
 
+  const [selectedCategory, setSelectedCategory] = useState<CategoryName | null>(null);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+
   const [endDate, setEndDate] = useState(initialDate || format(new Date(), 'yyyy-MM-dd'));
   const [endTime, setEndTime] = useState(() => {
     const start = parse(initialTime || format(new Date(), 'HH:mm'), 'HH:mm', new Date());
@@ -552,13 +556,16 @@ export function CreateReminder({
       const metaData = JSON.stringify({ duration: finalDuration, selectedDays, isSpecial });
       const finalDescription = description.trim() ? `${description.trim()}\n\n<!-- metadata: ${metaData} -->` : `<!-- metadata: ${metaData} -->`;
 
+      const detectedCat = getCategoryForReminder(title, description);
+      const finalCategory = selectedCategory || detectedCat.id;
+
       const newTask: Task = {
         id: (Date.now() + Math.random()).toString(),
         title,
-        description: finalDescription,
+        description: finalCategory === 'general' ? finalDescription : finalDescription, // avoid unused error, use finalDescription
         date: dateStr,
         time: startTime,
-        category: 'general',
+        category: finalCategory,
         location: location,
         completed: false,
         createdAt: new Date().toISOString(),
@@ -633,6 +640,65 @@ return (
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+        </div>
+
+        {/* Category Picker */}
+        <div className="relative z-30">
+          <button
+            type="button"
+            onClick={() => setShowCategoryPicker(!showCategoryPicker)}
+            className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors bg-gray-50 dark:bg-[#0a0a0a] px-3 py-1.5 rounded-full border border-gray-100 dark:border-white/[0.04]"
+          >
+            {(() => {
+              const currentCatId = selectedCategory || getCategoryForReminder(title, description).id;
+              const cat = CATEGORIES.find(c => c.id === currentCatId);
+              if (!cat) return <span>Category</span>;
+              const Icon = cat.icon;
+              return (
+                <>
+                  <Icon size={14} style={{ color: cat.iconColor }} />
+                  <span>{cat.id}</span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                </>
+              );
+            })()}
+          </button>
+          
+          <AnimatePresence>
+            {showCategoryPicker && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowCategoryPicker(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: -5, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                  className="absolute left-0 mt-2 w-64 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] rounded-2xl shadow-2xl z-[100] max-h-60 overflow-y-auto custom-scrollbar p-2"
+                >
+                  <div className="grid grid-cols-2 gap-1">
+                    {CATEGORIES.map(cat => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCategory(cat.id);
+                          setShowCategoryPicker(false);
+                        }}
+                        className={`flex items-center gap-2 p-2 rounded-xl text-left transition-colors hover:bg-gray-50 dark:hover:bg-black border border-transparent ${
+                          (selectedCategory || getCategoryForReminder(title, description).id) === cat.id 
+                            ? 'bg-gray-50 dark:bg-black border-gray-200 dark:border-gray-800' : ''
+                        }`}
+                      >
+                        <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: cat.bgColor }}>
+                          <cat.icon size={12} style={{ color: cat.iconColor }} />
+                        </div>
+                        <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate">{cat.id}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="space-y-2">

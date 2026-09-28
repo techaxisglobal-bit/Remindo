@@ -75,6 +75,7 @@ import {
 
 import { Task, User as UserType } from '@/app/types';
 import { TaskDetails } from '@/app/components/TaskDetails';
+import { ReminderCard } from '@/app/components/ReminderCard';
 import { SettingsPanel } from '@/app/components/SettingsPanel';
 import { GroupsView } from '@/app/components/GroupsView';
 import { CreateReminder } from '@/app/components/CreateReminder';
@@ -1487,52 +1488,14 @@ export function Dashboard({
                                           const cleanDesc = task.description ? task.description.replace(/<!-- metadata: .*? -->/g, '').trim() : '';
                                           const hasDesc = cleanDesc.length > 0;
                                           return (
-                                            <div
-                                              key={task.id}
-                                              onMouseDown={(e) => e.stopPropagation()}
-                                              onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                              className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 group transition-all active:scale-[0.98] ${task.completed ? 'bg-gray-50/50 dark:bg-black border-gray-100 dark:border-gray-800' : 'bg-white dark:bg-black border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] shadow-sm'}`}
-                                            >
-                                              {/* Time & Duration (Left) */}
-                                              <div className="flex flex-col items-center min-w-[64px] text-center">
-                                                <span className={`text-[10px] md:text-xs font-bold leading-none ${task.completed ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                                                  {task.time ? format(parse(task.time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
-                                                </span>
-                                                <span className="text-[10px] text-gray-400 mt-1">
-                                                  {(() => {
-                                                    const match = task.description?.match(/<!-- metadata: (.+) -->/);
-                                                    if (match) {
-                                                      try {
-                                                        const meta = JSON.parse(match[1]);
-                                                        if (meta.duration) return `${meta.duration} min`;
-                                                      } catch (e) { }
-                                                    }
-                                                    return '30 min';
-                                                  })()}
-                                                </span>
-                                              </div>
-
-                                              {/* Colored Bar */}
-                                              <div className={`w-1 ${hasDesc ? 'h-10' : 'h-6'} rounded-full flex-shrink-0 ${task.completed ? 'bg-gray-300' :
-                                                isBefore(setMinutes(setHours(startOfDay(parseTaskDate(task.date)), parseInt(task.time?.split(':')[0] || '0')), parseInt(task.time?.split(':')[1] || '0')), subMinutes(new Date(), 1)) ?
-                                                  'bg-amber-500' : 'bg-[#e0b596]'
-                                                }`} />
-
-                                              {/* Title (Right) */}
-                                              <div className="flex-1 min-w-0">
-                                                <h4 className={`font-bold text-sm md:text-base truncate ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
-                                                  {task.title}
-                                                </h4>
-                                                {hasDesc && (
-                                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
-                                                    {cleanDesc}
-                                                  </p>
-                                                )}
-                                              </div>
-                                              <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                            </div>
-                                          )
-                                        })}
+                                              <ReminderCard
+                                                key={task.id}
+                                                task={task}
+                                                onClick={(t) => setSelectedTask(t)}
+                                                onToggleComplete={onToggleComplete}
+                                              />
+                                            )
+                                          })}
                                       {dayTasks.length > 2 && (
                                         <button
                                           onClick={(e) => {

@@ -1,12 +1,13 @@
 import { fetchWithAuth } from '../../utils/apiClient';
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Edit2, Users } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Users, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { Group } from '../types';
 import { Friend } from './CreateReminder';
 import { API_BASE_URL } from '../api';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getGroupType, GROUP_TYPES, GroupTypeName } from '../utils/groupTypes';
 
 export function GroupsView() {
     const [groups, setGroups] = useState<Group[]>([]);
@@ -24,6 +25,8 @@ export function GroupsView() {
     const [editingFriendId, setEditingFriendId] = useState<string | null>(null);
     const [editFriendEmail, setEditFriendEmail] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [selectedGroupType, setSelectedGroupType] = useState<GroupTypeName | null>(null);
+    const [showGroupTypePicker, setShowGroupTypePicker] = useState(false);
 
     useEffect(() => {
         fetchGroups();
@@ -68,18 +71,19 @@ export function GroupsView() {
             return;
         }
 
+        const finalType = selectedGroupType || getGroupType(groupName).id;
         try {
             if (editingGroup) {
                 const updated = await fetchJson(`/api/groups/${editingGroup.id}`, {
                     method: 'PUT',
-                    body: JSON.stringify({ name: groupName, members })
+                    body: JSON.stringify({ name: groupName, members, groupType: finalType })
                 });
                 setGroups(prev => prev.map(g => g.id === updated.id ? updated : g));
                 toast.success('Group updated');
             } else {
                 const newGroup = await fetchJson('/api/groups', {
                     method: 'POST',
-                    body: JSON.stringify({ name: groupName, members })
+                    body: JSON.stringify({ name: groupName, members, groupType: finalType })
                 });
                 setGroups(prev => [newGroup, ...prev]);
                 toast.success('Group created');
@@ -157,6 +161,7 @@ export function GroupsView() {
         setEditingGroup(group);
         setGroupName(group.name);
         setMembers(group.members || []);
+        setSelectedGroupType(group.groupType as GroupTypeName || null);
         setIsFormVisible(true);
     };
 
@@ -184,6 +189,7 @@ export function GroupsView() {
         setGroupName('');
         setMembers([]);
         setMemberInput('');
+        setSelectedGroupType(null);
         setIsFormVisible(false);
     };
 
@@ -248,6 +254,65 @@ export function GroupsView() {
                                         />
                                     </div>
 
+                                    {/* Group Type Picker */}
+                                    <div className="relative z-30">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowGroupTypePicker(!showGroupTypePicker)}
+                                            className="flex items-center gap-2 text-[12px] font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors bg-gray-50 dark:bg-[#0a0a0a] px-3 py-1.5 rounded-full border border-gray-100 dark:border-white/[0.04]"
+                                        >
+                                            {(() => {
+                                                const currentCatId = selectedGroupType || getGroupType(groupName || '').id;
+                                                const cat = GROUP_TYPES.find(c => c.id === currentCatId);
+                                                if (!cat) return <span>Group Type</span>;
+                                                const Icon = cat.icon;
+                                                return (
+                                                    <>
+                                                        <Icon size={14} style={{ color: cat.iconColor }} />
+                                                        <span>{cat.id}</span>
+                                                        <ChevronDown className="w-3 h-3 text-gray-400" />
+                                                    </>
+                                                );
+                                            })()}
+                                        </button>
+                                        
+                                        <AnimatePresence>
+                                            {showGroupTypePicker && (
+                                                <>
+                                                    <div className="fixed inset-0 z-40" onClick={() => setShowGroupTypePicker(false)} />
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: -5, scale: 0.98 }}
+                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                        exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                                                        className="absolute left-0 mt-2 w-64 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/[0.04] rounded-2xl shadow-2xl z-[100] max-h-60 overflow-y-auto custom-scrollbar p-2"
+                                                    >
+                                                        <div className="grid grid-cols-2 gap-1">
+                                                            {GROUP_TYPES.map(cat => (
+                                                                <button
+                                                                    key={cat.id}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setSelectedGroupType(cat.id);
+                                                                        setShowGroupTypePicker(false);
+                                                                    }}
+                                                                    className={`flex items-center gap-2 p-2 rounded-xl text-left transition-colors hover:bg-gray-50 dark:hover:bg-black border border-transparent ${
+                                                                        (selectedGroupType || getGroupType(groupName || '').id) === cat.id 
+                                                                            ? 'bg-gray-50 dark:bg-black border-gray-200 dark:border-gray-800' : ''
+                                                                    }`}
+                                                                >
+                                                                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: cat.bgColor }}>
+                                                                        <cat.icon size={12} style={{ color: cat.iconColor }} />
+                                                                    </div>
+                                                                    <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate">{cat.id}</span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </motion.div>
+                                                </>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Members (Emails)</label>
                                         <div className="flex gap-2 mb-2">
@@ -276,6 +341,9 @@ export function GroupsView() {
 
                                     <div className="flex gap-3 pt-6">
                                         <Button type="button" onClick={resetForm} variant="ghost" className="flex-1 py-6 rounded-xl font-semibold">Cancel</Button>
+                                        {editingGroup && (
+                                            <Button type="button" onClick={() => { handleDeleteGroup(editingGroup.id); resetForm(); }} variant="ghost" className="flex-1 py-6 rounded-xl font-semibold text-red-500 hover:bg-red-50 hover:text-red-600">Delete</Button>
+                                        )}
                                         <Button type="submit" className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-6 rounded-xl font-semibold">Save Group</Button>
                                     </div>
                                 </form>
@@ -283,7 +351,7 @@ export function GroupsView() {
                         ) : activeTab === 'groups' ? (
                             <div className="max-w-3xl mx-auto">
                                 <div className="mb-6 flex justify-end">
-                                    <Button onClick={() => setIsFormVisible(true)} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white flex items-center gap-2 rounded-xl px-5 py-5 font-semibold shadow-sm hover:shadow-md">
+                                    <Button onClick={() => setIsFormVisible(true)} className="bg-gradient-to-r from-[#D9AD86] to-[#C99A70] text-white flex items-center gap-2 rounded-[14px] px-5 py-5 font-bold shadow-sm hover:shadow-md transition-all">
                                         <Plus className="w-4 h-4" /> Create New Group
                                     </Button>
                                 </div>
@@ -305,37 +373,33 @@ export function GroupsView() {
                                         <p>You haven't created any groups yet. Create one to easily share tasks!</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {groups.map(group => (
-                                            <div key={group.id} className="bg-white dark:bg-[#0a0a0a] p-5 rounded-2xl border border-gray-100 dark:border-white/[0.04] shadow-sm hover:shadow-md hover:border-[#e0b596]/30 transition-all flex flex-col justify-between">
-                                                <div>
-                                                    <div className="flex justify-between items-start mb-3">
-                                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{group.name}</h3>
-                                                        <div className="flex gap-1.5">
-                                                            <button onClick={() => handleEditGroup(group)} className="p-2 text-gray-400 hover:text-[#e0b596] bg-gray-50 dark:bg-black rounded-lg transition-colors">
-                                                                <Edit2 className="w-4 h-4" />
-                                                            </button>
-                                                            <button onClick={() => handleDeleteGroup(group.id)} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1.5 mb-2">
-                                                        {group.members?.slice(0, 3).map(m => (
-                                                            <span key={m} className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 text-xs font-bold ring-2 ring-teal-500 dark:ring-teal-400 border-2 border-white dark:border-[#0a0a0a] -ml-2 first:ml-0 shadow-sm" title={m}>
-                                                                {m.charAt(0).toUpperCase()}
-                                                            </span>
-                                                        ))}
-                                                        {(group.members?.length || 0) > 3 && (
-                                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold ring-2 ring-gray-300 dark:ring-gray-600 border-2 border-white dark:border-[#0a0a0a] -ml-2 shadow-sm">
-                                                                +{(group.members?.length || 0) - 3}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                    <div className="flex flex-col gap-3.5">
+                                        {groups.map(group => {
+                                            const groupTypeConfig = GROUP_TYPES.find(g => g.id === group.groupType) || getGroupType(group.name);
+                                            const IconComponent = groupTypeConfig.icon;
+                                            return (
+                                            <div key={group.id} className="bg-white dark:bg-[#0a0a0a] p-4 rounded-[20px] shadow-sm flex items-center gap-4 transition-all hover:shadow-md cursor-pointer border border-transparent dark:border-white/[0.04]" onClick={() => handleEditGroup(group)}>
+                                                {/* Icon Avatar */}
+                                                <div 
+                                                    className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" 
+                                                    style={{ backgroundColor: groupTypeConfig.bgColor }}
+                                                >
+                                                    <IconComponent size={24} style={{ color: groupTypeConfig.iconColor }} strokeWidth={2} />
                                                 </div>
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2">{group.members?.length || 0} members</p>
+                                                
+                                                {/* Details */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-[17px] font-bold text-gray-900 dark:text-gray-100 truncate">{group.name}</h3>
+                                                    <p className="text-[13px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">{group.members?.length || 0} members</p>
+                                                </div>
+                                                
+                                                {/* Chevron */}
+                                                <div className="shrink-0 flex items-center">
+                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                                </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

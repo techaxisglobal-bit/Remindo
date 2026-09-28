@@ -36,7 +36,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // @route   POST api/friends
-// @desc    Add a friend manually
+// @desc    Add a friend manually / Send friend request
 // @access  Private
 router.post('/', auth, async (req, res) => {
     try {
@@ -44,23 +44,97 @@ router.post('/', auth, async (req, res) => {
         if (!email) {
             return res.status(400).json({ msg: 'Email is required' });
         }
+        
+        const cleanEmail = email.toLowerCase().trim();
 
-        // Check if already exists
-        let friend = await Friend.findOne({ where: { userId: req.user.id, email: email.toLowerCase() } });
-        if (friend) {
-            return res.status(400).json({ msg: 'Contact already exists' });
+        // Prevent self-invite
+        const senderUser = await require('../models/User').findByPk(req.user.id);
+        if (cleanEmail === senderUser.email.toLowerCase()) {
+            return res.status(400).json({ msg: 'You cannot invite yourself' });
         }
 
-        friend = await Friend.create({
-            userId: req.user.id,
-            email: email.toLowerCase(),
-            name: name || email.split('@')[0],
-            lastInvitedAt: new Date()
-        });
+        // Check if already friends
+        let friend = await Friend.findOne({ where: { userId: req.user.id, email: cleanEmail } });
+        if (friend && friend.status === 'accepted') {
+            return res.status(400).json({ msg: 'Already in your friends' });
+        }
 
-        res.json(friend);
+        const FriendRequest = require('../models/FriendRequest');
+        // Check if pending request exists
+        const existingReq = await FriendRequest.findOne({
+            where: { senderId: req.user.id, recipientEmail: cleanEmail, status: 'pending' }
+        });
+        if (existingReq) {
+            // Check cooldown (e.g., 24 hours)
+            if (existingReq.createdAt && new Date() - existingReq.createdAt < 24 * 60 * 60 * 1000) {
+                return res.status(400).json({ msg: 'An invitation is already pending. Please wait 24h to resend.' });
+            }
+            // If cooldown passed, we could update it, but let's just proceed to send again
+            existingReq.createdAt = new Date();
+            await existingReq.save();
+        }
+
+        // Generate token
+        const crypto = require('crypto');
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        
+        // Expiry 7 days
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        // Check if user exists
+        const recipientUser = await require('../models/User').findOne({ where: { email: cleanEmail } });
+
+        let reqRecord = existingReq;
+        if (!reqRecord) {
+            reqRecord = await FriendRequest.create({
+                senderId: req.user.id,
+                recipientUserId: recipientUser ? recipientUser.id : null,
+                recipientEmail: cleanEmail,
+                status: 'pending',
+                tokenHash,
+                expiresAt
+            });
+        }
+
+        // Create or update Friend record for the sender
+        if (!friend) {
+            friend = await Friend.create({
+                userId: req.user.id,
+                contactUserId: recipientUser ? recipientUser.id : null,
+                email: cleanEmail,
+                name: name || cleanEmail.split('@')[0],
+                status: 'pending',
+                lastInvitedAt: new Date()
+            });
+        } else {
+            friend.status = 'pending';
+            friend.lastInvitedAt = new Date();
+            await friend.save();
+        }
+
+        if (recipientUser) {
+            // In-app notification
+            const { createAppNotification } = require('../services/notificationService');
+            await createAppNotification(req.app.get('io'), {
+                userId: recipientUser.id,
+                senderId: req.user.id,
+                type: 'FriendRequest',
+                title: 'New Friend Request',
+                message: `${senderUser.name || 'A user'} sent you a friend request.`,
+                actionUrl: `/friend-requests?token=${rawToken}` // Send raw token in action url
+            });
+        } else {
+            // Email invitation
+            const { sendFriendRequest } = require('../services/emailService');
+            const frontendUrl = process.env.FRONTEND_URL || 'https://web.remaindo.com';
+            await sendFriendRequest(cleanEmail, senderUser.name || senderUser.email, frontendUrl, rawToken);
+        }
+
+        res.json({ msg: 'Invitation sent', friend });
     } catch (err) {
-        console.error(err.message);
+        console.error(err);
         res.status(500).send('Server Error');
     }
 });

@@ -142,7 +142,63 @@ const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
     }
 };
 
+const sendFriendRequest = async (email, senderName, frontendUrl, token) => {
+    const acceptUrl = `${frontendUrl}/friend-invite?token=${token}&action=accept`;
+    const declineUrl = `${frontendUrl}/friend-invite?token=${token}&action=decline`;
+    
+    if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
+        console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for friend invitation.');
+        console.log(`\n\n=== FRIEND INVITATION MOCK EMAIL ===\nTo: ${email}\nSender: ${senderName}\nToken: ${token}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
+        return;
+    }
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 20px; padding: 24px; text-align: center; border: 1px solid #ddd;">
+                <h2 style="color: #333; margin-bottom: 20px;">You have a new friend request!</h2>
+                <p style="color: #555; font-size: 16px; margin-bottom: 30px;">
+                    <strong>${senderName}</strong> wants to connect with you on Remindo.
+                </p>
+                <div style="margin-bottom: 20px;">
+                    <a href="${acceptUrl}" style="background-color: #C99A70; color: white; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: bold; margin-right: 10px; display: inline-block;">Accept</a>
+                    <a href="${declineUrl}" style="background-color: #eee; color: #555; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Decline</a>
+                </div>
+                <p style="color: #999; font-size: 12px; margin-top: 30px;">
+                    If you don't know this person, you can safely ignore this email.
+                </p>
+            </div>
+        </div>
+    `;
+
+    try {
+        const graphToken = await getGraphToken();
+        const sender = process.env.MICROSOFT_GRAPH_SENDER || 'contact@techaxisglobal.com';
+
+        await axios.post(
+            `https://graph.microsoft.com/v1.0/users/${sender}/sendMail`,
+            {
+                message: {
+                    subject: `${senderName} invited you to connect on Remindo`,
+                    body: { contentType: "HTML", content: htmlContent },
+                    toRecipients: [{ emailAddress: { address: email } }]
+                },
+                saveToSentItems: "false"
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${graphToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log(`Friend invitation sent successfully to ${email} via Microsoft Graph API.`);
+    } catch (error) {
+        console.error('Error sending friend invitation via Microsoft Graph API:', error.response ? JSON.stringify(error.response.data) : error.message);
+    }
+};
+
 module.exports = {
     sendOTP,
     sendInvitation,
+    sendFriendRequest,
 };
