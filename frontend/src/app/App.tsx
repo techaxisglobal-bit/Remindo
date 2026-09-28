@@ -73,7 +73,11 @@ export default function App() {
     };
 
     window.addEventListener('auth-expired', handleAuthExpired);
-    return () => window.removeEventListener('auth-expired', handleAuthExpired);
+    window.addEventListener('refresh-tasks', fetchTasks);
+    return () => {
+      window.removeEventListener('auth-expired', handleAuthExpired);
+      window.removeEventListener('refresh-tasks', fetchTasks);
+    };
   }, []);
 
   useEffect(() => {

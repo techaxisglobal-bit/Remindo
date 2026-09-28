@@ -128,6 +128,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
             });
             setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, status: 'Accepted' } : n));
             toast.success('Invitation accepted');
+            window.dispatchEvent(new Event('refresh-tasks'));
         } catch (error: any) {
             toast.error(error.response?.data?.msg || 'Failed to accept invitation');
         }

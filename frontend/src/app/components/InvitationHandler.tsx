@@ -38,6 +38,7 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.msg || 'Failed to process invitation.');
                     toast.success(data.msg || 'Invitation processed successfully!');
+                    window.dispatchEvent(new Event('refresh-tasks'));
                     onNavigate('/dashboard');
                 } catch (err: any) {
                     setError(err.message || 'Failed to process invitation.');

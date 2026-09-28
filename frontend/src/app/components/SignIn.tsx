@@ -85,6 +85,7 @@ export function SignIn({ onSignIn }: SignInProps) {
           body: JSON.stringify({ token: inviteToken, action: inviteAction })
         });
         toast.success(`Invitation ${inviteAction}ed successfully!`);
+        window.dispatchEvent(new Event('refresh-tasks'));
       } catch (err) {
         console.error('Failed to process pending invitation', err);
         toast.error('Failed to process invitation automatically. Please check your dashboard.');
