@@ -162,12 +162,12 @@ router.post('/', auth, async (req, res) => {
                 message: `${senderUser.name || 'A user'} sent you a friend request.`,
                 actionUrl: `/friend-requests?token=${rawToken}` // Send raw token in action url
             });
-        } else {
-            // Email invitation
-            const { sendFriendRequest } = require('../services/emailService');
-            const frontendUrl = process.env.FRONTEND_URL || 'https://web.remaindo.com';
-            await sendFriendRequest(cleanEmail, senderUser.name || senderUser.email, frontendUrl, rawToken);
         }
+        
+        // ALWAYS send email invitation, regardless of whether they have an account
+        const { sendFriendRequest } = require('../services/emailService');
+        const frontendUrl = process.env.FRONTEND_URL || 'https://web.remaindo.com';
+        await sendFriendRequest(cleanEmail, senderUser.name || senderUser.email, frontendUrl, rawToken);
 
         res.json({ msg: 'Invitation sent', friend });
     } catch (err) {

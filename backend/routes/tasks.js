@@ -138,9 +138,10 @@ router.post('/', auth, async (req, res) => {
                         relatedTaskId: task.id,
                         actionUrl: `/invitation/${record.token}`
                     }).catch(err => console.error('Error creating app notification:', err));
-                } else {
-                    sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
                 }
+                
+                // ALWAYS send email invitation
+                sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation in background:', err));
             }
             
             // Save friends
@@ -201,9 +202,10 @@ router.post('/:id/resend', auth, async (req, res) => {
                 relatedTaskId: task.id,
                 actionUrl: `/invitation/${attendee.token}`
             });
-        } else {
-            await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
         }
+        
+        // ALWAYS send email invitation
+        await sendInvitation(email, task, creatorName, frontendUrl, attendee.token);
         res.json({ msg: 'Invitation resent' });
     } catch (err) {
         console.error(err.message);
@@ -307,9 +309,10 @@ router.put('/:id', auth, async (req, res) => {
                             relatedTaskId: task.id,
                             actionUrl: `/invitation/${record.token}`
                         }).catch(err => console.error('Error creating app notification:', err));
-                    } else {
-                        sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation:', err));
                     }
+                    
+                    // ALWAYS send email invitation
+                    sendInvitation(record.email, task, creatorName, frontendUrl, record.token).catch(err => console.error('Error sending invitation:', err));
                 }
                 
                 // Save friends
