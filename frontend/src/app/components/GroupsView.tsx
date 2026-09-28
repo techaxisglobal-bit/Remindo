@@ -113,10 +113,11 @@ export function GroupsView() {
         }
 
         try {
-            const newFriend = await fetchJson('/api/friends', {
+            const response = await fetchJson('/api/friends', {
                 method: 'POST',
                 body: JSON.stringify({ email: friendEmail, name: friendName })
             });
+            const newFriend = response.friend || response;
             setFriends(prev => [newFriend, ...prev]);
             toast.success('Friend added');
             setFriendEmail('');
