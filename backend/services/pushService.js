@@ -69,16 +69,19 @@ const sendPushNotification = async (target, payload) => {
                         android: {
                             priority: 'high',
                             notification: {
-                                sound: 'mixkit-sci-fi-reject-notification-896.caf',
+                                sound: 'default',
                                 channelId: 'remindo_alerts'
                             }
                         },
                         apns: {
                             payload: {
                                 aps: {
-                                    sound: 'mixkit-sci-fi-reject-notification-896.caf',
-                                    badge: 1,
-                                    'content-available': 1
+                                    alert: {
+                                        title: payload.title,
+                                        body: payload.body
+                                    },
+                                    sound: 'default',
+                                    badge: 1
                                 }
                             }
                         },
