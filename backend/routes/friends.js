@@ -240,7 +240,6 @@ router.post('/respond', auth, async (req, res) => {
                 await reqRecord.save({ transaction: t });
 
                 // Also update the sender's local Friend record status if it exists
-                const Friend = require('../models/Friend');
                 await Friend.update(
                     { status: 'declined' },
                     { where: { userId: reqRecord.senderId, email: reqRecord.recipientEmail }, transaction: t }
@@ -258,8 +257,6 @@ router.post('/respond', auth, async (req, res) => {
             reqRecord.respondedAt = new Date();
             await reqRecord.save({ transaction: t });
 
-            const Friend = require('../models/Friend');
-            
             // Update sender's local Friend record
             await Friend.update(
                 { status: 'accepted', contactUserId: user.id, name: user.name },
