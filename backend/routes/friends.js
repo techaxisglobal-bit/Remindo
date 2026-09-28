@@ -167,7 +167,7 @@ router.post('/', auth, async (req, res) => {
         // ALWAYS send email invitation, regardless of whether they have an account
         const { sendFriendRequest } = require('../services/emailService');
         const frontendUrl = process.env.FRONTEND_URL || 'https://web.remaindo.com';
-        await sendFriendRequest(cleanEmail, senderUser.name || senderUser.email, frontendUrl, rawToken);
+        sendFriendRequest(cleanEmail, senderUser.name || senderUser.email, frontendUrl, rawToken).catch(err => console.error('Background email failed:', err));
 
         res.json({ msg: 'Invitation sent', friend });
     } catch (err) {

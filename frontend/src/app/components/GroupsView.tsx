@@ -23,6 +23,7 @@ export function GroupsView() {
     const [isFriendFormVisible, setIsFriendFormVisible] = useState(false);
     const [friendEmail, setFriendEmail] = useState('');
     const [friendName, setFriendName] = useState('');
+    const [isSubmittingFriend, setIsSubmittingFriend] = useState(false);
     const [editingFriendId, setEditingFriendId] = useState<string | null>(null);
     const [editFriendEmail, setEditFriendEmail] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -115,6 +116,7 @@ export function GroupsView() {
             return;
         }
 
+        setIsSubmittingFriend(true);
         try {
             const response = await fetchJson('/api/friends', {
                 method: 'POST',
@@ -128,6 +130,8 @@ export function GroupsView() {
             setIsFriendFormVisible(false);
         } catch (error: any) {
             toast.error(error?.data?.msg || 'Failed to add friend');
+        } finally {
+            setIsSubmittingFriend(false);
         }
     };
 
@@ -450,7 +454,9 @@ export function GroupsView() {
                                             </div>
                                             <div className="flex gap-3">
                                                 <Button type="button" onClick={() => setIsFriendFormVisible(false)} variant="ghost" className="flex-1 py-4 rounded-xl font-semibold">Cancel</Button>
-                                                <Button type="submit" className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">Save Contact</Button>
+                                                <Button type="submit" disabled={isSubmittingFriend} className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">
+                                                    {isSubmittingFriend ? 'Saving...' : 'Save Contact'}
+                                                </Button>
                                             </div>
                                         </form>
                                     </div>
