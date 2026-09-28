@@ -11,7 +11,8 @@ import { getGroupType, GROUP_TYPES, GroupTypeName } from '../utils/groupTypes';
 
 export function GroupsView() {
     const [groups, setGroups] = useState<Group[]>([]);
-    const [friends, setFriends] = useState<Friend[]>([]);
+    const [friends, setFriends] = useState<any[]>([]);
+    const [friendRequests, setFriendRequests] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'groups' | 'friends'>('friends');
     const [isLoading, setIsLoading] = useState(true);
     const [editingGroup, setEditingGroup] = useState<Group | null>(null);
@@ -47,12 +48,14 @@ export function GroupsView() {
         setIsLoading(true);
         setError(null);
         try {
-            const [groupsData, friendsData] = await Promise.all([
+            const [groupsData, friendsData, requestsData] = await Promise.all([
                 fetchJson('/api/groups'),
-                fetchJson('/api/friends')
+                fetchJson('/api/friends'),
+                fetchJson('/api/friends/requests').catch(() => [])
             ]);
             setGroups(groupsData);
             setFriends(friendsData);
+            setFriendRequests(requestsData || []);
         } catch (error: any) {
             let msg = 'Server error. Please try again later.';
             if (error?.status === 401) msg = 'Session expired. Please log in again.';
@@ -144,6 +147,19 @@ export function GroupsView() {
             setEditFriendEmail('');
         } catch (error: any) {
             toast.error(error?.data?.msg || 'Failed to update contact');
+        }
+    };
+
+    const handleRespondToRequest = async (token: string, action: 'accept' | 'decline') => {
+        try {
+            await fetchJson('/api/friends/respond', {
+                method: 'POST',
+                body: JSON.stringify({ token, action })
+            });
+            toast.success(action === 'accept' ? 'Friend request accepted!' : 'Friend request declined');
+            fetchGroups(); // Refresh both friends and requests lists
+        } catch (error: any) {
+            toast.error(error?.data?.msg || 'Failed to respond to request');
         }
     };
 
@@ -437,6 +453,31 @@ export function GroupsView() {
                                                 <Button type="submit" className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">Save Contact</Button>
                                             </div>
                                         </form>
+                                    </div>
+                                )}
+
+                                {friendRequests.length > 0 && (
+                                    <div className="mb-8">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Pending Requests</h3>
+                                        <div className="space-y-3">
+                                            {friendRequests.map(request => (
+                                                <div key={request.id} className="bg-[#e0b596]/10 p-4 rounded-2xl border border-[#e0b596]/20 flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-full bg-[#e0b596] text-white flex items-center justify-center font-bold">
+                                                            {request.senderName ? request.senderName.charAt(0).toUpperCase() : '?'}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-gray-900 dark:text-white">{request.senderName}</p>
+                                                            <p className="text-xs text-gray-500">{request.senderEmail}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <Button onClick={() => handleRespondToRequest(request.token, 'accept')} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-xs px-3 h-8">Accept</Button>
+                                                        <Button onClick={() => handleRespondToRequest(request.token, 'decline')} variant="ghost" className="text-xs px-3 h-8 text-gray-500">Decline</Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
 

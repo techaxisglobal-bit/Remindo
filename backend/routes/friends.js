@@ -35,6 +35,43 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/friends/requests
+// @desc    Get all incoming pending friend requests
+// @access  Private
+router.get('/requests', auth, async (req, res) => {
+    try {
+        const requests = await Friend.findAll({
+            where: {
+                contactUserId: req.user.id,
+                status: 'pending'
+            },
+            order: [['createdAt', 'DESC']]
+        });
+        
+        // We need the sender's details.
+        const { User } = require('../models');
+        
+        const enrichedRequests = await Promise.all(requests.map(async (reqRow) => {
+            const sender = await User.findByPk(reqRow.userId, {
+                attributes: ['id', 'name', 'email']
+            });
+            
+            return {
+                id: reqRow.id,
+                senderId: sender ? sender.id : null,
+                senderName: sender ? sender.name : 'Unknown User',
+                senderEmail: sender ? sender.email : 'Unknown Email',
+                token: reqRow.token // For accepting/declining
+            };
+        }));
+        
+        res.json(enrichedRequests);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   POST api/friends
 // @desc    Add a friend manually / Send friend request
 // @access  Private
