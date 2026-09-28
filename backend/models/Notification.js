@@ -26,7 +26,7 @@ const Notification = sequelize.define('Notification', {
         onDelete: 'SET NULL'
     },
     type: {
-        type: DataTypes.ENUM('Reminder', 'Invitation', 'Shared Reminder', 'System'),
+        type: DataTypes.ENUM('Reminder', 'Invitation', 'Shared Reminder', 'System', 'FriendRequest', 'FriendAccepted'),
         allowNull: false,
         defaultValue: 'System'
     },
