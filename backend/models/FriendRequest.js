@@ -9,19 +9,11 @@ const FriendRequest = sequelize.define('FriendRequest', {
     },
     senderId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Users',
-            key: 'id'
-        }
+        allowNull: false
     },
     recipientUserId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Users',
-            key: 'id'
-        }
+        allowNull: true
     },
     recipientEmail: {
         type: DataTypes.STRING,
