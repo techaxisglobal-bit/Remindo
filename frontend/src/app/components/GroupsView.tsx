@@ -150,11 +150,11 @@ export function GroupsView() {
         }
     };
 
-    const handleRespondToRequest = async (token: string, action: 'accept' | 'decline') => {
+    const handleRespondToRequest = async (requestId: string | number, action: 'accept' | 'decline') => {
         try {
             await fetchJson('/api/friends/respond', {
                 method: 'POST',
-                body: JSON.stringify({ token, action })
+                body: JSON.stringify({ requestId, action })
             });
             toast.success(action === 'accept' ? 'Friend request accepted!' : 'Friend request declined');
             fetchGroups(); // Refresh both friends and requests lists
@@ -472,8 +472,8 @@ export function GroupsView() {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        <Button onClick={() => handleRespondToRequest(request.token, 'accept')} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-xs px-3 h-8">Accept</Button>
-                                                        <Button onClick={() => handleRespondToRequest(request.token, 'decline')} variant="ghost" className="text-xs px-3 h-8 text-gray-500">Decline</Button>
+                                                        <Button onClick={() => handleRespondToRequest(request.id, 'accept')} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-xs px-3 h-8">Accept</Button>
+                                                        <Button onClick={() => handleRespondToRequest(request.id, 'decline')} variant="ghost" className="text-xs px-3 h-8 text-gray-500">Decline</Button>
                                                     </div>
                                                 </div>
                                             ))}

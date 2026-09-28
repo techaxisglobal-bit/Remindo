@@ -180,30 +180,44 @@ router.post('/', auth, async (req, res) => {
 // @desc    Respond to a friend request
 // @access  Private
 router.post('/respond', auth, async (req, res) => {
-    const { token, action } = req.body; // action: 'accept' | 'decline'
+    const { token, requestId, action } = req.body; // action: 'accept' | 'decline'
 
-    if (!token || !action || !['accept', 'decline'].includes(action)) {
+    if ((!token && !requestId) || !action || !['accept', 'decline'].includes(action)) {
         return res.status(400).json({ msg: 'Invalid parameters' });
     }
 
     try {
         const FriendRequest = require('../models/FriendRequest');
         const User = require('../models/User');
+        const Friend = require('../models/Friend');
         const sequelize = require('../config/db');
 
         // Verify user exists
         const user = await User.findByPk(req.user.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
 
-        const crypto = require('crypto');
-        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-
         const result = await sequelize.transaction(async (t) => {
-            const reqRecord = await FriendRequest.findOne({
-                where: { tokenHash },
-                lock: t.LOCK.UPDATE,
-                transaction: t
-            });
+            let reqRecord;
+            
+            if (token) {
+                const crypto = require('crypto');
+                const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+                reqRecord = await FriendRequest.findOne({
+                    where: { tokenHash },
+                    lock: t.LOCK.UPDATE,
+                    transaction: t
+                });
+            } else if (requestId) {
+                const friendRow = await Friend.findByPk(requestId, { transaction: t });
+                if (!friendRow) return { status: 404, data: { msg: 'Friend request not found' } };
+                
+                reqRecord = await FriendRequest.findOne({
+                    where: { senderId: friendRow.userId, recipientEmail: user.email },
+                    order: [['createdAt', 'DESC']],
+                    lock: t.LOCK.UPDATE,
+                    transaction: t
+                });
+            }
 
             if (!reqRecord) {
                 return { status: 404, data: { msg: 'Invitation not found' } };
