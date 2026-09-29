@@ -86,6 +86,11 @@ router.post('/respond', auth, async (req, res) => {
                 return { status: 403, data: { msg: 'This invitation is not for your account' } };
             }
 
+            const originalTask = await Task.findByPk(attendee.taskId, { transaction: t });
+            if (!originalTask) {
+                return { status: 404, data: { msg: 'Original reminder no longer exists' } };
+            }
+
             if (action === 'decline') {
                 if (attendee.status === 'Declined') {
                     return { status: 400, data: { msg: 'Invitation already declined', attendee } };
@@ -98,17 +103,22 @@ router.post('/respond', auth, async (req, res) => {
                     { where: { userId: user.id, type: 'Invitation', relatedTaskId: attendee.taskId }, transaction: t }
                 );
 
-                return { status: 200, data: { msg: 'Invitation declined', attendee } };
+                return { 
+                    status: 200, 
+                    data: { msg: 'Invitation declined', attendee },
+                    notify: {
+                        userId: originalTask.userId,
+                        type: 'System',
+                        title: 'Invitation Declined',
+                        message: `${user.name || user.email} declined your invitation to "${originalTask.title}"`,
+                        relatedTaskId: originalTask.id
+                    }
+                };
             }
 
             // Accept flow
             if (attendee.status === 'Accepted') {
                 return { status: 400, data: { msg: 'Invitation already accepted' } };
-            }
-
-            const originalTask = await Task.findByPk(attendee.taskId, { transaction: t });
-            if (!originalTask) {
-                return { status: 404, data: { msg: 'Original reminder no longer exists' } };
             }
 
             // Also check if user already has a reminder created from this invitation (safety net)
@@ -162,8 +172,34 @@ router.post('/respond', auth, async (req, res) => {
                 { where: { userId: user.id, type: 'Invitation', relatedTaskId: attendee.taskId }, transaction: t }
             );
 
-            return { status: 200, data: { msg: 'Invitation accepted and reminder added', task: clonedTask, attendee } };
+            return { 
+                status: 200, 
+                data: { msg: 'Invitation accepted and reminder added', task: clonedTask, attendee },
+                notify: {
+                    userId: originalTask.userId,
+                    type: 'Shared Reminder',
+                    title: 'Invitation Accepted',
+                    message: `${user.name || user.email} accepted your invitation to "${originalTask.title}"`,
+                    relatedTaskId: originalTask.id
+                }
+            };
         });
+
+        if (result.status === 200 && result.notify) {
+            const { createAppNotification } = require('../services/notificationService');
+            try {
+                await createAppNotification(req.app.get('io'), {
+                    userId: result.notify.userId,
+                    senderId: req.user.id,
+                    type: result.notify.type,
+                    title: result.notify.title,
+                    message: result.notify.message,
+                    relatedTaskId: result.notify.relatedTaskId
+                });
+            } catch (notifyErr) {
+                console.error('Failed to notify task owner:', notifyErr);
+            }
+        }
 
         return res.status(result.status).json(result.data);
 
