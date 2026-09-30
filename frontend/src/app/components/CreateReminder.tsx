@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/app/components/ui/button';
+import { AsyncButton } from '@/app/components/ui/AsyncButton';
 import { format, parse, isSameDay, addMinutes, max, isBefore, subMinutes, startOfDay, startOfWeek, addDays, eachDayOfInterval, endOfMonth, getDay } from 'date-fns';
 import {
   Calendar as CalendarIcon,
@@ -1130,12 +1131,12 @@ return (
         <Button variant="ghost" onClick={handleCloseAttempt} className="text-gray-400 text-[13px] font-bold hover:text-gray-600 dark:hover:text-white">
           Cancel
         </Button>
-        <Button
+        <AsyncButton
           onClick={handleSubmit}
           className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-[13px] font-bold px-10 py-5 h-auto rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
         >
           Create Task
-        </Button>
+        </AsyncButton>
       </div>
     </div>
 

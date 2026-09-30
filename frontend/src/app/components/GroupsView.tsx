@@ -4,6 +4,7 @@ import { X, Plus, Trash2, Edit2, Users, ChevronRight, ChevronDown } from 'lucide
 import { Button } from './ui/button';
 import { Group } from '../types';
 import { Friend } from './CreateReminder';
+import { AsyncButton } from './ui/AsyncButton';
 import { API_BASE_URL } from '../api';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -155,46 +156,26 @@ export function GroupsView() {
     };
 
     const handleRespondToRequest = async (requestId: string | number, action: 'accept' | 'decline') => {
-        // Optimistic UI
-        const requestToUpdate = pendingRequests.find(r => r.id === requestId);
-        setPendingRequests(prev => prev.filter(r => r.id !== requestId));
-        if (action === 'accept' && requestToUpdate) {
-            setFriends(prev => [{...requestToUpdate, status: 'Accepted'} as any, ...prev]);
-        }
-
         try {
             await fetchJson('/api/friends/respond', {
                 method: 'POST',
                 body: JSON.stringify({ requestId, action })
             });
             toast.success(action === 'accept' ? 'Friend request accepted!' : 'Friend request declined');
-            fetchGroups(); // Refresh in background
+            fetchGroups(); // Refresh both friends and requests lists
         } catch (error: any) {
-            // Revert
-            if (requestToUpdate) {
-                setPendingRequests(prev => [...prev, requestToUpdate]);
-                if (action === 'accept') {
-                    setFriends(prev => prev.filter(f => f.id !== requestToUpdate.id));
-                }
-            }
             toast.error(error?.data?.msg || 'Failed to respond to request');
         }
     };
 
     const handleDeleteFriend = async (id: string) => {
         if (!confirm('Are you sure you want to remove this friend?')) return;
-        
-        // Optimistic UI
-        const friendToRemove = friends.find(f => String(f.id) === String(id));
-        setFriends(prev => prev.filter(f => String(f.id) !== String(id)));
-        
         try {
             await fetchJson(`/api/friends/${id}`, { method: 'DELETE' });
+            setFriends(prev => prev.filter(f => String(f.id) !== String(id)));
             toast.success('Friend removed');
-        } catch (error: any) {
-            console.error(error);
-            if (friendToRemove) setFriends(prev => [...prev, friendToRemove]);
-            toast.error(error?.data?.msg || 'Failed to remove friend.');
+        } catch (error) {
+            console.error(error); toast.error(error?.data?.msg || 'Failed to remove friend. Did you restart the backend?');
         }
     };
 
@@ -385,7 +366,7 @@ export function GroupsView() {
                                         {editingGroup && (
                                             <Button type="button" onClick={() => { handleDeleteGroup(editingGroup.id); resetForm(); }} variant="ghost" className="flex-1 py-6 rounded-xl font-semibold text-red-500 hover:bg-red-50 hover:text-red-600">Delete</Button>
                                         )}
-                                        <Button type="submit" className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-6 rounded-xl font-semibold">Save Group</Button>
+                                        <AsyncButton onClick={handleSaveGroup} className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-6 rounded-xl font-semibold">Save Group</AsyncButton>
                                     </div>
                                 </form>
                             </div>
@@ -474,9 +455,9 @@ export function GroupsView() {
                                             </div>
                                             <div className="flex gap-3">
                                                 <Button type="button" onClick={() => setIsFriendFormVisible(false)} variant="ghost" className="flex-1 py-4 rounded-xl font-semibold">Cancel</Button>
-                                                <Button type="submit" disabled={isSubmittingFriend} className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">
-                                                    {isSubmittingFriend ? 'Saving...' : 'Save Contact'}
-                                                </Button>
+                                                <AsyncButton onClick={handleAddFriend} className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white py-4 rounded-xl font-semibold">
+                                                    Save Contact
+                                                </AsyncButton>
                                             </div>
                                         </form>
                                     </div>
@@ -498,8 +479,8 @@ export function GroupsView() {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        <Button onClick={() => handleRespondToRequest(request.id, 'accept')} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-xs px-3 h-8">Accept</Button>
-                                                        <Button onClick={() => handleRespondToRequest(request.id, 'decline')} variant="ghost" className="text-xs px-3 h-8 text-gray-500">Decline</Button>
+                                                        <AsyncButton onClick={() => handleRespondToRequest(request.id, 'accept')} className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-xs px-3 h-8">Accept</AsyncButton>
+                                                        <AsyncButton onClick={() => handleRespondToRequest(request.id, 'decline')} variant="ghost" className="text-xs px-3 h-8 text-gray-500">Decline</AsyncButton>
                                                     </div>
                                                 </div>
                                             ))}
@@ -553,9 +534,9 @@ export function GroupsView() {
                                                         }} className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 dark:bg-black rounded-lg transition-colors">
                                                             <Edit2 className="w-4 h-4" />
                                                         </button>
-                                                        <button onClick={() => handleDeleteFriend(String(friend.id))} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2">
+                                                        <AsyncButton onClick={() => handleDeleteFriend(String(friend.id))} variant="ghost" className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-black rounded-lg transition-colors ml-2">
                                                             <Trash2 className="w-4 h-4" />
-                                                        </button>
+                                                        </AsyncButton>
                                                     </div>
                                                 )}
                                             </div>

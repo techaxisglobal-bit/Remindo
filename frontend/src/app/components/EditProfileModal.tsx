@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { User } from '@/app/types';
 import { X, Camera, Check, AlertCircle, Loader2, CalendarIcon } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { AsyncButton } from '@/app/components/ui/AsyncButton';
 import { Label } from '@/app/components/ui/label';
 import { Input } from '@/app/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
@@ -411,13 +412,13 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
 
         <div className="px-6 py-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] flex justify-end gap-3 bg-gray-50/50 dark:bg-[#0a0a0a]">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button 
+          <AsyncButton 
             onClick={handleSave} 
-            disabled={!hasChanges || isSaving || usernameStatus === 'checking'}
+            disabled={!hasChanges || usernameStatus === 'checking'}
             className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
-          </Button>
+            Save Changes
+          </AsyncButton>
         </div>
       </div>
       {showAvatarBuilder && (

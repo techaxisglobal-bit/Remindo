@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../api';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { notificationSocket } from '../services/NotificationSocket';
 import { toast } from 'sonner';
+import { AsyncButton } from './ui/AsyncButton';
 
 interface Notification {
     id: string;
@@ -210,8 +211,8 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                                 <span className="text-xs text-gray-400">{format(parseISO(n.createdAt), 'h:mm a')}</span>
                                                 {n.type === 'Invitation' && n.status === 'Unread' && (
                                                     <div className="flex gap-2">
-                                                        <button onClick={() => handleDecline(n)} className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black rounded-lg transition-colors">Decline</button>
-                                                        <button onClick={() => handleAccept(n)} className="px-3 py-1.5 text-xs font-bold text-white bg-[#e0b596] hover:bg-[#c49a7c] rounded-lg shadow-sm transition-colors">Accept</button>
+                                                        <AsyncButton onClick={() => handleDecline(n)} variant="ghost" className="h-8 px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black rounded-lg transition-colors">Decline</AsyncButton>
+                                                        <AsyncButton onClick={() => handleAccept(n)} className="h-8 px-3 py-1.5 text-xs font-bold text-white bg-[#e0b596] hover:bg-[#c49a7c] rounded-lg shadow-sm transition-colors">Accept</AsyncButton>
                                                     </div>
                                                 )}
                                                 {n.type === 'Invitation' && n.status !== 'Unread' && (

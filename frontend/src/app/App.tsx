@@ -475,9 +475,17 @@ export default function App() {
     const taskToToggle = tasks.find(t => (t as any)._id === id || t.id === id);
     if (!taskToToggle) return;
 
-    // Optimistic Update
-    const originalStatus = taskToToggle.completed;
-    setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: !originalStatus } : t));
+    // Optimistic UI: Update state immediately
+    const newCompletedStatus = !taskToToggle.completed;
+    setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: newCompletedStatus } : t));
+    
+    // Provide instant feedback haptic
+    if (Capacitor.isNativePlatform()) {
+        try {
+            const { Haptics, ImpactStyle } = require('@capacitor/haptics');
+            Haptics.impact({ style: ImpactStyle.Light });
+        } catch (e) {}
+    }
 
     try {
       const res = await fetchWithAuth(`/api/tasks/${id}`, {
@@ -485,7 +493,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ completed: !originalStatus })
+        body: JSON.stringify({ completed: newCompletedStatus })
       });
       if (res.ok) {
         const updatedTask = await res.json();
@@ -497,15 +505,14 @@ export default function App() {
            scheduleLocalNotifications(updatedTask);
         }
       } else {
-        // Revert on server error
-        setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: originalStatus } : t));
-        toast.error("Failed to update task status");
+        // Rollback
+        setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? taskToToggle : t));
+        toast.error('Failed to save task status');
       }
     } catch (err) {
       console.error('Failed to toggle task:', err);
-      // Revert on network error
-      setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: originalStatus } : t));
-      toast.error("Failed to update task status");
+      // Rollback
+      setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? taskToToggle : t));
     }
   };
 
