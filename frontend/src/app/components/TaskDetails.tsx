@@ -456,7 +456,7 @@ export function TaskDetails({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="flex flex-col md:flex-row bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] max-w-2xl w-full mx-auto h-[85vh]"
+        className="flex flex-col md:flex-row bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-[#f5f5f5] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] max-w-2xl w-full mx-auto max-h-[85vh]"
       >
         <div className="flex-[1.5] flex flex-col p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between">
@@ -873,17 +873,17 @@ export function TaskDetails({
             </div>
           )}
 
-          <div className="pt-4 flex items-center justify-between mt-auto border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+          <div className="pt-4 flex w-full items-center justify-between gap-2 mt-auto border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             {isEditing ? (
-              <>
-                <Button variant="ghost" onClick={() => setIsEditing(false)} className="text-gray-400 text-sm font-bold hover:text-gray-600 dark:hover:text-white h-auto py-4 px-2">
+              <div className="flex w-full items-center gap-2 md:gap-3 justify-between">
+                <Button variant="ghost" onClick={() => setIsEditing(false)} className="flex-[0.5] text-gray-400 text-[12px] md:text-sm font-bold hover:text-gray-600 dark:hover:text-white h-auto py-3 md:py-4 px-1">
                   Cancel
                 </Button>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-1 items-center gap-2 justify-end">
                   <Button
                     variant="ghost"
                     onClick={() => { onDeleteTask(task.id); onClose(); }}
-                    className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black text-sm font-bold h-auto py-4 px-4 rounded-xl"
+                    className="flex-1 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-black text-[12px] md:text-sm font-bold h-auto py-3 md:py-4 px-2 rounded-xl"
                   >
                     Delete
                   </Button>
@@ -959,37 +959,35 @@ export function TaskDetails({
                         setIsSaving(false);
                       }
                     }}
-                    className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-sm font-bold px-8 py-4 h-auto rounded-2xl shadow-lg transition-all flex items-center justify-center disabled:opacity-70"
+                    className="flex-1 bg-[#e0b596] hover:bg-[#d4a37f] text-white text-[12px] md:text-sm font-bold px-2 py-3 md:py-4 h-auto rounded-2xl shadow-lg transition-all flex items-center justify-center disabled:opacity-70"
                   >
                     {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
                   </Button>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex w-full items-center gap-2 justify-between">
                 <Button
                   variant="outline"
                   onClick={() => { onDeleteTask(task.id); onClose(); }}
-                  className="text-red-400 border-red-400/50 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 text-sm font-bold border-2 rounded-2xl h-auto py-4 px-6 transition-all"
+                  className="flex-1 text-red-400 border-red-400/50 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 text-[12px] md:text-sm font-bold border-2 rounded-2xl h-auto py-3 md:py-4 px-2 transition-all"
                 >
                   Delete
                 </Button>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => { if (!task.completed) { onToggleComplete(task.id); onClose(); } }}
-                    className={`text-sm font-bold border-2 rounded-2xl h-auto py-4 px-6 transition-all ${task.completed ? 'text-green-500 border-green-500 cursor-default bg-green-50/50' : 'text-gray-400 border-gray-200 dark:border-white/10 hover:border-[#e0b596] hover:text-[#e0b596]'}`}
-                  >
-                    {task.completed ? 'Completed' : 'Mark Done'}
-                  </Button>
-                  <Button
-                    onClick={() => setIsEditing(true)}
-                    className="bg-[#e0b596] hover:bg-[#d4a37f] text-white text-sm font-bold px-8 py-4 h-auto rounded-2xl shadow-lg transition-all"
-                  >
-                    Edit Task
-                  </Button>
-                </div>
-              </>
+                <Button
+                  variant="outline"
+                  onClick={() => { if (!task.completed) { onToggleComplete(task.id); onClose(); } }}
+                  className={`flex-[1.2] text-[12px] md:text-sm font-bold border-2 rounded-2xl h-auto py-3 md:py-4 px-1 transition-all ${task.completed ? 'text-green-500 border-green-500 cursor-default bg-green-50/50' : 'text-gray-400 border-gray-200 dark:border-white/10 hover:border-[#e0b596] hover:text-[#e0b596]'}`}
+                >
+                  {task.completed ? 'Completed' : 'Mark Done'}
+                </Button>
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  className="flex-[1.2] bg-[#e0b596] hover:bg-[#d4a37f] text-white text-[12px] md:text-sm font-bold px-1 py-3 md:py-4 h-auto rounded-2xl shadow-lg transition-all"
+                >
+                  Edit Task
+                </Button>
+              </div>
             )}
           </div>
         </div>
