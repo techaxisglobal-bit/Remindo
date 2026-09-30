@@ -552,11 +552,13 @@ export default function App() {
         }
         return true;
       } else {
+        const errorText = await res.text().catch(() => '');
+        console.error('Update failed. Status:', res.status, 'Response:', errorText);
         // Rollback on failure
         if (originalTask) {
           setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? originalTask : t));
         }
-        toast.error('Failed to update task');
+        toast.error(`Failed to update task: ${res.status}`);
         return false;
       }
     } catch (err) {

@@ -517,7 +517,7 @@ export function Dashboard({
     }
   }, [dragMode, dragStart, weekDays, startDate, dragCurrent, isMobile]);
 
-  const handlePointerUp = useCallback((e?: MouseEvent | TouchEvent) => {
+  const handlePointerUp = useCallback(async (e?: MouseEvent | TouchEvent) => {
     if (isProcessingPointerUp.current) return;
     document.body.style.overflow = '';
     if ((dragMode === 'create' || (isMobile && dragMode === 'none' && dragStart)) && dragStart) {
@@ -623,13 +623,15 @@ export function Dashboard({
           return;
         }
 
-        onUpdateTask({ ...task, date: newDateStr, time: newTimeStr });
-        toast.success('Event moved');
+        isProcessingPointerUp.current = true;
+        const success = await onUpdateTask({ ...task, date: newDateStr, time: newTimeStr });
+        if (success) {
+          toast.success('Event moved');
+        }
         setDragMode('none');
         setDragStart(null);
         setDragCurrent(null);
         setActiveTaskId(null);
-        isProcessingPointerUp.current = true;
         setTimeout(() => isProcessingPointerUp.current = false, 100);
       }
     } else if (dragMode === 'resize' && activeTaskId && dragCurrent && dragStart) {
@@ -654,15 +656,17 @@ export function Dashboard({
           return;
         }
 
+        isProcessingPointerUp.current = true;
         if (task.duration !== newDuration) {
-          onUpdateTask({ ...task, duration: newDuration });
-          toast.success('Event resized');
+          const success = await onUpdateTask({ ...task, duration: newDuration });
+          if (success) {
+            toast.success('Event resized');
+          }
         }
         setDragMode('none');
         setDragStart(null);
         setDragCurrent(null);
         setActiveTaskId(null);
-        isProcessingPointerUp.current = true;
         setTimeout(() => isProcessingPointerUp.current = false, 100);
       }
     }
