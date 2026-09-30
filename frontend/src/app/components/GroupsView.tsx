@@ -155,26 +155,46 @@ export function GroupsView() {
     };
 
     const handleRespondToRequest = async (requestId: string | number, action: 'accept' | 'decline') => {
+        // Optimistic UI
+        const requestToUpdate = pendingRequests.find(r => r.id === requestId);
+        setPendingRequests(prev => prev.filter(r => r.id !== requestId));
+        if (action === 'accept' && requestToUpdate) {
+            setFriends(prev => [{...requestToUpdate, status: 'Accepted'} as any, ...prev]);
+        }
+
         try {
             await fetchJson('/api/friends/respond', {
                 method: 'POST',
                 body: JSON.stringify({ requestId, action })
             });
             toast.success(action === 'accept' ? 'Friend request accepted!' : 'Friend request declined');
-            fetchGroups(); // Refresh both friends and requests lists
+            fetchGroups(); // Refresh in background
         } catch (error: any) {
+            // Revert
+            if (requestToUpdate) {
+                setPendingRequests(prev => [...prev, requestToUpdate]);
+                if (action === 'accept') {
+                    setFriends(prev => prev.filter(f => f.id !== requestToUpdate.id));
+                }
+            }
             toast.error(error?.data?.msg || 'Failed to respond to request');
         }
     };
 
     const handleDeleteFriend = async (id: string) => {
         if (!confirm('Are you sure you want to remove this friend?')) return;
+        
+        // Optimistic UI
+        const friendToRemove = friends.find(f => String(f.id) === String(id));
+        setFriends(prev => prev.filter(f => String(f.id) !== String(id)));
+        
         try {
             await fetchJson(`/api/friends/${id}`, { method: 'DELETE' });
-            setFriends(prev => prev.filter(f => String(f.id) !== String(id)));
             toast.success('Friend removed');
-        } catch (error) {
-            console.error(error); toast.error(error?.data?.msg || 'Failed to remove friend. Did you restart the backend?');
+        } catch (error: any) {
+            console.error(error);
+            if (friendToRemove) setFriends(prev => [...prev, friendToRemove]);
+            toast.error(error?.data?.msg || 'Failed to remove friend.');
         }
     };
 

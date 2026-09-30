@@ -475,13 +475,17 @@ export default function App() {
     const taskToToggle = tasks.find(t => (t as any)._id === id || t.id === id);
     if (!taskToToggle) return;
 
+    // Optimistic Update
+    const originalStatus = taskToToggle.completed;
+    setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: !originalStatus } : t));
+
     try {
       const res = await fetchWithAuth(`/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ completed: !taskToToggle.completed })
+        body: JSON.stringify({ completed: !originalStatus })
       });
       if (res.ok) {
         const updatedTask = await res.json();
@@ -492,9 +496,16 @@ export default function App() {
         } else {
            scheduleLocalNotifications(updatedTask);
         }
+      } else {
+        // Revert on server error
+        setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: originalStatus } : t));
+        toast.error("Failed to update task status");
       }
     } catch (err) {
       console.error('Failed to toggle task:', err);
+      // Revert on network error
+      setTasks(prev => prev.map(t => ((t as any)._id === id || t.id === id) ? { ...t, completed: originalStatus } : t));
+      toast.error("Failed to update task status");
     }
   };
 

@@ -73,3 +73,17 @@
     -webkit-text-fill-color: white !important;
   }
 }
+
+/* Global Click Feedback */
+button:active, 
+a:active, 
+[role="button"]:active, 
+.cursor-pointer:active {
+  transform: scale(0.96) !important;
+  opacity: 0.8 !important;
+  transition: transform 0.05s ease, opacity 0.05s ease !important;
+}
+
+button, a, [role="button"], .cursor-pointer {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
