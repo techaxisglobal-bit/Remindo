@@ -185,6 +185,7 @@ export function Dashboard({
     }
   }, [inlineWarning]);
   const wasDragging = useRef(false);
+  const isProcessingPointerUp = useRef(false);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
 
   // Create Modal State
@@ -517,6 +518,7 @@ export function Dashboard({
   }, [dragMode, dragStart, weekDays, startDate, dragCurrent, isMobile]);
 
   const handlePointerUp = useCallback((e?: MouseEvent | TouchEvent) => {
+    if (isProcessingPointerUp.current) return;
     document.body.style.overflow = '';
     if ((dragMode === 'create' || (isMobile && dragMode === 'none' && dragStart)) && dragStart) {
       const current = dragCurrent || dragStart;
@@ -623,6 +625,12 @@ export function Dashboard({
 
         onUpdateTask({ ...task, date: newDateStr, time: newTimeStr });
         toast.success('Event moved');
+        setDragMode('none');
+        setDragStart(null);
+        setDragCurrent(null);
+        setActiveTaskId(null);
+        isProcessingPointerUp.current = true;
+        setTimeout(() => isProcessingPointerUp.current = false, 100);
       }
     } else if (dragMode === 'resize' && activeTaskId && dragCurrent && dragStart) {
       // Finalize resize
@@ -650,6 +658,12 @@ export function Dashboard({
           onUpdateTask({ ...task, duration: newDuration });
           toast.success('Event resized');
         }
+        setDragMode('none');
+        setDragStart(null);
+        setDragCurrent(null);
+        setActiveTaskId(null);
+        isProcessingPointerUp.current = true;
+        setTimeout(() => isProcessingPointerUp.current = false, 100);
       }
     }
 
@@ -658,8 +672,9 @@ export function Dashboard({
     setDragCurrent(null);
     setActiveTaskId(null);
 
-    // Clear wasDragging after a short delay to allow the click event to fire and be ignored
+    isProcessingPointerUp.current = true;
     setTimeout(() => {
+      isProcessingPointerUp.current = false;
       wasDragging.current = false;
     }, 100);
   }, [dragMode, dragStart, dragCurrent, startDate, tasks, onUpdateTask, isMobile]);
