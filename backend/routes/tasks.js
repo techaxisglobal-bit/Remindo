@@ -280,7 +280,9 @@ router.put('/:id', auth, async (req, res) => {
             const existingAttendees = await TaskAttendee.findAll({ where: { taskId: task.id } });
             const existingEmails = existingAttendees.map(a => a.email);
 
-            const newAttendees = attendees.filter(email => !existingEmails.includes(email));
+            // Ensure attendees is an array of strings (emails)
+            const attendeeEmails = attendees.map(a => typeof a === 'string' ? a : a.email).filter(Boolean);
+            const newAttendees = attendeeEmails.filter(email => !existingEmails.includes(email));
 
             if (newAttendees.length > 0) {
                 const attendeeRecords = newAttendees.map(email => ({
