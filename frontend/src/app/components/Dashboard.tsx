@@ -1447,21 +1447,16 @@ export function Dashboard({
                 {isMobile && mobileViewMode === 'schedule' ? (
                   <div ref={scheduleListRef} className="flex-1 overflow-y-auto p-4 pb-32 space-y-8 bg-gray-50/30 dark:bg-black custom-scrollbar scroll-smooth">
                     {(() => {
-                      let listDays = [];
-                      if (calendarView === 'day') {
-                        listDays = [currentDate];
-                      } else if (calendarView === 'week') {
-                        const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // Sunday
-                        listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
-                      } else if (calendarView === 'month') {
-                        const start = startOfMonth(currentDate);
-                        const end = endOfMonth(currentDate);
-                        listDays = eachDayOfInterval({ start, end });
-                      } else {
-                        // Fallback for workWeek or others (e.g. 7-day window)
-                        const start = subDays(currentDate, 3);
-                        listDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+                      let listDays: Date[] = [];
+                      const uniqueDates = Array.from(new Set(sanitizedTasks.map(t => format(parseTaskDate(t.date), 'yyyy-MM-dd'))))
+                        .map(dateStr => parseISO(dateStr));
+                      
+                      const currentStr = format(currentDate, 'yyyy-MM-dd');
+                      if (!uniqueDates.some(d => format(d, 'yyyy-MM-dd') === currentStr)) {
+                         uniqueDates.push(startOfDay(currentDate));
                       }
+                      
+                      listDays = uniqueDates.sort((a, b) => a.getTime() - b.getTime());
 
                       return listDays.map((day, i) => {
                         const dayTasks = sanitizedTasks.filter(t => isSameDay(parseTaskDate(t.date), day));
