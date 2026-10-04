@@ -108,7 +108,7 @@ const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
             ${task.description ? `<p><strong>Description:</strong><br/>${task.description.replace(/\n/g, '<br/>')}</p>` : ''}
             
             <div style="margin-top: 30px; text-align: center;">
-                <a href="${frontendUrl}/invite?token=${token}" style="background-color: #e0b596; color: white; width: 100px; height: 100px; line-height: 100px; text-align: center; text-decoration: none; border-radius: 50%; font-weight: bold; display: inline-block;">Respond</a>
+                <a href="${frontendUrl}/invite?token=${token}" style="background-color: #e0b596; color: white; padding: 14px 36px; text-align: center; text-decoration: none; border-radius: 9999px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 10px rgba(224, 181, 150, 0.4);">Respond</a>
             </div>
         </div>
     `;
@@ -157,7 +157,7 @@ const sendFriendRequest = async (email, senderName, frontendUrl, token) => {
                     <strong>${senderName}</strong> wants to connect with you on Remindo.
                 </p>
                 <div style="margin-bottom: 20px;">
-                    <a href="${frontendUrl}/friend-invite?token=${token}" style="background-color: #e0b596; color: white; width: 100px; height: 100px; line-height: 100px; text-align: center; text-decoration: none; border-radius: 50%; font-weight: bold; display: inline-block;">Respond</a>
+                    <a href="${frontendUrl}/friend-invite?token=${token}" style="background-color: #e0b596; color: white; padding: 14px 36px; text-align: center; text-decoration: none; border-radius: 9999px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 4px 10px rgba(224, 181, 150, 0.4);">Respond</a>
                 </div>
                 <p style="color: #999; font-size: 12px; margin-top: 30px;">
                     If you don't know this person, you can safely ignore this email.
