@@ -1,14 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import { toast } from 'sonner';
-import { API_BASE_URL } from '@/app/api';
-import { fetchWithAuth } from '../../utils/apiClient';
 
 export default function InvitationHandler({ onNavigate }: { onNavigate: (path: string) => void }) {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
-    const action = urlParams.get('action');
+    const isFriend = window.location.pathname === '/friend-invite';
     const [loading, setLoading] = useState(true);
-    const [inviteDetails, setInviteDetails] = useState<any>(null);
     const [error, setError] = useState('');
     const processingRef = useRef(false);
 
@@ -16,55 +12,42 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
         const processInvitation = async () => {
             if (processingRef.current) return;
             processingRef.current = true;
-            if (!token || !action) {
+            if (!token) {
                 setError('Invalid invitation link.');
                 setLoading(false);
                 return;
             }
 
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+            const isAndroid = /android/i.test(navigator.userAgent);
+            
+            if (isIOS || isAndroid) {
+                const deepLinkUrl = `remindo://${isFriend ? 'friend-invite' : 'invite'}?token=${token}`;
+                window.location.href = deepLinkUrl;
+                
+                setTimeout(() => {
+                    if (isIOS) {
+                        window.location.href = "https://apps.apple.com/"; // Fallback to App Store
+                    } else if (isAndroid) {
+                        window.location.href = "https://play.google.com/store/apps/details?id=com.techaxisglobal.remindo";
+                    }
+                }, 2000);
+                
+                // Allow a few seconds for redirect before falling back to web logic
+                await new Promise(resolve => setTimeout(resolve, 2500));
+            }
+
             const authToken = localStorage.getItem('token');
 
             if (authToken) {
-                // User is logged in, try to accept/decline directly
-                try {
-                    const res = await fetchWithAuth(`${API_BASE_URL}/api/invitations/respond`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-auth-token': authToken
-                        },
-                        body: JSON.stringify({ token, action })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.msg || 'Failed to process invitation.');
-                    toast.success(data.msg || 'Invitation processed successfully!');
-                    window.dispatchEvent(new Event('refresh-tasks'));
-                    onNavigate('/dashboard');
-                } catch (err: any) {
-                    setError(err.message || 'Failed to process invitation.');
-                    setLoading(false);
-                }
+                onNavigate('/dashboard');
             } else {
-                // Not logged in, fetch preview details
-                try {
-                    const res = await fetchWithAuth(`${API_BASE_URL}/api/invitations/${token}`);
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.msg || 'Failed to fetch invitation details.');
-                    setInviteDetails(data);
-                    // Save to session storage for post-login processing
-                    sessionStorage.setItem('inviteToken', token);
-                    sessionStorage.setItem('inviteAction', action);
-                    sessionStorage.setItem('inviteEmail', data.email); // Helpful to prefill signup email
-                    setLoading(false);
-                } catch (err: any) {
-                    setError(err.message || 'Failed to fetch invitation details.');
-                    setLoading(false);
-                }
+                setLoading(false);
             }
         };
 
         processInvitation();
-    }, [token, action, onNavigate]);
+    }, [token, isFriend, onNavigate]);
 
     if (loading) {
         return (
@@ -96,55 +79,38 @@ export default function InvitationHandler({ onNavigate }: { onNavigate: (path: s
         );
     }
 
-    if (inviteDetails) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4">
-                <div className="bg-white dark:bg-[#0a0a0a] p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] text-center space-y-6">
-                    <div className="w-16 h-16 bg-[#e0b596]/10 text-[#e0b596] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">You've been invited!</h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            <strong>{inviteDetails.task.creatorName}</strong> invited you to a reminder:
-                        </p>
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] p-4 rounded-2xl text-left space-y-2">
-                        <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-2">{inviteDetails.task.title}</h3>
-                        <p className="text-sm text-gray-500 flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            {inviteDetails.task.date}
-                        </p>
-                    </div>
-
-                    <div className="pt-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            Please sign in or create an account to {action === 'accept' ? 'accept' : 'decline'} this invitation.
-                        </p>
-                        <div className="space-y-3 flex flex-col">
-                            <button
-                                onClick={() => onNavigate(`/signup?email=${encodeURIComponent(inviteDetails.email)}`)}
-                                className="w-full bg-[#e0b596] hover:bg-[#d4a37f] text-white py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-                            >
-                                Create an Account
-                            </button>
-                            <button
-                                onClick={() => onNavigate('/signin')}
-                                className="w-full bg-white dark:bg-[#0a0a0a] hover:bg-gray-50 dark:hover:bg-black text-gray-900 dark:text-white py-3 rounded-xl font-bold transition-all border border-gray-200 dark:border-[#444] active:scale-[0.98]"
-                            >
-                                Sign In
-                            </button>
-                        </div>
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4">
+            <div className="bg-white dark:bg-[#0a0a0a] p-8 rounded-[2rem] max-w-md w-full shadow-2xl border border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] text-center space-y-6">
+                <div className="w-16 h-16 bg-[#e0b596]/10 text-[#e0b596] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">You've been invited!</h2>
+                </div>
+                
+                <div className="pt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Please sign in or create an account to view and respond to this invitation.
+                    </p>
+                    <div className="space-y-3 flex flex-col">
+                        <button
+                            onClick={() => onNavigate(`/signup`)}
+                            className="w-full bg-[#e0b596] hover:bg-[#d4a37f] text-white py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                        >
+                            Create an Account
+                        </button>
+                        <button
+                            onClick={() => onNavigate('/signin')}
+                            className="w-full bg-white dark:bg-[#0a0a0a] hover:bg-gray-50 dark:hover:bg-black text-gray-900 dark:text-white py-3 rounded-xl font-bold transition-all border border-gray-200 dark:border-[#444] active:scale-[0.98]"
+                        >
+                            Sign In
+                        </button>
                     </div>
                 </div>
             </div>
-        );
-    }
-
-    return null;
+        </div>
+    );
 }

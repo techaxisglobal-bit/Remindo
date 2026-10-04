@@ -8,6 +8,7 @@ import { Task, User } from "@/app/types";
 import { toast } from "sonner";
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { tokenManager } from '../utils/tokenManager';
 import { fetchWithAuth } from '../utils/apiClient';
@@ -73,7 +74,20 @@ export default function App() {
     };
 
     window.addEventListener('auth-expired', handleAuthExpired);
+    window.addEventListener('auth-expired', handleAuthExpired);
     window.addEventListener('refresh-tasks', fetchTasks);
+
+    // Handle deep links
+    if (Capacitor.isNativePlatform()) {
+      CapacitorApp.addListener('appUrlOpen', (event) => {
+        const urlStr = event.url;
+        if (urlStr.startsWith('remindo://')) {
+          const path = urlStr.replace(/^remindo:\/\//, '/');
+          window.location.href = path;
+        }
+      });
+    }
+
     return () => {
       window.removeEventListener('auth-expired', handleAuthExpired);
       window.removeEventListener('refresh-tasks', fetchTasks);
@@ -575,8 +589,8 @@ export default function App() {
     return <div className="min-h-screen bg-gray-50 dark:bg-black"></div>;
   }
 
-  // Handle invitation route
-  if (window.location.pathname === '/invite') {
+  // Handle invitation routes
+  if (window.location.pathname === '/invite' || window.location.pathname === '/friend-invite') {
     return (
       <>
         <InvitationHandler onNavigate={(path) => window.location.href = path} />
