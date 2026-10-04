@@ -88,12 +88,11 @@ const sendOTP = async (email, otp, type = 'signup') => {
 
 const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
     // Generate secure links to frontend
-    const acceptUrl = `${frontendUrl}/invite?token=${token}&action=accept`;
-    const declineUrl = `${frontendUrl}/invite?token=${token}&action=decline`;
+    const respondUrl = `${frontendUrl}/invite?token=${token}`;
     
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for invitation.');
-        console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nToken: ${token}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
+        console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nToken: ${token}\nRespond: ${respondUrl}\n======================\n\n`);
         return;
     }
 
@@ -109,8 +108,7 @@ const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
             ${task.description ? `<p><strong>Description:</strong><br/>${task.description.replace(/\n/g, '<br/>')}</p>` : ''}
             
             <div style="margin-top: 30px; text-align: center;">
-                <a href="${acceptUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">Accept</a>
-                <a href="${declineUrl}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Decline</a>
+                <a href="${frontendUrl}/invite?token=${token}" style="background-color: #e0b596; color: white; width: 100px; height: 100px; line-height: 100px; text-align: center; text-decoration: none; border-radius: 50%; font-weight: bold; display: inline-block;">Respond</a>
             </div>
         </div>
     `;
@@ -143,12 +141,11 @@ const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
 };
 
 const sendFriendRequest = async (email, senderName, frontendUrl, token) => {
-    const acceptUrl = `${frontendUrl}/friend-invite?token=${token}&action=accept`;
-    const declineUrl = `${frontendUrl}/friend-invite?token=${token}&action=decline`;
+    const respondUrl = `${frontendUrl}/friend-invite?token=${token}`;
     
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for friend invitation.');
-        console.log(`\n\n=== FRIEND INVITATION MOCK EMAIL ===\nTo: ${email}\nSender: ${senderName}\nToken: ${token}\nAccept: ${acceptUrl}\nDecline: ${declineUrl}\n======================\n\n`);
+        console.log(`\n\n=== FRIEND INVITATION MOCK EMAIL ===\nTo: ${email}\nSender: ${senderName}\nToken: ${token}\nRespond: ${respondUrl}\n======================\n\n`);
         return;
     }
 
@@ -160,8 +157,7 @@ const sendFriendRequest = async (email, senderName, frontendUrl, token) => {
                     <strong>${senderName}</strong> wants to connect with you on Remindo.
                 </p>
                 <div style="margin-bottom: 20px;">
-                    <a href="${acceptUrl}" style="background-color: #C99A70; color: white; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: bold; margin-right: 10px; display: inline-block;">Accept</a>
-                    <a href="${declineUrl}" style="background-color: #eee; color: #555; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Decline</a>
+                    <a href="${frontendUrl}/friend-invite?token=${token}" style="background-color: #e0b596; color: white; width: 100px; height: 100px; line-height: 100px; text-align: center; text-decoration: none; border-radius: 50%; font-weight: bold; display: inline-block;">Respond</a>
                 </div>
                 <p style="color: #999; font-size: 12px; margin-top: 30px;">
                     If you don't know this person, you can safely ignore this email.
