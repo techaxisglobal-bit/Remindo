@@ -212,7 +212,7 @@ router.post('/respond', auth, async (req, res) => {
                 if (!friendRow) return { status: 404, data: { msg: 'Friend request not found' } };
                 
                 reqRecord = await FriendRequest.findOne({
-                    where: { senderId: friendRow.userId, recipientEmail: user.email },
+                    where: { senderId: friendRow.userId, recipientEmail: user.email.toLowerCase() },
                     order: [['createdAt', 'DESC']],
                     lock: t.LOCK.UPDATE,
                     transaction: t
