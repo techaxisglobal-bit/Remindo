@@ -38,7 +38,7 @@ const sendOTP = async (email, otp, type = 'signup') => {
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging.');
         console.log(`\n\n=== OTP MOCK EMAIL ===\nTo: ${email}\nOTP: ${otp}\nType: ${type}\n======================\n\n`);
-        return; 
+        return;
     }
 
     const subject = type === 'signup' ? 'Email Verification - Remindo' : 'Password Reset - Remindo';
@@ -89,7 +89,7 @@ const sendOTP = async (email, otp, type = 'signup') => {
 const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
     // Generate secure links to frontend
     const respondUrl = `${frontendUrl}/invite?token=${token}`;
-    
+
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for invitation.');
         console.log(`\n\n=== INVITATION MOCK EMAIL ===\nTo: ${email}\nTitle: ${task.title}\nCreator: ${creatorName}\nToken: ${token}\nRespond: ${respondUrl}\n======================\n\n`);
@@ -142,7 +142,7 @@ const sendInvitation = async (email, task, creatorName, frontendUrl, token) => {
 
 const sendFriendRequest = async (email, senderName, frontendUrl, token) => {
     const respondUrl = `${frontendUrl}/friend-invite?token=${token}`;
-    
+
     if (!process.env.MICROSOFT_GRAPH_CLIENT_ID) {
         console.warn('MICROSOFT_GRAPH_CLIENT_ID not set. Falling back to console logging for friend invitation.');
         console.log(`\n\n=== FRIEND INVITATION MOCK EMAIL ===\nTo: ${email}\nSender: ${senderName}\nToken: ${token}\nRespond: ${respondUrl}\n======================\n\n`);

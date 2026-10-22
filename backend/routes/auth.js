@@ -9,6 +9,9 @@ const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const emailService = require('../services/emailService');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
+const { Task, TaskAttendee, Merchant, Notification, Group, Friend, FriendRequest } = require('../models');
 
 // Helper to generate access & refresh tokens
 const generateTokensAndRespond = async (user, res) => {
@@ -696,7 +699,6 @@ router.post('/verify-phone-otp', auth, async (req, res) => {
 
 // Multer setup for profile picture upload using Cloudinary
 const multer = require('multer');
-const path = require('path');
 const { getStorage, cloudinary } = require('../config/cloudinary');
 const Replicate = require("replicate");
 const storage = getStorage('profiles');
@@ -809,5 +811,142 @@ router.delete('/remove-profile-picture', auth, async (req, res) => {
         res.status(500).json({ msg: 'Server error' });
     }
 });
+
+// @route   DELETE api/auth/delete-account
+// @desc    Permanently delete user account and all associated data
+// @access  Private
+const deleteAccountHandler = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        const userEmail = user.email;
+
+        // Cascade delete all associated data in a transaction
+        await User.sequelize.transaction(async (t) => {
+            // 1. Find tasks owned by user
+            const userTasks = await Task.findAll({
+                where: { userId },
+                attributes: ['id'],
+                transaction: t
+            });
+            const userTaskIds = userTasks.map(task => task.id);
+
+            // 2. Delete attendees of user's tasks, disassociate shared tasks, then delete user's tasks
+            if (userTaskIds.length > 0) {
+                await TaskAttendee.destroy({
+                    where: {
+                        [Op.or]: [
+                            { taskId: { [Op.in]: userTaskIds } },
+                            { sharedTaskId: { [Op.in]: userTaskIds } }
+                        ]
+                    },
+                    transaction: t
+                });
+                await Task.update({ originalTaskId: null }, {
+                    where: { originalTaskId: { [Op.in]: userTaskIds } },
+                    transaction: t
+                });
+                await Notification.destroy({
+                    where: { relatedTaskId: { [Op.in]: userTaskIds } },
+                    transaction: t
+                });
+                await Task.destroy({
+                    where: { id: { [Op.in]: userTaskIds } },
+                    transaction: t
+                });
+            }
+
+            // 3. Delete attendee invitations where this user was the invitee
+            if (userEmail) {
+                await TaskAttendee.destroy({
+                    where: { email: userEmail },
+                    transaction: t
+                });
+            }
+
+            // 4. Delete user's merchants
+            await Merchant.destroy({
+                where: { userId },
+                transaction: t
+            });
+
+            // 5. Delete user's groups
+            await Group.destroy({
+                where: { userId },
+                transaction: t
+            });
+
+            // 6. Delete notifications (sent or received)
+            await Notification.destroy({
+                where: {
+                    [Op.or]: [
+                        { userId },
+                        { senderId: userId }
+                    ]
+                },
+                transaction: t
+            });
+
+            // 7. Delete friendships
+            const friendConditions = [
+                { userId },
+                { contactUserId: userId }
+            ];
+            if (userEmail) {
+                friendConditions.push({ email: userEmail });
+            }
+            await Friend.destroy({
+                where: { [Op.or]: friendConditions },
+                transaction: t
+            });
+
+            // 8. Delete friend requests
+            const requestConditions = [
+                { senderId: userId },
+                { recipientUserId: userId }
+            ];
+            if (userEmail) {
+                requestConditions.push({ recipientEmail: userEmail });
+            }
+            await FriendRequest.destroy({
+                where: { [Op.or]: requestConditions },
+                transaction: t
+            });
+
+            // 9. Delete activity logs
+            await ActivityLog.destroy({
+                where: { userId },
+                transaction: t
+            });
+
+            // 10. Delete the user
+            await user.destroy({ transaction: t });
+        });
+
+        // 11. Delete local profile picture file if exists
+        if (user.profilePictureUrl && !user.profilePictureUrl.startsWith('http')) {
+            try {
+                const oldImagePath = path.join(__dirname, '..', user.profilePictureUrl);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            } catch (err) {
+                console.error('Failed to remove profile picture file:', err.message);
+            }
+        }
+
+        return res.json({ msg: 'Account and associated data deleted successfully' });
+    } catch (err) {
+        console.error('Delete account error:', err);
+        return res.status(500).json({ msg: err.message || 'Server error deleting account' });
+    }
+};
+
+router.delete('/delete-account', auth, deleteAccountHandler);
+router.delete('/account', auth, deleteAccountHandler);
 
 module.exports = router;

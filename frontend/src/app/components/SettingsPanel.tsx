@@ -5,14 +5,16 @@ import { Button } from '@/app/components/ui/button';
 import { Label } from '@/app/components/ui/label';
 import { Switch } from '@/app/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/app/components/ui/avatar';
-import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown, Timer, CheckCircle2, ListTodo, ChevronRight } from 'lucide-react';
+import { X, User, Moon, Sun, Pencil, Check, Bell, Mail, LogOut, Shield, Key, Eye, EyeOff, Loader2, ChevronDown, Timer, CheckCircle2, ListTodo, ChevronRight, Trash2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/app/api';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import type { User as UserType } from '@/app/types';
 import { EditProfileModal } from './EditProfileModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 import { AvatarImage } from '@/app/components/ui/avatar';
 import { fetchWithAuth } from '../../utils/apiClient';
+import { tokenManager } from '../../utils/tokenManager';
 
 interface SettingsPanelProps {
   user: UserType;
@@ -34,6 +36,7 @@ export function SettingsPanel({
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme');
@@ -129,6 +132,12 @@ export function SettingsPanel({
     } catch (e) {
       console.error('Google signOut error:', e);
     }
+    try {
+      await SocialLogin.logout({ provider: 'apple' });
+    } catch (e) {
+      console.error('Apple signOut error:', e);
+    }
+    await tokenManager.clearTokens();
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     toast.success('Logged out successfully');
@@ -370,6 +379,34 @@ export function SettingsPanel({
             </div>
           </section>
 
+          {/* Account Deletion / Danger Zone */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-semibold text-red-500 uppercase tracking-wider mt-4 mb-2 px-1">Danger Zone</h3>
+            <div className="p-4 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/20 backdrop-blur-md transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 shrink-0">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <Label className="font-semibold text-gray-900 dark:text-white block">Delete Account</Label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Permanently delete your account and all associated data. This action is irreversible.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteAccountModal(true)}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold shadow-sm text-xs px-4 h-9 shrink-0 self-start sm:self-auto cursor-pointer"
+                >
+                  Delete Account
+                </Button>
+              </div>
+            </div>
+          </section>
+
           {/* Footer / About */}
           <section className="pt-6 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-6 px-1">
@@ -395,6 +432,12 @@ export function SettingsPanel({
             user={user}
             onClose={() => setShowEditProfile(false)}
             onUpdateUser={onUpdateUser}
+          />
+        )}
+        {showDeleteAccountModal && (
+          <DeleteAccountModal
+            isOpen={showDeleteAccountModal}
+            onClose={() => setShowDeleteAccountModal(false)}
           />
         )}
       </AnimatePresence>

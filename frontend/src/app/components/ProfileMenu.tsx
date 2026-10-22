@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, User, Plus, LogOut, Check } from 'lucide-react';
+import { X, User, Plus, LogOut, Check, Trash2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 import { toast } from 'sonner';
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 import { User as UserType } from '@/app/types';
 import { API_BASE_URL } from '@/app/api';
@@ -14,6 +16,7 @@ interface ProfileMenuProps {
 }
 
 export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const accounts = [
         { email: user.email, name: user.name, active: true },
         // Mock previous account if any
@@ -99,18 +102,32 @@ export function ProfileMenu({ user, onClose, onLogout }: ProfileMenuProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] bg-gray-50/50 dark:bg-[#0a0a0a]">
+                <div className="p-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] bg-gray-50/50 dark:bg-[#0a0a0a] space-y-1">
                     <Button
                         onClick={onLogout}
                         variant="ghost"
-                        className="w-full justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-black"
+                        className="w-full justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 font-medium"
                     >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign out
                     </Button>
+                    <Button
+                        onClick={() => setShowDeleteModal(true)}
+                        variant="ghost"
+                        className="w-full justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-semibold py-1.5 h-8"
+                    >
+                        <Trash2 className="w-3.5 h-3.5 mr-2" />
+                        Delete Account
+                    </Button>
                 </div>
 
             </motion.div>
+            {showDeleteModal && (
+                <DeleteAccountModal
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                />
+            )}
         </motion.div>
     );
 }

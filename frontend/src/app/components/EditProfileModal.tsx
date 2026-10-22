@@ -8,6 +8,7 @@ import { Label } from '@/app/components/ui/label';
 import { Input } from '@/app/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 import { AvatarBuilderModal } from './AvatarBuilderModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import { Calendar } from '@/app/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
@@ -42,6 +43,7 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const defaultCode = user.phoneNumber?.startsWith('+1') ? '+1' : (user.phoneNumber?.startsWith('+44') ? '+44' : (user.phoneNumber?.startsWith('+61') ? '+61' : '+91'));
   const [countryCode, setCountryCode] = useState(defaultCode);
@@ -410,21 +412,37 @@ export function EditProfileModal({ user, onClose, onUpdateUser }: EditProfileMod
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] flex justify-end gap-3 bg-gray-50/50 dark:bg-[#0a0a0a]">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <AsyncButton 
-            onClick={handleSave} 
-            disabled={!hasChanges || usernameStatus === 'checking'}
-            className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] flex items-center justify-between gap-3 bg-gray-50/50 dark:bg-[#0a0a0a]">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={() => setShowDeleteModal(true)} 
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-medium px-2.5 h-9"
           >
-            Save Changes
-          </AsyncButton>
+            Delete Account
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <AsyncButton 
+              onClick={handleSave} 
+              disabled={!hasChanges || usernameStatus === 'checking'}
+              className="bg-[#e0b596] hover:bg-[#d4a37f] text-white min-w-[120px]"
+            >
+              Save Changes
+            </AsyncButton>
+          </div>
         </div>
       </div>
       {showAvatarBuilder && (
         <AvatarBuilderModal
           onClose={() => setShowAvatarBuilder(false)}
           onSave={handleAvatarGenerated}
+        />
+      )}
+      {showDeleteModal && (
+        <DeleteAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
         />
       )}
     </motion.div>

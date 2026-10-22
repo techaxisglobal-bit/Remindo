@@ -12,6 +12,7 @@
     "electron:preview": "npm run build && electron .",
     "android:sync": "cap sync",
     "android:open": "cap open android",
+    "ios:sync": "npm run build && cap sync ios",
     "ios:open": "cap open ios"
   },
   "dependencies": {
