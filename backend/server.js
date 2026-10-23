@@ -111,6 +111,10 @@ app.get('/', (req, res) => {
     res.send('Backend running');
 });
 
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
 const User = require('./models/User');
 app.get('/users', async (req, res) => {
     try {
