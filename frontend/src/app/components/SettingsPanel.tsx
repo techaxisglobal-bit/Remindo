@@ -379,34 +379,6 @@ export function SettingsPanel({
             </div>
           </section>
 
-          {/* Account Deletion / Danger Zone */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-semibold text-red-500 uppercase tracking-wider mt-4 mb-2 px-1">Danger Zone</h3>
-            <div className="p-4 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/20 backdrop-blur-md transition-all">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start sm:items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 shrink-0">
-                    <Trash2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <Label className="font-semibold text-gray-900 dark:text-white block">Delete Account</Label>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Permanently delete your account and all associated data. This action is irreversible.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowDeleteAccountModal(true)}
-                  className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold shadow-sm text-xs px-4 h-9 shrink-0 self-start sm:self-auto cursor-pointer"
-                >
-                  Delete Account
-                </Button>
-              </div>
-            </div>
-          </section>
-
           {/* Footer / About */}
           <section className="pt-6 border-t border-gray-100 dark:border-white/[0.04] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-6 px-1">
@@ -422,6 +394,14 @@ export function SettingsPanel({
               <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
               Sign out
             </Button>
+
+            <button
+              type="button"
+              onClick={() => setShowDeleteAccountModal(true)}
+              className="w-full text-center text-xs text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors pt-3 pb-1 block cursor-pointer"
+            >
+              Delete Account
+            </button>
           </section>
 
         </div>
